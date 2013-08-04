@@ -1,0 +1,19 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	util \
+
+
+DIRS=\
+	telnet \
+	#arm  \
+
+<$VPROC/mk/mkdirs
+
+flag_FILES=\
+	flag.go \
+#	cpu_mips.go \
+
+flag.$O: $flag_FILES
+
+<$VPROC/mk/mklib

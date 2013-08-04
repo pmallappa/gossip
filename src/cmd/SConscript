@@ -1,0 +1,23 @@
+import os
+from os.path import join
+
+Import('env', 'bdir', 'idir')
+
+var=['mips', 'arm']
+src_local = ['vproc_cmdline.go', 'vproc_ld.go', 'vproc_main.go']
+
+progs = []
+
+for v in var:
+	e = env.Clone()
+	target = 'vproc' + '_' + v
+	src = src_local[:]
+	src.append(target + '.go')
+	e_a = e.Go(target, src)
+	e_prog = e.GoProgram(target, e_a)
+	progs += e_prog
+	e.Install('#bin', e_prog)
+
+env.Alias('install', '#bin')
+
+Return ('progs')

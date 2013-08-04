@@ -1,0 +1,6 @@
+
+19-Feb-2013:
+	- Use reStructuredText for all documentation markup. Markdown seems to be too simple
+
+08-Dec-2012:
+	- Decided to use Plan9's mk as the build system, scons continue to exist

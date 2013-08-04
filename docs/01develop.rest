@@ -1,0 +1,29 @@
+*****
+GoSPEL - 'G'o 'S'ystem 'Si'mulation 'P'roject
+*****
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 20012-2013 Prem Mallappa. All rights reserved.
+
+---------------------
+
+.. Contents::
+
+---------------------
+
+
+================================================================================================
+**Disclaimer : This is a experimental software and the features listed may not be available**
+================================================================================================
+
+============
+Writing CPU Cores
+============
+
+============
+Writing Platforms
+============
+
+============
+Using GIT
+============

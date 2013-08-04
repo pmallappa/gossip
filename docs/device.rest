@@ -1,0 +1,62 @@
+=============================
+Device specification
+=============================
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.
+
+
+We try to be consistent with QEMU's device specification. Each device has
+a host part and guest part. The host part specifies how the communication
+happens between host and the guest's device, while the guest part
+specifies what the guest OS should think of the device.
+
+Options:
+
+-dev <type>[,option=value][,option=value]
+
+\'option' depends on \'type'
+\'type' can be \'char', \'disk', 'net', 'pci', 'usb'
+
+Character Device:
+------------
+  -dev char,iobase=IOADDR,irq=IRQ,index=IDX,name='name'
+  -chardev 'name'[,idx=id][,option=val][,option=val]
+      where  'name' is <null><socket><file><pipe><udp><parport><console>
+                       <tty>
+  eg:
+    -chardev null,id=id[,mux=on|off]
+    -chardev socket,id=id[,host=host],port=host[,to=to][,ipv4][,ipv6][,nodelay]
+    	           [,server][,nowait][,telnet][,mux=on|off] (tcp)
+    -chardev socket,id=id,path=path[,server][,nowait][,telnet],[mux=on|off] (unix)
+    -chardev udp,id=id[,host=host],port=port[,localaddr=localaddr]
+    	          [,localport=localport][,ipv4][,ipv6][,mux=on|off]
+    -chardev vc,id=id[[,width=width][,height=height]][[,cols=cols][,rows=rows]]
+           [,mux=on|off]
+    -chardev file,id=id,path=path[,mux=on|off]
+    -chardev pipe,id=id,path=path[,mux=on|off]
+    -chardev pty,id=id[,mux=on|off]
+    -chardev stdio,id=id[,mux=on|off][,signal=on|off]
+    -chardev tty,id=id,path=path[,mux=on|off]
+    -chardev parport,id=id,path=path[,mux=on|off]
+
+    By default idx=0, is assumed, if there are multiple devices of the same type specified for guest part, 'idx' is mandatory
+
+
+Network Device:
+------------
+Details refer net-devices.txt
+
+
+Disks:
+------------
+  This is very wast area containing various configuration, as of now
+  we will not be able to concentrate on this, may be we'll  come back later, but on most embedded systems this is useless
+
+NAND flash:
+------------
+  This will be either part of Disks or part of MTD devices
+
+NOR flash:
+------------
+  Same as NAND flash.

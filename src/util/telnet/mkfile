@@ -1,0 +1,16 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	telnet \
+
+telnet_FILES=\
+	telnet.go \
+#	cpu_mips.go \
+
+telnet.$O: $telnet_FILES
+
+<$VPROC/mk/mklib
+
+DIRS=\
+	#telnet \
+	#arm  \

@@ -1,0 +1,17 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	mem \
+
+mem_FILES=\
+	mem.go \
+
+
+mem.$O: $mem_FILES
+
+<$VPROC/mk/mklib
+
+
+
+
+

@@ -1,0 +1,23 @@
+<$VPROC/mk/mkhdr
+
+DIRS=\
+	mem \
+	#arm  \
+
+<$VPROC/mk/mkdirs
+
+LIB=\
+	dev \
+
+dev_FILES=\
+	device.go \
+
+
+dev.$O: $dev_FILES
+
+<$VPROC/mk/mklib
+
+
+
+
+

@@ -1,0 +1,18 @@
+LIBS=${LIB:%=%.a}
+
+default:V: install
+
+all:V: $INSTPATH/$LIB.a
+
+install:V: ${LIB:%=%.install}
+
+%.install:VQ:
+	go install 
+
+CLEANFILES=$CLEANFILES $LIB.$O $LIB.a
+
+NUKEFILES=$INSTPATH/$LIB.a
+
+NUKEDIRS=$INSTPATH
+
+<$VPROC/mk/mkcommon

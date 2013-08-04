@@ -1,0 +1,17 @@
+<$VPROC/mk/mkhdr
+
+DOFILES=\
+	 vproc_cmdline.go \
+	 vproc_main.go \
+	 
+TARG=\
+	vproc_mips \
+	vproc_arm \
+	#vproc_ppc \
+	#vproc_tilera \
+
+vproc_%.$O: $DOFILES vproc_%.go 
+
+NUKEFILES=$TARG
+
+<$VPROC/mk/mkmany

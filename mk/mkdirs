@@ -1,0 +1,13 @@
+dir-%:VQ:
+	for i in $DIRS
+	do
+		(cd $i; echo "(CD)" `pwd`'=>' $stem; mk $MKFLAGS $stem)
+		#echo "(CD) `pwd`"
+	done
+
+all:V: dir-all
+clean:V: dir-clean
+install:V: dir-install
+goinstall:V: dir-goinstall
+nuke:V: dir-nuke
+

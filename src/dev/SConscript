@@ -1,0 +1,32 @@
+import os
+from os.path import join
+
+Import('env', 'bdir', 'idir')
+
+dirs=['char', 'net']
+common_src = ['dev.go', 'options.go']
+
+dev_pack = []
+
+for sd in dirs:
+	dev_env = env.Clone()
+	name = "%s"%('dev' + '_' + sd)
+	src_list = common_src + [name + '.go']
+	dev_a = dev_env.Go(name, src_list)
+	dev = dev_env.GoPack(name, dev_a)
+	dev_env.Install(idir, dev)
+	dev_pack += dev
+
+objs = []
+idir = join(idir, 'dev')
+
+for sd in dirs:
+	objs += SConscript(join(sd, 'SConscript'),
+			   exports =['env', 'bdir', 'idir'],
+			   #variant_dir=sd,
+			   duplicate=0)
+
+
+Depends(objs, dev_pack)
+
+Return (['dev_pack', 'objs'])

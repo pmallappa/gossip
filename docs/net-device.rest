@@ -1,0 +1,401 @@
+##############
+Networking
+##############
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.
+
+---------------------
+
+.. Contents::
+
+---------------------
+
+
+The networking will be specified by -net options, it contains host part and guest part;
+The Host part specifies how to communicate, while the guest part says how the device
+looks like.
+(Most parts are copied from QEMu specification of net work)
+
+Guest part:
+~~~~~~~~~~~~~~~
+Guest part of the option specifies how the device should look like for the Guest OS
+
+============      =================================================
+``-net nic``      ``[vlan=n][,macaddr=mac][,model=type][,name=name]
+                  [,addr=addr][,vectors=v]``
+============      =================================================
+Not all devices are supported on all targets. Use *-net nic,model=?* for a list of available devices for your target.
+-------------------------------------------------------------------
+vlan=n            Connect VLAN 'n', (n = 0 is the default).
+macaddr=mac       Set the MAC address of the interface to
+                  'mac'. MAC is of format **xx:xx:xx:xx:xx:xx**
+model=type        type are *virtio*, *i82551*, *i82557b*, *i82559er*,
+                  *ne2k_pci*, *ne2k_isa*, *pcnet*, *rtl8139*, *e1000*,
+                  *smc91c111*, *lance* *andmcf_fec*. **e1000** is default
+name=name         Interface will be given a name, later *name* can be used to attach
+                  the guest part
+addr=addr         the device address set to addr (PCI cards only)
+vectos=v          Optionally, for PCI cards, you can specify the number v of MSI-X
+                  vectors that the card should have; this option currently only affects
+                  virtio cards; set v = 0 to disable MSI-X.
+============      =================================================
+
+
+Host part:
+~~~~~~~~~~~~~~
+Host part of the option specifies how the data communicated to/from the Guest
+
++---------------+----------------------------+-----------------------------------------------------+------------------------------------------------------------------------------------+
+|-net <type>    |Description                 |Arguments                                            |Meaning                                                                             |
++===============+============================+=====================================================+=====================+==============================================================+
+| user          | Connect the user mode      | user[,vlan=n][,name=str][,net=addr[/mask]]          | vlan=n              | Connect user mode stack to VLAN n (n = 0 is the              |
+|               | network stack to VLAN      | [,host=addr][,restrict=on|off][,hostname=host]      |                     |default).                                                     |
+|               | 'n', configure its DHCP    | [,dhcpstart=addr][,dns=addr][,tftp=dir]             +---------------------+--------------------------------------------------------------+
+|               | server and enabled         | [,bootfile=f][,hostfwd=rule]                        | name=str            | Assign symbolic name for use in monitor commands.            |
+|               | optional services          | [,guestfwd=rule][,smb=dir[,smbserver=addr]]         +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | net=addr[/mask]     | Set IP network address the guest will see. Optionally        |
+|               |                            |                                                     |                     |specify the netmask, either in the form a.b.c.d or as         |
+|               |                            |                                                     |                     |number of valid top-most bits. Default is 10.0.2.0/8.         |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | host=addr           | Specify the guest-visible address of the ost. Default        |
+|               |                            |                                                     |                     |is the 2nd IP in the guest network, i.e. x.x.x.2.             |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | restrict=y|yes|n|no | If this options is enabled, the guest will be isolated,      |
+|               |                            |                                                     |                     |i.e. it will not be able to contact the host and no           |
+|               |                            |                                                     |                     |guest IP packets will be routed over the host to the          |
+|               |                            |                                                     |                     |outside. This option does not affect explicitly set           |
+|               |                            |                                                     |                     |forwarding rule.                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | hostname=host       | Specifies the client hostname reported by the builtin        |
+|               |                            |                                                     |                     |DHCP server.                                                  |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | dhcpstart=addr      | Specify the first of the 16 IPs the built-in DHCP            |
+|               |                            |                                                     |                     |server can assign. Default is the 16th to 31st IP in the      |
+|               |                            |                                                     |                     |guest network, i.e. x.x.x.16 to x.x.x.31.                     |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | dns=addr            | Specify the guest-visible address of the virtual             |
+|               |                            |                                                     |                     |nameserver. The address must be different from the host       |
+|               |                            |                                                     |                     |address. Default is the 3rd IP in the guest network,          |
+|               |                            |                                                     |                     |i.e. x.x.x.3.                                                 |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | tftp=dir            | When using the user mode network stack, activate a           |
+|               |                            |                                                     |                     |built-in TFTP server. The files in dir will be exposed        |
+|               |                            |                                                     |                     |as the root of a TFTP server. The TFTP client on the          |
+|               |                            |                                                     |                     |guest must be configured in binary mode (use the command      |
+|               |                            |                                                     |                     |bin of the Unix TFTP client).                                 |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | bootfile=f          | When using the user mode network stack, broadcast file       |
+|               |                            |                                                     |                     |as the BOOTP filename. In conjunction with 'tftp', this       |
+|               |                            |                                                     |                     |can be used to network boot a guest from a local              |
+|               |                            |                                                     |                     |directory.  Example (using pxelinux): -boot n -net            |
+|               |                            |                                                     |                     |user,tftp=/path/to/tftp/files,bootfile=/pxelinux.0            |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | hostfwd=rule        | 'hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport'|
+|               |                            |                                                     |                     |        Redirect incoming TCP or UDP connections to the host  |
+|               |                            |                                                     |                     |port hostport to the guest IP address guestaddr on guest port |
+|               |                            |                                                     |                     |guestport. If guestaddr is not specified, its value is        |
+|               |                            |                                                     |                     |x.x.x.15 (default first address given by the built-in DHCP    |
+|               |                            |                                                     |                     |server). By specifying hostaddr, the rule can be bound to a   |
+|               |                            |                                                     |                     |specific host interface. If no connection type is set, TCP    |
+|               |                            |                                                     |                     |  is used.  This option can be given multiple times.  For     |
+|               |                            |                                                     |                     |example, to redirect host X11 connection from screen 1 to     |
+|               |                            |                                                     |                     |guest screen 0, use the following:                            |
+|               |                            |                                                     |                     | # on the host                                                |
+|               |                            |                                                     |                     |  -net user,hostfwd=tcp:127.0.0.1:6001-:6000 [...]            |
+|               |                            |                                                     |                     | # this host xterm should open in the guest X11 xterm -display|
+|               |                            |                                                     |                     |:1 To redirect telnet connections from host port 5555 to      |
+|               |                            |                                                     |                     |telnet port on the guest, use the following: on the host      |
+|               |                            |                                                     |                     |  $ telnet user,hostfwd=tcp:5555::23 [...]                    |
+|               |                            |                                                     |                     |  $ lnet localhost 5555                                       |
+|               |                            |                                                     |                     | Then when you use on the host telnet                         |
+|               |                            |                                                     |                     | localhost 5555, you connect to the guest telnet server.      |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | guestfwd=rule       | 'guestfwd=[tcp]:server:port-dev'                             |
+|               |                            |                                                     |                     |        Forward guest TCP connections to the IP address server|
+|               |                            |                                                     |                     |on port port to the character device dev. This option can be  |
+|               |                            |                                                     |                     |given multiple times.                                         |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | smb=dir             |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | smbserver=addr      |                                                              |
++---------------+----------------------------+-----------------------------------------------------+---------------------+--------------------------------------------------------------+
+| tap           | Connect the host TAP       | tap[,vlan=n][,name=str][,fd=h][,ifname=name]        | vlan=n              | same as above                                                |
+|               | network interface to       | [,script=file][,downscript=dfile][,helper=helper]   |                     |                                                              |
+|               | VLAN 'n' use network       | [,sndbuf=nbytes][,vnet_hdr=on|off][,vhost=on|off]   +---------------------+--------------------------------------------------------------+
+|               | scripts 'file'.            | [,vhostfd=h][,vhostforce=on|off]                    | name=str=host       | same as above                                                |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | fd=h                |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | ifname=name         |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | script=file         |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | downscript=dfile    |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | helper=helper       |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | sndbuf=nbytes       |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | vnet_hdr=on|off     |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | vhost=on|off        |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | vhostfd=h           |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | vhostforce=on|off   |                                                              |
++---------------+----------------------------+-----------------------------------------------------+---------------------+--------------------------------------------------------------+
+| bridge        | Connects a host TAP network| bridge[,vlan=n][,name=str]                          | vlan=n              | same as above                                                |
+|               | interface to a host bridge | [,br=bridge][,helper=helper]                        |                     |                                                              |
+|               | device 'br' (default=br0)  |                                                     +---------------------+--------------------------------------------------------------+
+|               | using the program 'helper' |                                                     | name=str            | same as above                                                |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | br=bridge           |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | helper=helper       | same as above                                                |
++---------------+----------------------------+-----------------------------------------------------+---------------------+--------------------------------------------------------------+
+| socket        | Connect the vlan 'n' to    | socket[,vlan=n][,name=str][,fd=h]                   | restrict=on|off     |flkasjdlfjlasjdl ajsdf alskjdf ;lkdjf ajs                     |
+|               | another VLAN using a       | [,listen=[host]:port][,connect=host:port]           |                     |                                                              |
+|               | socket connection          |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | hostname=host       |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | dhcpstart=addr      |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | dns=addr            |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               | Connect the vlan 'n' to    |                                                     | asdfas              |                                                              |
+|               | multicast maddr and port   | socket[,vlan=n][,name=str][,fd=h]                   +---------------------+--------------------------------------------------------------+
+|               | use 'localaddr=addr' to    | [,mcast=maddr:port[,localaddr=addr]]                | asdfs               |                                                              |
+|               | specify the host address to|                                                     +---------------------+--------------------------------------------------------------+
+|               | send packets from          |                                                     | asdfasdf            |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | asdfsd              |                                                              |
+|               |                            |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | asdfs               |                                                              |
+|               | Connect the vlan 'n' to    |                                                     +---------------------+--------------------------------------------------------------+
+|               | another VLAN using an UDP  |                                                     | asdfas              |                                                              |
+|               | tunnel                     | [,vlan=n][,name=str][,fd=h]                         +---------------------+--------------------------------------------------------------+
+|               |                            | [,udp=host:port][,localaddr=host:port]              | asdfsdf             |                                                              |
++---------------+----------------------------+-----------------------------------------------------+---------------------+--------------------------------------------------------------+
+| vde           | Connect the vlan 'n' to    | vde[,vlan=n][,name=str] [,sock=socketpath][,port=n] | restrict=on|off     |flkasjdlfjlasjdl ajsdf alskjdf ;lkdjf ajs                     |
+|               | port 'n' of a vde switch   | [,group=groupname][,mode=octalmode]                 |                     |                                                              |
+|               | running on host and        |                                                     +---------------------+--------------------------------------------------------------+
+|               | listening for incoming     |                                                     | hostname=host       |                                                              |
+|               | connections on             |                                                     +---------------------+--------------------------------------------------------------+
+|               | 'socketpath'. Use group    |                                                     | dhcpstart=addr      |                                                              |
+|               | 'groupname' and mode       |                                                     +---------------------+--------------------------------------------------------------+
+|               | 'octalmode' to change      |                                                     | dns=addr            |                                                              |
+|               | default ownership and      |                                                     +---------------------+--------------------------------------------------------------+
+|               | permissions for            |                                                     | asdfas              |                                                              |
+|               | communication port.        |                                                     +---------------------+--------------------------------------------------------------+
+|               |                            |                                                     | asdfs               |                                                              |
++---------------+----------------------------+-----------------------------------------------------+---------------------+--------------------------------------------------------------+
+
+
+Example:
+# launch a first QEMU instance
+ -net nic,macaddr=52:54:00:12:34:56 -net socket,listen=:1234
+
+# connect the VLAN 0 of this instance to the VLAN 0
+# of the first instance
+ -net nic,macaddr=52:54:00:12:34:57 -net socket,connect=127.0.0.1:1234
+
+Several QEMU can be running on different hosts and share same bus (assuming correct multicast setup for these hosts).
+mcast support is compatible with User Mode Linux (argument
+'ethN=mcast'), see http://user-mode-linux.sf.net. Use 'fd=h' to specify
+an already opened UDP multicast socket.
+Example:
+# launch one QEMU instance
+ -net nic,macaddr=52:54:00:12:34:56 -net socket,mcast=230.0.0.1:1234
+
+# launch another QEMU instance on same "bus"
+ -net nic,macaddr=52:54:00:12:34:57 -net socket,mcast=230.0.0.1:1234
+
+# launch yet another QEMU instance on same "bus"
+ -net nic,macaddr=52:54:00:12:34:58 -net socket,mcast=230.0.0.1:1234
+
+
+VDE Example:
+----------------
+Example:
+# launch vde switch
+vde_switch -F -sock /tmp/myswitch
+
+# Run a DHCP server on the VLAN Switch
+slirpvde -d -s $socket -dhcp -n 10.0.2.0
+
+# launch with options
+-net nic -net vde,sock=/tmp/myswitch -net dump[,vlan=n][,file=file][,len=len]
+    Dump network traffic on VLAN n to file file (vlan0.pcap' by default). At most
+    len bytes (64k by default) per packet are stored. The file format is libpcap,
+    so it can be analyzed with tools such as tcpdump or Wireshark.
+
+
+VLANs and NICs
+----------------
+::
+
+         +-----------+
+         |   Guest   |
+         |    OS     |
+         |   +---+   |
+         |   |NIC|   |
+         +---+-+-+---+       vlan1
+               ^           +-----------+
+               |           |     port10+<------> Other IF
+               |           | switch    |
+               +---------->+           |
+                           |     port14+<------> Other IF
+                           +-----------+
+
+
+So, for example, if you do:
+    -net nic,model=rtl8139,vlan=1,macaddr=52:54:00:12:34:56 ...
+
+
+Connecting VLANs Together
+-------------------------------
+::
+
+ +-----------+                                      +-----------+
+ |   Guest   |                                      |   Guest   |
+ |     A     |                                      |     B     |
+ |   +---+   |                                      |   +---+   |
+ |   |NIC|   |                                      |   |NIC|   |
+ +---+-+-+---+                                      +---+-+-+---+
+       ^       +--------+                +--------+       ^
+       |       |        |                |        |       |
+       +------>+ VLAN 0 +<--> Socket <-->+ VLAN 2 +<------+
+               |        |                |        |
+               +--------+                +--------+
+
+For example, you might start Guest A with:
+    -net nic -net socket,listen=:8010 ...
+     This qemu process is hosting a guest with a nic connected to VLAN 0, which in turn has a socket interface listening for connections on port 8010.
+
+You could then start Guest B with:
+    -net nic,vlan=2 -net socket,vlan=2,connect=127.0.0.1:8010 ...
+     This qemu process would then have a guest with a nic connected to VLAN 2,
+     which in turn has a socket interface connected to VLAN 0 in the first qemu process.
+
+Thus, any frames transmitted by Guest A is received by Guest B, and vice versa.
+(Note, the two vlans do not need to be numbered differently. It is only done here for illustrative purposes)
+
+An extension of this concept is to connect vlans together using a multicast socket. For example, with:
+  GuestA: -net nic -net socket,mcast=230.0.0.1:1234
+  
+  GuestB: -net nic -net socket,mcast=230.0.0.1:1234
+    you have two guests with their vlan 0 connected together over a multicase bus.
+    Any number of guests can connect to the same multicast address and receive the
+    frames sent by any guest to that vlan. It's interesting to note that any of
+    the above can be done by unpriviledged users.
+
+
+
+Connecting VLANs To TAP Devices
+---------------------------------
+Another option is to make a vlan available through a device in the host OS. Any
+frames transmitted via this device will appear on a vlan in the qemu process
+(and thus received by another other interfaces on the vlan) and frames sent to
+the vlan will be received by the device.
+
+::
+
+ +-----------+                            +-------+
+ |   Guest   |                            |  TAP  |
+ |    OS     |                            | Device|
+ |   +---+   |                            |(qtap0)|
+ |   |NIC|   |                            +---+---+
+ +---+-+-+---+                                |
+       ^       +------+                   +---+-----+
+       |       |      |                   | Kernel  |
+       +------>+ VLAN +<-->   File    <-->+ TUN/TAP |
+               |      |     Descriptor    | Driver  |
+               +------+                   +---------+
+
+  -net nic -net tap,ifname=qtap0 ...
+    This works using the kernel's TUN/TAP device driver. This driver basically
+    allows a user-space application to obtain a file descriptor which is
+    connected to a network device. Any frames sent to the kernel over the file
+    descriptor will be received by the device and any frames transmitted via
+    the device will be received by the application.
+    If you e.g. assign an IP address to the TAP device, applications in the
+    guest will be able to connect to applications in the host listening for
+    connections on that IP address. And if you enable port forwarding in the
+    host, packets sent from the guest can be forwarded by the host kernel to the Internet.
+
+    Essentially, the TAP device looks just like a network device connected to a physical
+    network to which the guest is also connected.
+    TAP devices are obtained by opening /dev/net/tun and invoking the TUNSETIFF ioctl().
+    This is not usually allowed for unpriviledged users so, in general, only root can use this method.
+
+
+
+Connecting VLANs Using VDE
+----------------------------
+An extension of this idea is possible using VDE (Virtual Distributed Ethernet).
+This is a user-space program which can obtain a TAP device and allow a number
+of other programs to connect to it and bridge those connections to the TAP
+device. It would be quite similar in effect to connecting multiple qemu vlans
+together and connecting one of those vlans to a TAP device.
+::
+
+    +-----------+                           +-----------+
+    |   Guest   |                           |   Guest   |
+    |     A     |                           |     B     |
+    |   +---+   |                           |   +---+   |
+    |   |NIC|   |                           |   |NIC|   |
+    +---+-+-+---+                           +---+-+-+---+
+          ^       +------+         +------+       ^
+          |       |      | +-----+ |      |       |
+          +------>+ VLAN +-+ VDE +-+ VLAN +<------+
+                  |      | +--+--+ |      |
+                  +------+    |    +------+
+                              |
+                          +---+-----+  +--------+
+                          | Kernel  |  |  TAP   |
+                          | TUN/TAP +--+ Device |
+                          | Driver  |  | (qtap) |
+                          +---------+  +--------+
+
+ $> vde_switch -hub -tap qtap -sock /var/run/qtap-ctl
+ GuestA: -net vde,sock=/var/run/qtap-ctl qemu -net nic ...
+ GuestB: -net vde,sock=/var/run/qtap-ctl qemu -net nic ...
+    Here we end up with the vde_switch receiving packets from the vlans in
+    both qemu processes and forwarding to the qtap network interface in the host,
+    and likewise, forwarding packets from the qtap device to both vlans. Since
+    both guests have nics on these vlans, they can transmit/receive frames
+    to/from the host OS and each other.
+
+
+Connecting VDE-switched together
+--------------------------------
+# 1. run several switches
+    On the same computer you can run several switches, provided they have different names:
+
+$ vde_switch -s /tmp/switch1
+$ vde_switch -s /tmp/switch2
+
+It is possible to run switches on different computers:
+
+host1$ vde_switch -s /tmp/switch
+host2$ vde_switch -s /tmp/switch
+
+
+# 2: connect them together It is straightforward simple:
+
+$ dpipe vde_plug /tmp/switch1 = vde_plug /tmp/switch2
+      dpipe is a double pipe: the two commands separated by a = sign are mutually
+      interconnected: the output of the first is the input for the second and
+      viceversa. In this way the two plugs plugged-in the two switches exchange
+      their packets...
+
+      If the switch are running on different computers we need a wire, i.e.
+      a program able to forward a stream connection from a computer to the other.
+      ssh is the simplest (safe and quite fast) example
+
+host1$ dpipe vde_plug /tmp/switch = ssh host2 vde_plug /tmp/switch
+      when the switch are connected all the virtual (and real) machines connected
+      to one can communicate with those connected to the other. It has exactly
+      the same effect for real (physical, not-virtual) ethernet of connecting a
+      cross-cable between two switches.

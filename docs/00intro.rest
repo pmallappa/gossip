@@ -1,0 +1,104 @@
+************************************************************************************************
+Disclaimer : This is a experimental software and the features listed may not be available
+************************************************************************************************
+
+
+****************************************************
+GoSPEL - 'G'o 'S'ystem and 'P'latform 'E'mu'L'ation
+****************************************************
+
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 20012-2013 Prem Mallappa. All rights reserved.
+
+---------------------
+
+.. Contents::
+
+---------------------
+
+
+
+============
+Introduction
+============
+
+GoSPEL is a full system simulator written from scratch. Command-line arguemetns
+resembles that of QEMU, it has some extensions at places and also cut down in some parts.
+GoSPEL is intended to be highly debuggable full system simulator with its own
+debugger language mostly derived from acid (Plan9). And is written entirely in Go_ language.
+
+.. _Go: http://www.golang.org
+
+**Features**
+
+- Simulates full platform
+    All the devices in the given standarad platform are simulated
+    
+- Multicore simulation
+	As many as a given platform supports simulates all parts of the platform to make it
+	realistic in approach.
+- Fast simulation
+    Functional simulation, implements a model which doesn't have strict timing requirement,
+    but it does have strict "functionally correct" interface.
+- Cycle accurate
+	Simulates memory, bus and caches as per cycles, keeping the speed of
+	host, though this is not as much as the wordings says, intension is to achieve it.
+- Debugger
+	Highly inspired by the acid_ debugger in Plan9_, also it is scriptable (to start with
+	only few commands are supported).
+- Lua Scripting
+	This is a planned feature not present yet.
+- Full system simulator
+	All devices/parts of a given platform are simulated, if any devices are
+	unavailable its mostly due to author(s) dont have timer or financial support to writer
+	or they dont have access to the hardware manual.
+
+.. _Plan9: http://plan9.bell-labs.com/plan9/
+.. _acid: http://plan9.bell-labs.com/sys/doc/acidpaper.html
+
+Default platforms for
+
+`ARM <http://www.arm.com>`_
+	RealviewPB, Cortex-A15
+
+`MIPS <http://www.mips.com>`_
+	Malta, MIPS R4000
+`Tilera <http://tilera.com>`_:
+	GXEncore, TILE-Gx72
+
+
+
+
+
+===
+FAQ
+===
+
+#) Where is it Used
+--------------------
+Dont know, AFAIK, in my own lab.
+
+#) What GoSPEL is not
+----------------------
+It is not a tool for general purpuse computing, it is mainly geared towards
+low-level software developers to provide great debug view of the system.
+
+Why Not |QEMU|
+-------------------
+This effort is not to replace or compete with QEMU_, but to provide more accurate simulation environment and more debugger friendly.
+
+.. |QEMU| replace:: QEMU
+.. _Qemu: <http://www.qemu.org>
+
+What Architectures are supported
+--------------------------------
+See Above
+
+============
+Future Plans
+============
+
+ - Support more architectures (PowerPC, SH, x86)
+ - Extended API Support to create more Platforms
+ - Extended API support to create custom CPU's based on existing base models

@@ -1,0 +1,23 @@
+<$VPROC/mk/mkhdr
+
+DIRS=\
+	mips \
+	#arm  \
+
+<$VPROC/mk/mkdirs
+
+LIB=\
+	plat \
+
+plat_FILES=\
+	plat.go \
+	platld.go \
+
+plat.$O: $plat_FILES
+
+<$VPROC/mk/mklib
+
+
+
+
+

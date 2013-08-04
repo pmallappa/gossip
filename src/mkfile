@@ -1,0 +1,14 @@
+<$VPROC/mk/mkhdr
+
+DIRS=\
+	util \
+	cpu \
+	dev \
+	bus \
+	plat \
+	cmd \
+
+
+<$VPROC/mk/mkdirs
+
+<$VPROC/mk/mkcommon

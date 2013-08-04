@@ -1,0 +1,27 @@
+import os
+from os.path import join
+
+Import('env', 'bdir', 'idir')
+
+dirs=['cpu', 'plat'] #, 'dev']
+
+libs = []
+
+env.Append(GO_LIBPATH=join(bdir, 'pkg'))
+
+idir_backup=idir
+
+for variant in dirs:
+	libs += SConscript(join(variant, 'SConscript'),
+			   exports=['env', 'variant', 'idir'],
+			   #variant_dir='#build',
+			   duplicate=0)
+
+progs = SConscript(join('cmd', 'SConscript'),
+		   exports=['env', 'bdir', 'idir'],
+		   #variant_dir='#build',
+		   duplicate=0)
+
+env.Depends('progs', 'libs')
+
+Return(['progs', 'libs'])

@@ -1,0 +1,24 @@
+
+#&.$O:Q:
+#	echo "(build) $stem.$O [$prereq]"
+#	go build $prereq
+#	#$GOC -o $stem.$O -I $VPROC/pkg $prereq
+
+nuke:VQ: nuke-dirs nuke-common
+	echo "(NUKE)"
+clean:V: clean-common
+%.clean:V: %.clean-common
+
+nuke-common:VQ:
+	rm -f *.[$O] [$OS].$O $CLEANFILES $NUKEFILES
+
+nuke-dirs:VQ:
+	rm -fr $NUKEDIRS
+
+clean-common:Q:
+	rm -f *.[$O] $CLEANFILES
+
+%.clean-common:VQ:
+	rm -f $stem.[$O] [$OS].$stem $stem
+
+

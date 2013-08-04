@@ -1,0 +1,62 @@
+=============
+Commandline
+=============
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.
+
+---------------------
+
+.. Contents::
+
+---------------------
+
+--------------------
+
+Using cmdline
+--------------------
+
+
+Our goal is to have much sophisticated command line. The generic driver tries
+to handle frequently used commandline options
+
+**./GoSPEL -<CPU> -plat=ebb5800 -cpu=model=octeon71xx -dev=flash,amd,0x1303234,0x1232**
+
+	-plat <plat>
+		Specifies platform; for eg: ebb5800, for evaluation base board from
+		Cavium. This should auto-select CPU and peripherals this case it
+		should select *-cpu model=octeon*.
+
+	-cpu model=arm1176jzfs[,freq=50mhz][,cache=<size>:<way>/<lines>/<bytes>:<wb/wt>
+		 See below anything selected using '-plat', but these options are restricted
+		 for the 'ebb5800', valid cpu values are 5801,5810 etc.
+
+            freq= specifies the frequency in hz/mhz/ghz etc.
+            cache=size:<way><lines><bytes>* size in bytes/kb/mb,
+            <way><lines><bytes>* specifies number of ways, lines per way and bytes per line respectively, this should match with size if specified, recommended, give either size or details; not both
+
+	-device <device_details>
+		refer to doc/device.txt
+
+	-smp n[,cores=coremask]
+		cores specifies which cores to use, for eg. 0x31 uses only cores 6,5 and 1,
+		number of cores in coremask should match 'n', or else uses first 'n' cores
+
+	-mem n<K/k/M/m/G/g>
+		m/M=Megs, K/k=Kilo, G/g=Giga
+		specifies amount of memory installed.
+
+	-ld [<address>:<len>][<address>:file]
+		'len' bytes of zeros are filled at 'address', or 'file' is loaded at 'address'
+
+	-perf
+		Enable performance measurement
+
+	-pstart [cycle]
+		Start performance measurement from <cycle> cycles onwards.
+
+	-pstop [cycle]
+		Stop performance measurement after <cycle> cycles.
+
+	-h [-help]
+		Print this help message

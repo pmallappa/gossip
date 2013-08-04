@@ -1,0 +1,14 @@
+*.pyc
+*.6
+6.*
+pkg
+bin
+build
+*.diff
+*.sublime*
+.goenv
+
+.idea
+.sconsign.dblite
+*.iml
+.DS_Store

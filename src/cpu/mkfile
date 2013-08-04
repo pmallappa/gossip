@@ -1,0 +1,20 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	cpu \
+
+cpu_FILES=\
+	main.go \
+	cores.go \
+	misc.go \
+	regs.go \
+
+cpu.$O: $cpu_FILES
+
+<$VPROC/mk/mklib
+
+DIRS=\
+	mips \
+	arm  \
+	
+<$VPROC/mk/mkdirs
