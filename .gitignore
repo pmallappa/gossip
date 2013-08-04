@@ -12,3 +12,8 @@ build
 .sconsign.dblite
 *.iml
 .DS_Store
+
+
+src/cpu/arm
+src/cpu/mips
+

@@ -9,7 +9,7 @@ GoSPEL - 'G'o 'S'ystem and 'P'latform 'E'mu'L'ation
 
 
 :Author: Prem Mallappa <prem.mallappa@gmail.com>
-:Copyright: Copyright (c) 20012-2013 Prem Mallappa. All rights reserved.
+:Copyright: Copyright (c) 2012-2013 Prem Mallappa. All rights reserved.
 
 ---------------------
 
@@ -61,32 +61,30 @@ Default platforms for
 
 `ARM <http://www.arm.com>`_
 	RealviewPB, Cortex-A15
-
 `MIPS <http://www.mips.com>`_
 	Malta, MIPS R4000
-`Tilera <http://tilera.com>`_:
+`Tilera <http://tilera.com>`_: (Doesn't exists as of now, but is a great candidate for immediate implementation)
 	GXEncore, TILE-Gx72
-
-
-
 
 
 ===
 FAQ
 ===
 
-#) Where is it Used
+ Where is it Used
 --------------------
 Dont know, AFAIK, in my own lab.
 
-#) What GoSPEL is not
+ What GoSPEL is not
 ----------------------
 It is not a tool for general purpuse computing, it is mainly geared towards
 low-level software developers to provide great debug view of the system.
 
 Why Not |QEMU|
 -------------------
-This effort is not to replace or compete with QEMU_, but to provide more accurate simulation environment and more debugger friendly.
+QEMU_ by all means is a great piece of software, This effort is not to replace or compete with QEMU_,
+but to complement it with more accurate simulation and/or an environment where more insight to the hardware
+details are found.
 
 .. |QEMU| replace:: QEMU
 .. _Qemu: <http://www.qemu.org>

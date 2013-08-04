@@ -3,7 +3,7 @@ Device specification
 =============================
 
 :Author: Prem Mallappa <prem.mallappa@gmail.com>
-:Copyright: Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.
+:Copyright: Copyright (c) 2012-2013 Prem Mallappa. All rights reserved.
 
 
 We try to be consistent with QEMU's device specification. Each device has
@@ -16,7 +16,7 @@ Options:
 -dev <type>[,option=value][,option=value]
 
 \'option' depends on \'type'
-\'type' can be \'char', \'disk', 'net', 'pci', 'usb'
+\'type' can be \'char', \'disk', 'net'
 
 Character Device:
 ------------
