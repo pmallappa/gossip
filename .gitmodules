@@ -1,0 +1,3 @@
+[submodule "src/cpu/arm"]
+	path = src/cpu/arm
+	url = ssh://git@bitbucket.org/prem.mallappa/gospel-arm.git
