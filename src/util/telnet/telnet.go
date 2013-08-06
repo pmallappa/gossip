@@ -1,11 +1,12 @@
 package telnet
 
 import (
-	"bytes"
+	//	"bytes"
+	"errors"
 	"fmt"
 	"net"
 	"os"
-	"strconv"
+	//	"strconv"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func (t *Telnet) Read(buf []byte) (int, error) {
 	if t.Conn == nil { // We might have dummy connection ignore reads
 		return 0, nil
 	}
-	n, err := t.conn.Read(buf)
+	n, err := t.Conn.Read(buf)
 	if err != nil {
 		return n, err
 	}
@@ -76,6 +77,7 @@ func (t *Telnet) ConnectTimeout(proto string, addr string, timeout uint32) error
 	go connect(con, listener, t)
 
 	for ; timeout > 0; timeout-- {
+		var connected bool
 		fmt.Printf("Waiting %d seconds for connection \r", timeout)
 		select {
 		case <-time.After(1 * time.Second):
@@ -91,9 +93,10 @@ func (t *Telnet) ConnectTimeout(proto string, addr string, timeout uint32) error
 	if timeout == 0 {
 		e = errors.New("Connection timed out\n")
 	}
-	if t.IgnoreConnectError {
+	if t.ignConnectError {
 		e = nil
 	}
+	return e
 }
 
 func (t *Telnet) Connect(proto string, addr string) {

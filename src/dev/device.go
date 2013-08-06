@@ -2,13 +2,13 @@ package dev
 
 // system imports
 import (
-	"encoding/binary"
-	"fmt"
+//"encoding/binary"
+//"fmt"
 )
 
 // local imports
 import (
-	"util"
+//"util"
 )
 
 // Each device has a host part and device part
@@ -55,7 +55,7 @@ type Dev struct {
 }
 
 type Device struct {
-	DeviceInfo
+	DevInfo
 	Dev
 }
 

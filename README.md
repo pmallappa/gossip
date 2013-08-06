@@ -71,7 +71,7 @@ Directory Tree:
 	    |
 	    +---  dev/	- contains platform specific peripherals
 	    |      |
-		|      +--- dev.go (Generic Device infrastructure)
+	    |      +--- dev.go (Generic Device infrastructure)
 	    |      |
 	    |      |_____ net/
 	    |      |       |

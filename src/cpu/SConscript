@@ -4,7 +4,7 @@ from os.path import join
 Import('env', 'variant', 'idir')
 
 dirs=['mips','arm']
-cpu_src = ['main.go', 'options.go', 'cores.go', 'misc.go']
+cpu_src = ['main.go', 'cores.go', 'misc.go']
 
 cpu_env = env.Clone()
 cpu_a = cpu_env.Go('cpu', cpu_src)

@@ -3,16 +3,17 @@ package plat
 import (
 	"errors"
 	"flag"
+	"fmt"
 
-//	"fmt"
 //"strings"
 //"strconv"
 )
 
 import (
+	//	"bus"
 	"cpu"
 	"dev"
-	"dev/mem"
+	//	"dev/mem"
 	//	"dev/serial"
 	//	"dev/net"
 	"util"
@@ -45,7 +46,7 @@ type Plat struct {
 	NumCores int // For Easy Access, its actully len(Cores)
 	MemSize  uint64
 
-	devices []dev.Device // An array of all devices on platform
+	devices []dev.Devicer // An array of all devices on platform
 
 	// uart  []serial.Serial
 
@@ -61,7 +62,7 @@ var (
 	model   string
 )
 
-type Platform interface {
+type Platformer interface {
 	Init() error
 	Start()
 	//ParseFlags() error
@@ -69,22 +70,20 @@ type Platform interface {
 
 func (p *Plat) Finalize() error {
 	// It is expected that All devices are added by actual platform
-	memory = mem.Newmem(p.MemSize)
-	for device := range p.devices {
-		e := device.Initialize()
+	for _, d := range p.devices {
+		e := d.Initialize()
 		if e != nil {
-			fmt.Printf("Device %v did not initialize %v\n", device)
+			fmt.Printf("Device %v did not initialize %v\n", d)
 		}
 	}
+	return nil
 }
 
 func NewPlat() *Plat {
-	return Plat{
-		PlatInfo{vendor: vendor, model: model},
-		MemSize: memSize,
+	return &Plat{
+		PlatInfo: PlatInfo{model: model, vendor: vendor, version: "0.0"},
+		MemSize:  memSize,
 	}
-
-	return p
 }
 
 func init() {
@@ -102,11 +101,11 @@ for interpretation */
 func ParseFlags() (map[string]string, error) {
 	m, e := util.ParseFlags(plat_opts)
 	for k, v := range m {
-		switch {
-		case k == "mem":
+		switch k {
+		case "mem":
 			//p.SetMem(memParse(v))
-			memSize, _ := util.ParseMem(v)
-		case k == "?":
+			memSize, _ = util.ParseMem(v)
+		case "?":
 			var s string
 			for i := range availablePlatforms {
 				s += " vendor: " + availablePlatforms[i].vendor + " model: " +

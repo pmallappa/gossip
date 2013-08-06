@@ -2,7 +2,7 @@
 
 DIRS=\
 	mips \
-	#arm  \
+	arm  \
 
 <$VPROC/mk/mkdirs
 

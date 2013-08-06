@@ -13,7 +13,7 @@ type ExcptType uint32
 
 // Types of Cpu Exceptions
 type Exception struct {
-	Type  ExceptType
+	Type  ExcptType
 	instr string
 }
 
