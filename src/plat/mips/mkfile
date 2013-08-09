@@ -1,0 +1,19 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	mips \
+
+#DIRS=\
+#	cavium \
+#
+#<$VPROC/mk/mkdirs
+
+mips_FILES=\
+	mips.go \
+	sead3.go \
+	malta.go \
+
+mips.$O: $mips_FILES
+
+<$VPROC/mk/mklib
+

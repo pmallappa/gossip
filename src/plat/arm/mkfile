@@ -1,0 +1,19 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	arm \
+
+#DIRS=\
+#	ti \
+#
+#<$VPROC/mk/mkdirs
+
+arm_FILES=\
+	arm.go \
+	sead3.go \
+	malta.go \
+
+arm.$O: $arm_FILES
+
+<$VPROC/mk/mklib
+
