@@ -4,7 +4,7 @@ from os.path import join
 Import('env', 'bdir', 'idir')
 
 var=['mips', 'arm']
-src_local = ['vproc_cmdline.go', 'vproc_ld.go', 'vproc_main.go']
+src_local = ['gospel_cmdline.go', 'gospel_ld.go', 'gospel_main.go']
 
 progs = []
 

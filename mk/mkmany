@@ -9,7 +9,7 @@ all:V:	$PROGS
 	go build -ldflags="-o $stem" $prereq
 	#go build -x -ldflags="-o $stem" $prereq
 
-%.install:VQ:	%.$O $VPROC/bin/%
+%.install:VQ:	%.$O $VPROC/bin $VPROC/bin/%
 	echo "(INSTALL) " $stem
 	cp $stem $VPROC/bin/$stem
 

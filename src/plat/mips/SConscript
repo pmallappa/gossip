@@ -3,7 +3,7 @@ from os.path import join
 
 Import('env', 'variant', 'idir')
 
-dirs=['cavium'] #, 'arm']
+dirs=[] #['cavium'] #, 'arm']
 src_local = ['mips.go', 'malta.go', 'sead3.go']
 objs = []
 

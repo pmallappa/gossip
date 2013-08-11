@@ -3,23 +3,24 @@ from os.path import join
 
 Import('env', 'variant', 'idir')
 
-dirs=['mips','arm']
-cpu_src = ['main.go', 'cores.go', 'misc.go']
+dirs=['mips'] #'arm', 'mips']
+
+cpu_src = ['main.go', 'cores.go', 'misc.go', 'regs.go']
 
 cpu_env = env.Clone()
 cpu_a = cpu_env.Go('cpu', cpu_src)
-cpu = cpu_env.GoPack('cpu', cpu_a)
-cpu_env.Install(idir, cpu)
+cpu_pack = cpu_env.GoPack('cpu', cpu_a)
+cpu_env.Install(idir, cpu_pack)
 
 objs = []
 idir = join(idir, 'cpu')
 
 for variant in dirs:
 	objs += SConscript(join(variant, 'SConscript'),
-			   exports =['env', 'variant', 'idir'],
-			   #variant_dir=sd,
+			   exports ={'env': cpu_env, 'variant': variant, 'idir': idir},
+			   #variant_dir = variant,
 			   duplicate=0)
 
-Depends(objs, cpu)
+cpu_env.Depends(objs, cpu_pack)
 
-Return (['cpu', 'objs'])
+Return (['objs', 'cpu_pack'])

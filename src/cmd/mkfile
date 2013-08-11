@@ -1,16 +1,16 @@
 <$VPROC/mk/mkhdr
 
 DOFILES=\
-	 vproc_cmdline.go \
-	 vproc_main.go \
+	 gospel_cmdline.go \
+	 gospel_main.go \
 	 
 TARG=\
-	vproc_mips \
-	vproc_arm \
+	gospel_mips \
+	gospel_arm \
 	#vproc_ppc \
 	#vproc_tilera \
 
-vproc_%.$O: $DOFILES vproc_%.go 
+gospel_%.$O: $DOFILES gospel_%.go 
 
 NUKEFILES=$TARG
 

@@ -102,3 +102,7 @@ func (t *Telnet) ConnectTimeout(proto string, addr string, timeout uint32) error
 func (t *Telnet) Connect(proto string, addr string) {
 	t.ConnectTimeout(proto, addr, 0)
 }
+
+func (t *Telnet) Start() error {
+	return nil
+}

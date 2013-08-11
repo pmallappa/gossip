@@ -3,19 +3,24 @@ from os.path import join
 
 Import('env', 'bdir', 'idir')
 
-dirs=['util', 'cpu', 'plat'] #, 'dev']
-
-libs = []
-
 env.Append(GO_LIBPATH=join(bdir, 'pkg'))
 
 idir_backup=idir
 
+utils = SConscript(join('util', 'SConscript'),
+                  exports={'env': env, 'variant': 'util', 'idir': idir},
+                  duplicate=0)
+
+dirs=['cpu', 'plat'] #, 'dev']
+libs = []
+
 for variant in dirs:
 	libs += SConscript(join(variant, 'SConscript'),
-			   exports=['env', 'variant', 'idir'],
+                           exports={'env': env, 'variant': variant, 'idir': idir},
 			   #variant_dir='#build',
 			   duplicate=0)
+
+env.Depends('libs', 'utils')
 
 progs = SConscript(join('cmd', 'SConscript'),
 		   exports=['env', 'bdir', 'idir'],
@@ -24,5 +29,4 @@ progs = SConscript(join('cmd', 'SConscript'),
 
 env.Depends('progs', 'libs')
 
-
-Return(['progs', 'libs'])
+Return(['utils', 'libs', 'progs'])

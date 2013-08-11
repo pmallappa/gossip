@@ -4,28 +4,21 @@ from os.path import join
 Import('env', 'variant', 'idir')
 
 dirs=['mips'] #, 'arm']
-common_src = ['plat.go', 'platld.go']
+src_local = ['plat.go', 'platld.go']
 
-plat_pack = []
-
-for sd in dirs:
-	plat_env = env.Clone()
-#	plat_arch = variant+sd
-	plat_arch = variant
-	plat_a = plat_env.Go(plat_arch, common_src)
-	plat = plat_env.GoPack(plat_arch, plat_a)
-	plat_env.Install(idir, plat)
-	plat_pack += plat
-
-objs = []
+plat_env = env.Clone()
+plat_a = plat_env.Go('plat', src_local)
+plat = plat_env.GoPack('plat', plat_a)
+plat_env.Install(idir, plat)
 
 idir = join(idir, variant)
+objs=[]
 for variant in dirs:
 	objs += SConscript(join(variant, 'SConscript'),
-			   exports =['env', 'variant', 'idir'],
+			   exports = {'env': plat_env, 'variant': variant, 'idir': idir},
 			   #variant_dir=sd,
 			   duplicate=0)
 
-Depends(objs, plat_pack)
+Depends(plat, objs)
 
-Return(['plat_pack', 'objs'])
+Return(['plat', 'objs'])
