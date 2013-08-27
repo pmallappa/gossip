@@ -3,15 +3,15 @@ package util
 import (
 	//"fmt"
 	//"errors"
-	"io"
-	"log"
-	"os"
+	//"io"
+	//"log"
+	//"os"
 	"strconv"
 	"strings"
 )
 
 import (
-	"util/telnet"
+	//"util/logger"
 )
 
 // ParseFlags parses flags of type below
@@ -88,26 +88,4 @@ func ParseFreq(s string) (uint32, error) {
 	}
 
 	return uint32(mem * mult), nil
-}
-
-func ParseLogger(s string) (*log.Logger, error) {
-	var logger io.Writer
-	var e error
-	switch loggerstr := strings.SplitN(s, ":", 2); loggerstr[0] {
-	case "":
-		loggerstr[0] = "tcp"
-		fallthrough
-	case "tcp", "udp":
-		if logger, e = telnet.Start(loggerstr); e != nil {
-			return nil, e
-		}
-	case "file":
-		fallthrough
-	default:
-		if logger, e = os.OpenFile(loggerstr[1], os.O_WRONLY|os.O_CREATE, 0640); e != nil {
-			return nil, e
-		}
-	}
-
-	return log.New(logger, "", 0), nil
 }

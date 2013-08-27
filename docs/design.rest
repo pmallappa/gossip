@@ -1,0 +1,73 @@
+========================
+ GoSPEL Design Document
+========================
+
+:Author: Prem Mallappa <prem.mallappa@gmail.com>
+:Copyright: Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.
+
+---------------------
+
+.. Contents::
+
+Introduction
+============
+GoSPEL is a hobby project, designed for
+ - Speed and Simplicity
+ - Friendly commandline
+ - Scriptable debugger
+ - Cycle Accuracy
+ - Learning Go Language
+
+Starting the simulator
+======================
+Simulator can be started with
+
+<install-path>/bin/GoSPEL-mips -plat malta -mem 1G -device serial,model=8250,make=synopsis
+
+
+Simulator start up
+==================
+
+The command interpreter
+-----------------------
+
+Platform Start
+--------------
+
+Creating New CPU
+----------------
+
+Creating Devices
+----------------
+
+CPU Startup
+-----------
+
+Device Startup
+--------------
+
+
+Debugger Startup
+----------------
+For more information on 'debugger' design refer debugger.rest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

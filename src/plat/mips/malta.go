@@ -5,8 +5,7 @@ import (
 )
 
 import (
-	//	"cpu"
-	//	"cpu/mips"
+	"cpu/mips"
 	//	"dev/mem"
 	//	"dev/char"
 	//	"dev/char/ser8250"
@@ -18,6 +17,7 @@ type PlatMalta struct {
 }
 
 func maltaInit() error {
+	mips.Mips
 	return nil
 }
 
@@ -29,5 +29,16 @@ func init() {
 func (pm *PlatMalta) Init() error {
 	return nil
 }
-func (pm *PlatMalta) Start() {
+
+func (pm *PlatMalta) Start() error {
+}
+
+func (pm *PlatMalta) Stop() error {
+
+}
+
+func NewPlatMalta() *PlatMalta {
+	return &PlatMalta{
+		nil,
+	}
 }

@@ -1,0 +1,16 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	logng \
+
+logng_FILES=\
+	logng.go \
+#	cpu_mips.go \
+
+logng.$O: $loggng_FILES
+
+<$VPROC/mk/mklib
+
+DIRS=\
+	#logng \
+	#arm  \

@@ -2,10 +2,12 @@ package cpu
 
 import (
 	"errors"
-	"log"
+	//"log"
 )
+
 import (
 	"util"
+	logng "util/logng"
 )
 
 // Static Declaration to pass values to new CPU's
@@ -19,8 +21,8 @@ func ParseFlags() (map[string]string, error) {
 		case "freq":
 			cpu.freq, e = util.ParseFreq(v)
 		case "log":
-			var logger *log.Logger
-			if logger, e = util.ParseLogger(v); e != nil {
+			var logger *logng.LoggerNG
+			if logger, e = logng.ParseLogger(v); e != nil {
 				return nil, e
 			}
 			//cpu.SetLogger(logger)

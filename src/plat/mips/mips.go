@@ -40,5 +40,5 @@ func (p *PlatMips) Init() error {
 }
 
 func init() {
-	println("plat/mips init")
+	//plat.RegisterPlatform()
 }

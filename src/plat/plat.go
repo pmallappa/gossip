@@ -54,7 +54,7 @@ type Plat struct {
 	// VGA: Some platforms like PC
 }
 
-var availablePlatforms []PlatInfo
+var availPlats []PlatInfo
 
 var (
 	memSize uint64
@@ -68,11 +68,15 @@ type Platformer interface {
 	//ParseFlags() error
 }
 
+type PlatDebugger interface {
+	Pause()
+	Resume()
+}
+
 func (p *Plat) Finalize() error {
 	// It is expected that All devices are added by actual platform
 	for _, d := range p.devices {
-		e := d.Initialize()
-		if e != nil {
+		if e := d.Initialize(); e != nil {
 			fmt.Printf("Device %v did not initialize %v\n", d)
 		}
 	}
@@ -88,7 +92,7 @@ func NewPlat() *Plat {
 
 func init() {
 	util.PrintMe()
-	availablePlatforms = make([]PlatInfo, 16)
+	availPlats = make([]PlatInfo, 16)
 
 	flag.StringVar(&plat_opts, "plat", "", "Platforms, type ? to list")
 	flag.StringVar(&smp, "smp", "",
@@ -107,9 +111,9 @@ func ParseFlags() (map[string]string, error) {
 			memSize, _ = util.ParseMem(v)
 		case "?":
 			var s string
-			for i := range availablePlatforms {
-				s += " vendor: " + availablePlatforms[i].vendor + " model: " +
-					availablePlatforms[i].model + "\n"
+			for i := range availPlats {
+				s += " vendor: " + availPlats[i].vendor + " model: " +
+					availPlats[i].model + "\n"
 			}
 			e = errors.New(s)
 		case "vendor":

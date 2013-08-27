@@ -17,22 +17,6 @@ type Exception struct {
 	instr string
 }
 
-// Illegal Instruction and Reserved Instruction means same
-const (
-	EXCP_RESET ExcptType = iota
-	EXCP_RSVDINSTR
-	EXCP_MEMACCES // Usually ends up in Pagefault
-	EXCP_TLB      // in case of Unified TLB
-	EXCP_ITLB
-	EXCP_DTLB
-	EXCP_DIVZERO // Divide by Zero
-	EXCP_BKPT    // Breakpoint
-	EXCP_SOFTINT // Way to call Syscall
-
-	EXCP_EXTINT // External Interrupt
-	EXCP_MAX    // Processor specific numbering starts from ExceptMax
-)
-
 type CpuInfo struct {
 	freq   uint32 // Hz
 	vendor string // Eg, TI, Qualcomm, NetLogic
@@ -44,7 +28,6 @@ type CpuCore struct {
 	id     uint32 // SMP ID
 	cycle  uint64 // Processor cycle, modified after every instruction
 	excpt  Exception
-	instr  interface{}
 }
 
 type Core struct {
@@ -73,12 +56,21 @@ func (c *CpuCore) GetCycle() uint64 {
 	return c.cycle
 }
 
-type Cores interface {
+type CpuController interface {
 	Init() error
 	Start() error
 	Stop() error
+}
+
+type CpuStater interface {
 	PrintStats() (string, error)
 	PrintRegs() (string, error)
+}
+
+type CpuExectuter interface {
+	Fetch() error
+	Decode() error
+	Execute() error
 }
 
 type CpuInterrupter interface {

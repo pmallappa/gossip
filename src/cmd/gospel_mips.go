@@ -9,4 +9,4 @@ import (
 	"plat/mips"
 )
 
-var platform mips.PlatMips
+var plat mips.PlatMips

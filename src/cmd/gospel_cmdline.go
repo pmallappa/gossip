@@ -7,12 +7,12 @@ import (
 	//"strings"
 )
 
-var  (
-	perf, debug bool
+var (
+	perf, debug   bool
 	pstart, pstop int
 	dstart, dstop int
-	quiet, help bool
-	)
+	quiet, help   bool
+)
 
 func init() {
 	flag.BoolVar(&quiet, "quiet", true, "As the name indicates, default true")
@@ -32,7 +32,6 @@ func init() {
 	flag.BoolVar(&help, "h", false, "Display help")
 
 }
-
 
 func errExit1(errno error) {
 	flag.Usage()
@@ -80,6 +79,10 @@ func parseFlags() {
 		errExit1(nil)
 	}
 
+	if err = plat.ParseFlags(); err != nil {
+		fmt.Printf("%v\n", err)
+		errExit1(error)
+	}
 	if err = parseLocal(); err != nil {
 		errExit1(err)
 	}

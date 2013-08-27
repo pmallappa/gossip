@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
+<title>Networking</title>
+<meta name="author" content="Prem Mallappa &lt;prem.mallappa&#64;gmail.com&gt;" />
+<meta name="copyright" content="Copyright (c) 2006-2013 Prem Mallappa. All rights reserved." />
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="networking">
+<h1 class="title">Networking</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Author:</th>
+<td>Prem Mallappa &lt;<a class="reference external" href="mailto:prem.mallappa&#64;gmail.com">prem.mallappa&#64;gmail.com</a>&gt;</td></tr>
+<tr><th class="docinfo-name">Copyright:</th>
+<td>Copyright (c) 2006-2013 Prem Mallappa. All rights reserved.</td></tr>
+</tbody>
+</table>
+<hr class="docutils" />
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#guest-part" id="id1">Guest part:</a><ul>
+<li><a class="reference internal" href="#not-all-devices-are-supported-on-all-targets-use-net-nic-model-for-a-list-of-available-devices-for-your-target" id="id2">Not all devices are supported on all targets. Use <em>-net nic,model=?</em> for a list of available devices for your target.</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#host-part" id="id3">Host part:</a><ul>
+<li><a class="reference internal" href="#vde-example" id="id4">VDE Example:</a></li>
+<li><a class="reference internal" href="#vlans-and-nics" id="id5">VLANs and NICs</a></li>
+<li><a class="reference internal" href="#connecting-vlans-together" id="id6">Connecting VLANs Together</a></li>
+<li><a class="reference internal" href="#connecting-vlans-to-tap-devices" id="id7">Connecting VLANs To TAP Devices</a></li>
+<li><a class="reference internal" href="#connecting-vlans-using-vde" id="id8">Connecting VLANs Using VDE</a></li>
+<li><a class="reference internal" href="#connecting-vde-switched-together" id="id9">Connecting VDE-switched together</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<hr class="docutils" />
+<p>The networking will be specified by -net options, it contains host part and guest part;
+The Host part specifies how to communicate, while the guest part says how the device
+looks like.
+(Most parts are copied from QEMu specification of net work)</p>
+<div class="section" id="guest-part">
+<h1><a class="toc-backref" href="#id1">Guest part:</a></h1>
+<p>Guest part of the option specifies how the device should look like for the Guest OS</p>
+<div class="section" id="not-all-devices-are-supported-on-all-targets-use-net-nic-model-for-a-list-of-available-devices-for-your-target">
+<h2><a class="toc-backref" href="#id2">Not all devices are supported on all targets. Use <em>-net nic,model=?</em> for a list of available devices for your target.</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head"><tt class="docutils literal"><span class="pre">-netdev</span> nic</tt></th>
+<th class="head"><tt class="docutils literal"><span class="pre">[vlan=n][,macaddr=mac][,model=type][,name=name][,addr=addr][,vectors=v]</span></tt></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>vlan=n</td>
+<td>Connect VLAN 'n', (n = 0 is the default).</td>
+</tr>
+<tr><td>macaddr=mac</td>
+<td>Set the MAC address of the interface to
+'mac'. MAC is of format <strong>xx:xx:xx:xx:xx:xx</strong></td>
+</tr>
+<tr><td>model=type</td>
+<td>type are <em>virtio</em>, <em>i82551</em>, <em>i82557b</em>, <em>i82559er</em>,
+<em>ne2k_pci</em>, <em>ne2k_isa</em>, <em>pcnet</em>, <em>rtl8139</em>, <em>e1000</em>,
+<em>smc91c111</em>, <em>lance</em> <em>andmcf_fec</em>. <strong>e1000</strong> is default</td>
+</tr>
+<tr><td>name=name</td>
+<td>Interface will be given a name, later <em>name</em> can be used to attach
+the guest part</td>
+</tr>
+<tr><td>addr=addr</td>
+<td>the device address set to addr (PCI cards only)</td>
+</tr>
+<tr><td>vectos=v</td>
+<td>Optionally, for PCI cards, you can specify the number v of MSI-X
+vectors that the card should have; this option currently only affects
+virtio cards; set v = 0 to disable MSI-X.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="host-part">
+<h1><a class="toc-backref" href="#id3">Host part:</a></h1>
+<p>Host part of the option specifies how the data communicated to/from the Guest</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="18%" />
+<col width="17%" />
+<col width="15%" />
+<col width="43%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">-netdev
+&lt;type&gt;</th>
+<th class="head">Description</th>
+<th class="head">Arguments</th>
+<th class="head" colspan="2">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td rowspan="14">user</td>
+<td rowspan="14">Connect the user mode
+network stack to VLAN
+'n', configure its DHCP
+server and enabled
+optional services</td>
+<td rowspan="14">[,vlan=n]
+[,name=str]
+[,net=addr[/mask]]
+[,host=addr]
+[,restrict=on|off]
+[,hostname=host]
+[,dhcpstart=addr]
+[,dns=addr]
+[,tftp=dir]
+[,bootfile=f]
+[,hostfwd=rule]
+[,guestfwd=rule]
+[,smb=dir]
+[,smbserver=addr]]</td>
+<td><!-- _vlan=n -->
+<div class="first last system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">net-device.rest</tt>, line 62)</p>
+malformed hyperlink target.</div>
+</td>
+<td>Connect user mode stack to VLAN n (n = 0 is the default).</td>
+</tr>
+<tr><td>name=str</td>
+<td>Assign symbolic name for use in monitor commands.</td>
+</tr>
+<tr><td>net=addr[/mask]</td>
+<td>Set IP network address the guest will see. Optionally specify
+the netmask, either in the form a.b.c.d or as number of valid
+top-most bits. Default is 10.0.2.0/8.</td>
+</tr>
+<tr><td>host=addr</td>
+<td>Specify the guest-visible address of the ost. Default is the
+2nd IP in the guest network, i.e. x.x.x.2.</td>
+</tr>
+<tr><td>restrict=y|yes|n|no</td>
+<td>If this options is enabled, the guest will be isolated,
+i.e. it will not be able to contact the host and no guest IP
+packets will be routed over the host to the outside. This
+option does not affect explicitly set forwarding rule.</td>
+</tr>
+<tr><td>hostname=host</td>
+<td>Specifies the client hostname reported by the builtin DHCP
+server.</td>
+</tr>
+<tr><td>dhcpstart=addr</td>
+<td>Specify the first of the 16 IPs the built-in DHCP server can
+assign. Default is the 16th to 31st IP in the guest network,
+i.e. x.x.x.16 to x.x.x.31.</td>
+</tr>
+<tr><td>dns=addr</td>
+<td>Specify the guest-visible address of the virtual
+nameserver. The address must be different from the host
+address. Default is the 3rd IP in the guest network,
+i.e. x.x.x.3.</td>
+</tr>
+<tr><td>tftp=dir</td>
+<td>When using the user mode network stack, activate a built-in
+TFTP server. The files in dir will be exposed as the root of a
+TFTP server. The TFTP client on the guest must be configured
+in binary mode (use the command bin of the Unix TFTP client).</td>
+</tr>
+<tr><td>bootfile=f</td>
+<td>When using the user mode network stack, broadcast file as the
+BOOTP filename. In conjunction with 'tftp', this can be used
+to network boot a guest from a local directory.  Example
+(using pxelinux): -boot n -net
+user,tftp=/path/to/tftp/files,bootfile=/pxelinux.0</td>
+</tr>
+<tr><td>hostfwd=rule</td>
+<td><p class="first">'hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport'</p>
+<p>Redirect incoming TCP or UDP connections to the host port
+hostport to the guest IP address guestaddr on guest port
+guestport. If guestaddr is not specified, its value is
+x.x.x.15 (default first address given by the built-in DHCP
+server). By specifying hostaddr, the rule can be bound to a
+specific host interface. If no connection type is set, TCP is
+used.  This option can be given multiple times.  For example,
+to redirect host X11 connection from screen 1 to guest screen
+0, use the following:</p>
+<p>on the host</p>
+<p>-net user,hostfwd=tcp:127.0.0.1:6001-:6000 [...]</p>
+<p>this host xterm should open in the guest X11 xterm -display :1
+To redirect telnet connections from host port 5555 to telnet
+port on the guest, use the following on the host</p>
+<p>$ telnet user,hostfwd=tcp:5555::23 [...]</p>
+<dl class="last docutils">
+<dt>$ telnet localhost 5555</dt>
+<dd>Then when you use on the host telnet
+localhost 5555, you connect to the guest telnet server.</dd>
+</dl>
+</td>
+</tr>
+<tr><td>guestfwd=rule</td>
+<td>'guestfwd=[tcp]:server:port-dev'
+Forward guest TCP connections
+to the IP address server on port port to the character device
+dev. This option can be given multiple times.</td>
+</tr>
+<tr><td>smb=dir</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>smbserver=addr</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td rowspan="12">tap</td>
+<td rowspan="12">Connect the host TAP
+network interface to
+VLAN 'n' use network
+scripts 'file'.</td>
+<td rowspan="12">[,vlan=n]
+[,name=str]
+[,fd=h]
+[,fds=x:y:...:z]
+[,ifname=name]
+[,script=file]
+[,downscript=dfile]
+[,helper=helper]
+[,sndbuf=nbytes]
+[,vnet_hdr=on|off]
+[,vhost=on|off]
+[,vhostfd=h]
+[,vhostfds=x:y:...:z]
+[,vhostforce=on|off]
+[,queues=n]</td>
+<td>vlan_=n</td>
+<td>same as above</td>
+</tr>
+<tr><td>name=str=host</td>
+<td>same as above</td>
+</tr>
+<tr><td>fd=h</td>
+<td>to connect to an already opened TAP interface</td>
+</tr>
+<tr><td>ifname=name</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>script=file</td>
+<td>use network scripts 'file' (default=/etc/qemu-ifup) to
+configure</td>
+</tr>
+<tr><td>downscript=dfile</td>
+<td>'defile' (default=/etc/qemu-ifdown) to deconfigure</td>
+</tr>
+<tr><td>helper=helper</td>
+<td>use network helper 'helper'
+(default=/usr/lib/qemu/qemu-bridge-helper) to configure it</td>
+</tr>
+<tr><td>sndbuf=nbytes</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>vnet_hdr=on|off</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>vhost=on|off</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>vhostfd=h</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>vhostforce=on|off</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td rowspan="4">bridge</td>
+<td rowspan="4">Connects a host TAP
+network interface to a
+host bridge device 'br'
+(default=br0) using the
+program 'helper'</td>
+<td rowspan="4">[,vlan=n]
+[,name=str]
+[,br=bridge]
+[,helper=helper]</td>
+<td>vlan=n</td>
+<td>same as above</td>
+</tr>
+<tr><td>name=str</td>
+<td>same as above</td>
+</tr>
+<tr><td>br=bridge</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>helper=helper</td>
+<td>same as above</td>
+</tr>
+<tr><td rowspan="11">socket</td>
+<td rowspan="11"><p class="first">Connect the vlan 'n' to
+another VLAN using a
+socket connection</p>
+<p>Connect the vlan 'n' to
+multicast maddr and port
+use 'localaddr=addr' to
+specify the host address
+to send packets from</p>
+<p class="last">Connect the vlan 'n' to
+another VLAN using an UDP
+tunnel</p>
+</td>
+<td rowspan="11"><p class="first">[,vlan=n]
+[,name=str]
+[,fd=h]
+[,listen=[host]:port]
+[,connect=host:port]</p>
+<p>[,vlan=n]
+[,name=str]
+[,fd=h]
+[,mcast=maddr:port]
+[,localaddr=addr]]</p>
+<p class="last">[,vlan=n]
+[,name=str]
+[,fd=h]
+[,udp=host:port]
+[,localaddr=host:port]</p>
+</td>
+<td>restrict=on|off</td>
+<td>flkasjdlfjlasjdl ajsdf alskjdf ;lkdjf ajs</td>
+</tr>
+<tr><td>hostname=host</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>dhcpstart=addr</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>dns=addr</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfas</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfs</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfasdf</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfsd</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfs</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfas</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfsdf</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td rowspan="6">vde</td>
+<td rowspan="6">Connect the vlan 'n' to
+port 'n' of a vde switch
+running on host and
+listening for incoming
+connections on
+'socketpath'. Use group
+'groupname' and mode
+'octalmode' to change
+default ownership and
+permissions for
+communication port.</td>
+<td rowspan="6">[,vlan=n]
+[,name=str]
+[,sock=socketpath]
+[,port=n]
+[,group=groupname]
+[,mode=octalmode]</td>
+<td>restrict=on|off</td>
+<td>flkasjdlfjlasjdl ajsdf alskjdf ;lkdjf ajs</td>
+</tr>
+<tr><td>hostname=host</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>dhcpstart=addr</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>dns=addr</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfas</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>asdfs</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>Example:
+# launch a first QEMU instance</p>
+<p>-net nic,macaddr=52:54:00:12:34:56 -net socket,listen=:1234</p>
+<p># connect the VLAN 0 of this instance to the VLAN 0
+# of the first instance</p>
+<p>-net nic,macaddr=52:54:00:12:34:57 -net socket,connect=127.0.0.1:1234</p>
+<p>Several QEMU can be running on different hosts and share same bus (assuming correct multicast setup for these hosts).
+mcast support is compatible with User Mode Linux (argument
+'ethN=mcast'), see <a class="reference external" href="http://user-mode-linux.sf.net">http://user-mode-linux.sf.net</a>. Use 'fd=h' to specify
+an already opened UDP multicast socket.
+Example:
+# launch one QEMU instance</p>
+<p>-net nic,macaddr=52:54:00:12:34:56 -net socket,mcast=230.0.0.1:1234</p>
+<p># launch another QEMU instance on same &quot;bus&quot;</p>
+<p>-net nic,macaddr=52:54:00:12:34:57 -net socket,mcast=230.0.0.1:1234</p>
+<p># launch yet another QEMU instance on same &quot;bus&quot;</p>
+<p>-net nic,macaddr=52:54:00:12:34:58 -net socket,mcast=230.0.0.1:1234</p>
+<div class="section" id="vde-example">
+<h2><a class="toc-backref" href="#id4">VDE Example:</a></h2>
+<p>Example:
+# launch vde switch
+vde_switch -F -sock /tmp/myswitch</p>
+<p># Run a DHCP server on the VLAN Switch
+slirpvde -d -s $socket -dhcp -n 10.0.2.0</p>
+<p># launch with options
+-net nic -net vde,sock=/tmp/myswitch -net dump[,vlan=n][,file=file][,len=len] Dump network traffic on VLAN n to file file (vlan0.pcap' by default). At most len bytes (64k by default) per packet are stored. The file format is libpcap, so it can be analyzed with tools such as tcpdump or Wireshark.</p>
+</div>
+<div class="section" id="vlans-and-nics">
+<h2><a class="toc-backref" href="#id5">VLANs and NICs</a></h2>
+<pre class="literal-block">
++-----------+
+|   Guest   |
+|    OS     |
+|   +---+   |
+|   |NIC|   |
++---+-+-+---+       vlan1
+      ^           +-----------+
+      |           |     port10+&lt;------&gt; Other IF
+      |           | switch    |
+      +----------&gt;+           |
+                  |     port14+&lt;------&gt; Other IF
+                  +-----------+
+</pre>
+<dl class="docutils">
+<dt>So, for example, if you do:</dt>
+<dd>-net nic,model=rtl8139,vlan=1,macaddr=52:54:00:12:34:56 ...</dd>
+</dl>
+</div>
+<div class="section" id="connecting-vlans-together">
+<h2><a class="toc-backref" href="#id6">Connecting VLANs Together</a></h2>
+<pre class="literal-block">
++-----------+                                      +-----------+
+|   Guest   |                                      |   Guest   |
+|     A     |                                      |     B     |
+|   +---+   |                                      |   +---+   |
+|   |NIC|   |                                      |   |NIC|   |
++---+-+-+---+                                      +---+-+-+---+
+      ^       +--------+                +--------+       ^
+      |       |        |                |        |       |
+      +------&gt;+ VLAN 0 +&lt;--&gt; Socket &lt;--&gt;+ VLAN 2 +&lt;------+
+              |        |                |        |
+              +--------+                +--------+
+</pre>
+<dl class="docutils">
+<dt>For example, you might start Guest A with:</dt>
+<dd><dl class="first last docutils">
+<dt>-net nic -net socket,listen=:8010 ...</dt>
+<dd>This qemu process is hosting a guest with a nic connected to VLAN 0, which in turn has a socket interface listening for connections on port 8010.</dd>
+</dl>
+</dd>
+<dt>You could then start Guest B with:</dt>
+<dd><dl class="first last docutils">
+<dt>-net nic,vlan=2 -net socket,vlan=2,connect=127.0.0.1:8010 ...</dt>
+<dd>This qemu process would then have a guest with a nic connected to VLAN 2,
+which in turn has a socket interface connected to VLAN 0 in the first qemu process.</dd>
+</dl>
+</dd>
+</dl>
+<p>Thus, any frames transmitted by Guest A is received by Guest B, and vice versa.
+(Note, the two vlans do not need to be numbered differently. It is only done here for illustrative purposes)</p>
+<dl class="docutils">
+<dt>An extension of this concept is to connect vlans together using a multicast socket. For example, with:</dt>
+<dd><p class="first">GuestA: -net nic -net socket,mcast=230.0.0.1:1234</p>
+<dl class="last docutils">
+<dt>GuestB: -net nic -net socket,mcast=230.0.0.1:1234</dt>
+<dd>you have two guests with their vlan 0 connected together over a multicase bus.
+Any number of guests can connect to the same multicast address and receive the
+frames sent by any guest to that vlan. It's interesting to note that any of
+the above can be done by unpriviledged users.</dd>
+</dl>
+</dd>
+</dl>
+</div>
+<div class="section" id="connecting-vlans-to-tap-devices">
+<h2><a class="toc-backref" href="#id7">Connecting VLANs To TAP Devices</a></h2>
+<p>Another option is to make a vlan available through a device in the host OS. Any
+frames transmitted via this device will appear on a vlan in the qemu process
+(and thus received by another other interfaces on the vlan) and frames sent to
+the vlan will be received by the device.</p>
+<pre class="literal-block">
++-----------+                            +-------+
+|   Guest   |                            |  TAP  |
+|    OS     |                            | Device|
+|   +---+   |                            |(qtap0)|
+|   |NIC|   |                            +---+---+
++---+-+-+---+                                |
+      ^       +------+                   +---+-----+
+      |       |      |                   | Kernel  |
+      +------&gt;+ VLAN +&lt;--&gt;   File    &lt;--&gt;+ TUN/TAP |
+              |      |     Descriptor    | Driver  |
+              +------+                   +---------+
+
+ -net nic -net tap,ifname=qtap0 ...
+   This works using the kernel's TUN/TAP device driver. This driver basically
+   allows a user-space application to obtain a file descriptor which is
+   connected to a network device. Any frames sent to the kernel over the file
+   descriptor will be received by the device and any frames transmitted via
+   the device will be received by the application.
+   If you e.g. assign an IP address to the TAP device, applications in the
+   guest will be able to connect to applications in the host listening for
+   connections on that IP address. And if you enable port forwarding in the
+   host, packets sent from the guest can be forwarded by the host kernel to the Internet.
+
+   Essentially, the TAP device looks just like a network device connected to a physical
+   network to which the guest is also connected.
+   TAP devices are obtained by opening /dev/net/tun and invoking the TUNSETIFF ioctl().
+   This is not usually allowed for unpriviledged users so, in general, only root can use this method.
+</pre>
+</div>
+<div class="section" id="connecting-vlans-using-vde">
+<h2><a class="toc-backref" href="#id8">Connecting VLANs Using VDE</a></h2>
+<p>An extension of this idea is possible using VDE (Virtual Distributed Ethernet).
+This is a user-space program which can obtain a TAP device and allow a number
+of other programs to connect to it and bridge those connections to the TAP
+device. It would be quite similar in effect to connecting multiple qemu vlans
+together and connecting one of those vlans to a TAP device.</p>
+<pre class="literal-block">
+   +-----------+                           +-----------+
+   |   Guest   |                           |   Guest   |
+   |     A     |                           |     B     |
+   |   +---+   |                           |   +---+   |
+   |   |NIC|   |                           |   |NIC|   |
+   +---+-+-+---+                           +---+-+-+---+
+         ^       +------+         +------+       ^
+         |       |      | +-----+ |      |       |
+         +------&gt;+ VLAN +-+ VDE +-+ VLAN +&lt;------+
+                 |      | +--+--+ |      |
+                 +------+    |    +------+
+                             |
+                         +---+-----+  +--------+
+                         | Kernel  |  |  TAP   |
+                         | TUN/TAP +--+ Device |
+                         | Driver  |  | (qtap) |
+                         +---------+  +--------+
+
+$&gt; vde_switch -hub -tap qtap -sock /var/run/qtap-ctl
+GuestA: -net vde,sock=/var/run/qtap-ctl qemu -net nic ...
+GuestB: -net vde,sock=/var/run/qtap-ctl qemu -net nic ...
+   Here we end up with the vde_switch receiving packets from the vlans in
+   both qemu processes and forwarding to the qtap network interface in the host,
+   and likewise, forwarding packets from the qtap device to both vlans. Since
+   both guests have nics on these vlans, they can transmit/receive frames
+   to/from the host OS and each other.
+</pre>
+</div>
+<div class="section" id="connecting-vde-switched-together">
+<h2><a class="toc-backref" href="#id9">Connecting VDE-switched together</a></h2>
+<dl class="docutils">
+<dt># 1. run several switches</dt>
+<dd>On the same computer you can run several switches, provided they have different names:</dd>
+</dl>
+<p>$ vde_switch -s /tmp/switch1
+$ vde_switch -s /tmp/switch2</p>
+<p>It is possible to run switches on different computers:</p>
+<p>host1$ vde_switch -s /tmp/switch
+host2$ vde_switch -s /tmp/switch</p>
+<p># 2: connect them together It is straightforward simple:</p>
+<dl class="docutils">
+<dt>$ dpipe vde_plug /tmp/switch1 = vde_plug /tmp/switch2</dt>
+<dd><p class="first">dpipe is a double pipe: the two commands separated by a = sign are mutually
+interconnected: the output of the first is the input for the second and
+viceversa. In this way the two plugs plugged-in the two switches exchange
+their packets...</p>
+<p class="last">If the switch are running on different computers we need a wire, i.e.
+a program able to forward a stream connection from a computer to the other.
+ssh is the simplest (safe and quite fast) example</p>
+</dd>
+<dt>host1$ dpipe vde_plug /tmp/switch = ssh host2 vde_plug /tmp/switch</dt>
+<dd>when the switch are connected all the virtual (and real) machines connected
+to one can communicate with those connected to the other. It has exactly
+the same effect for real (physical, not-virtual) ethernet of connecting a
+cross-cable between two switches.</dd>
+</dl>
+</div>
+</div>
+</div>
+</body>
+</html>

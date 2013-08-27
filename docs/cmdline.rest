@@ -1,5 +1,5 @@
 =============
-Commandline
+ Commandline
 =============
 
 :Author: Prem Mallappa <prem.mallappa@gmail.com>
@@ -9,9 +9,8 @@ Commandline
 
 .. Contents::
 
---------------------
 Using cmdline
---------------------
+=============
 
 Our goal is to have much sophisticated command line. The generic driver tries
 to handle frequently used commandline options
@@ -20,10 +19,6 @@ to handle frequently used commandline options
 
 	-freq
 		specifies the frequency in hz/mhz/ghz etc.
-		cache=size:<way><lines><bytes>* size in bytes/kb/mb,
-		<way><lines><bytes>* specifies number of ways, lines per way and bytes per line
-		respectively, this should match with size if specified, recommended, give either
-		size or details; not both
 
 	-plat
 		Specifies platform; for eg: arm1175, for evaluation base board from

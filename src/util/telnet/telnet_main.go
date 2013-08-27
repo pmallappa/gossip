@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
-	//"strings"
+	"strings"
 )
 
 type Conn struct {
@@ -24,7 +24,7 @@ func newConn(conn net.Conn) (*Conn, error) {
 	return &c, nil
 }
 
-func Start(s []string) (io.Writer, error) {
+func Start(str string) (io.Writer, error) {
 	//
 	// TODO: Need to fix this,
 	// Required is, open a telnet port, keep listening
@@ -39,7 +39,7 @@ func Start(s []string) (io.Writer, error) {
 	)
 
 	var listn net.Listener
-
+	s := strings.SplitN(str, ":", 2)
 	listn, e = net.Listen(s[0], s[1])
 	if e != nil {
 		return nil, e
