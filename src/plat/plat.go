@@ -42,7 +42,7 @@ func (p *PlatInfo) SetInfo(info *PlatInfo) {
 type Plat struct {
 	PlatInfo
 	Cores    []cpu.Cores
-	NumCores uint // For Easy Access, its actully len(Cores)
+	NumCores int // For Easy Access, its actully len(Cores)
 	MemSize  uint64
 
 	devices []dev.Devicer // An array of all devices on platform
@@ -138,8 +138,8 @@ out:
 	return m, e
 }
 
-func ParseSMPFlags() (uint, error) {
-	var newsmp, maxcpus, cores, threads, sockets uint64
+func ParseSMPFlags() (int, error) {
+	var newsmp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
 
 	m, e := util.ParseFlagsSubst(smp, "smp")
 	for k, v := range m {
@@ -165,22 +165,34 @@ func ParseSMPFlags() (uint, error) {
 
 	}
 
+	// Suppress error untill we figure out the meaning of 'maxcpus'
 	_ = maxcpus
-
-	// ????
-	if newsmp > 0 {
-	} else {
-	}
 
 	// smp is number of cores pers socket, number threads per core
 	// and number of such sockets
-	newsmp = cores * threads * sockets
+	// newsmp = cores * threads * sockets
 
 	// Need to compute the SMP options form what ever is given
 	// If alone smp is given, using above equation calculate other values
 	// sockets = 1
 	// cores = smp / (sockets * threads)
 	// threads = smp / (sockets * cores)
+
+	// Recalculate
+	if newsmp != sockets*cores*threads {
+		if sockets > 1 {
+			newsmp = sockets * cores * threads
+		} else {
+			cores = newsmp / (sockets * threads)
+			threads = newsmp / (sockets * cores)
+		}
+	}
+
 out:
-	return uint(newsmp), e
+	return int(newsmp), e
+}
+
+func ParseFlags() (map[string]string, error) {
+	// TODO
+	return nil, nil
 }
