@@ -4,9 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-
-//"strings"
-//"strconv"
+	//"strings"
+	"strconv"
 )
 
 import (
@@ -43,7 +42,7 @@ func (p *PlatInfo) SetInfo(info *PlatInfo) {
 type Plat struct {
 	PlatInfo
 	Cores    []cpu.Cores
-	NumCores int // For Easy Access, its actully len(Cores)
+	NumCores uint // For Easy Access, its actully len(Cores)
 	MemSize  uint64
 
 	devices []dev.Devicer // An array of all devices on platform
@@ -57,9 +56,10 @@ type Plat struct {
 var availPlats []PlatInfo
 
 var (
-	memSize uint64
-	vendor  string
-	model   string
+	memSize  uint64
+	platname string
+	vendor   string
+	model    string
 )
 
 type Platformer interface {
@@ -97,13 +97,15 @@ func init() {
 	flag.StringVar(&plat_opts, "plat", "", "Platforms, type ? to list")
 	flag.StringVar(&smp, "smp", "",
 		"-smp n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
-
 }
 
 /* Try to process as much as possible, rest send to specific platform
 for interpretation */
-func ParseFlags() (map[string]string, error) {
-	m, e := util.ParseFlags(plat_opts)
+func ParsePlatFlags() (map[string]string, error) {
+	m, e := util.ParseFlagsSubst(plat_opts, "plat")
+	if e != nil {
+		goto out
+	}
 	for k, v := range m {
 		switch k {
 		case "mem":
@@ -120,16 +122,65 @@ func ParseFlags() (map[string]string, error) {
 			vendor = v
 		case "model":
 			model = v
+		case "plat":
+			platname = v
 		default:
 			continue
 		}
 		// if any cases returns non-nil
 		if e != nil {
-			return nil, e
+			goto out
 		}
 		// Delete the consumed options
 		delete(m, k)
 	}
-
+out:
 	return m, e
+}
+
+func ParseSMPFlags() (uint, error) {
+	var newsmp, maxcpus, cores, threads, sockets uint64
+
+	m, e := util.ParseFlagsSubst(smp, "smp")
+	for k, v := range m {
+		switch k {
+		case "maxcpus":
+			maxcpus, e = strconv.ParseUint(v, 0, 0)
+		case "cores":
+			cores, e = strconv.ParseUint(v, 0, 0)
+		case "threads":
+			threads, e = strconv.ParseUint(v, 0, 0)
+		case "sockets":
+			sockets, e = strconv.ParseUint(v, 0, 0)
+		case "smp":
+			newsmp, e = strconv.ParseUint(v, 0, 0)
+		default:
+			fmt.Printf("Dont understand options", k, v)
+			continue
+		}
+
+		if e != nil {
+			goto out
+		}
+
+	}
+
+	_ = maxcpus
+
+	// ????
+	if newsmp > 0 {
+	} else {
+	}
+
+	// smp is number of cores pers socket, number threads per core
+	// and number of such sockets
+	newsmp = cores * threads * sockets
+
+	// Need to compute the SMP options form what ever is given
+	// If alone smp is given, using above equation calculate other values
+	// sockets = 1
+	// cores = smp / (sockets * threads)
+	// threads = smp / (sockets * cores)
+out:
+	return uint(newsmp), e
 }

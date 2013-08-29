@@ -30,7 +30,7 @@ type CpuCore struct {
 	excpt  Exception
 }
 
-type Core struct {
+type Cpu struct {
 	CpuInfo
 	CpuCore
 }
@@ -62,7 +62,7 @@ type CpuController interface {
 	Stop() error
 }
 
-type CpuStater interface {
+type CpuStats interface {
 	PrintStats() (string, error)
 	PrintRegs() (string, error)
 }
@@ -76,6 +76,13 @@ type CpuExectuter interface {
 type CpuInterrupter interface {
 	InterruptRaise(uint32) error
 	InterruptAck(uint32) error
+}
+
+type Cores interface {
+	CpuInterrupter
+	CpuExectuter
+	CpuStats
+	CpuController
 }
 
 type InstrType uint32

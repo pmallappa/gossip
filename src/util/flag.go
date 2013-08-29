@@ -33,17 +33,33 @@ func ParseFlags(s string) (map[string]string, error) {
 	return optmap, err
 }
 
+
+func ParseFlagsSubst(s string, subst string) (map[string]string, error) {
+	var err error = nil
+	optmap := make(map[string]string)
+	for _, opt := range strings.Split(s, ",") {
+		if idx := strings.Index(opt, "="); idx < 0 {
+			optmap[opt] = subst
+		} else {
+			// Assing key as start-to-idx, skip '=', then value as idx-to-end
+			optmap[opt[:idx]] = opt[idx+1:]
+		}
+	}
+
+	return optmap, err
+}
+
 func ParseMem(v string) (uint64, error) {
 	var mult, mem uint64
 	var e error
 
 	switch v[len(v)-1] {
 	case 'k', 'K':
-		mult = 1 << 10
+		mult = 1 << 10 // 2^10
 	case 'm', 'M':
-		mult = 1 << 20
+		mult = 1 << 20 // 2^20
 	case 'g', 'G':
-		mult = 1 << 30
+		mult = 1 << 30 // 2^30
 	default:
 		mult = 1
 	}
