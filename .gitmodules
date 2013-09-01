@@ -1,6 +1,0 @@
-[submodule "src/cpu/arm"]
-	path = src/cpu/arm
-	url = ssh://git@bitbucket.org/prem.mallappa/gospel-arm.git
-[submodule "src/cpu/mips"]
-	path = src/cpu/mips
-	url = ssh://git@bitbucket.org/prem.mallappa/gospel-mips.git
