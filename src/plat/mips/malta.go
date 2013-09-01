@@ -39,7 +39,9 @@ func (pm *PlatMalta) Stop() error {
 }
 
 func NewPlatMalta() *plat.Plat {
-	return &plat.Plat{
-		plat.PlatInfo: plat.PlatInfo{model: "malta", vendor: "MIPS Technologies", version: "1.0"},
-	}
+	p := plat.NewPlat()
+
+	p.SetInfo("malta", "MIPS", "1.0")
+
+	return p
 }

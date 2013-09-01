@@ -32,7 +32,7 @@ func main() {
 
 	parseFlags()
 
-	if err := plat.Init(); err != nil {
+	if err := platform.Init(); err != nil {
 		println(os.Args[0])
 		os.Exit(-123)
 	}

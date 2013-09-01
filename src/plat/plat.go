@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	plat_opts string
-	smp       string
+	platflags string
+	smpflag   string
 )
 
 type PlatInfo struct {
@@ -33,10 +33,10 @@ func (p *PlatInfo) GetInfo() map[string]string {
 	return map[string]string{"model": p.model, "vendor": p.vendor, "version": p.version}
 }
 
-func (p *PlatInfo) SetInfo(info *PlatInfo) {
-	p.model = info.model
-	p.vendor = info.vendor
-	p.version = info.version
+func (p *PlatInfo) SetInfo(model, vendor, version string) {
+	p.model = model
+	p.vendor = vendor
+	p.version = version
 }
 
 type Plat struct {
@@ -94,15 +94,15 @@ func init() {
 	util.PrintMe()
 	availPlats = make([]PlatInfo, 16)
 
-	flag.StringVar(&plat_opts, "plat", "", "Platforms, type ? to list")
-	flag.StringVar(&smp, "smp", "",
+	flag.StringVar(&platflags, "plat", "", "Platforms, type ? to list")
+	flag.StringVar(&smpflag, "smp", "",
 		"-smp n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
 }
 
 /* Try to process as much as possible, rest send to specific platform
 for interpretation */
 func ParsePlatFlags() (map[string]string, error) {
-	m, e := util.ParseFlagsSubst(plat_opts, "plat")
+	m, e := util.ParseFlagsSubst(platflags, "plat")
 	if e != nil {
 		goto out
 	}
@@ -139,9 +139,9 @@ out:
 }
 
 func ParseSMPFlags() (int, error) {
-	var newsmp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
+	var smp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
 
-	m, e := util.ParseFlagsSubst(smp, "smp")
+	m, e := util.ParseFlagsSubst(smpflag, "smp")
 	for k, v := range m {
 		switch k {
 		case "maxcpus":
@@ -153,7 +153,7 @@ func ParseSMPFlags() (int, error) {
 		case "sockets":
 			sockets, e = strconv.ParseUint(v, 0, 0)
 		case "smp":
-			newsmp, e = strconv.ParseUint(v, 0, 0)
+			smp, e = strconv.ParseUint(v, 0, 0)
 		default:
 			fmt.Printf("Dont understand options", k, v)
 			continue
@@ -170,7 +170,7 @@ func ParseSMPFlags() (int, error) {
 
 	// smp is number of cores pers socket, number threads per core
 	// and number of such sockets
-	// newsmp = cores * threads * sockets
+	// smp = cores * threads * sockets
 
 	// Need to compute the SMP options form what ever is given
 	// If alone smp is given, using above equation calculate other values
@@ -179,17 +179,17 @@ func ParseSMPFlags() (int, error) {
 	// threads = smp / (sockets * cores)
 
 	// Recalculate
-	if newsmp != sockets*cores*threads {
+	if smp != sockets*cores*threads {
 		if sockets > 1 {
-			newsmp = sockets * cores * threads
+			smp = sockets * cores * threads
 		} else {
-			cores = newsmp / (sockets * threads)
-			threads = newsmp / (sockets * cores)
+			cores = smp / (sockets * threads)
+			threads = smp / (sockets * cores)
 		}
 	}
 
 out:
-	return int(newsmp), e
+	return int(smp), e
 }
 
 func ParseFlags() (map[string]string, error) {

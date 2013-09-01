@@ -3,8 +3,13 @@ package main
 import (
 	//"errors"
 	"flag"
+	"fmt"
 	"os"
 	//"strings"
+)
+
+import (
+	"plat"
 )
 
 var (
@@ -79,9 +84,9 @@ func parseFlags() {
 		errExit1(nil)
 	}
 
-	if err = plat.ParseFlags(); err != nil {
+	if _, err = plat.ParseFlags(); err != nil {
 		fmt.Printf("%v\n", err)
-		errExit1(error)
+		errExit1(err)
 	}
 	if err = parseLocal(); err != nil {
 		errExit1(err)
