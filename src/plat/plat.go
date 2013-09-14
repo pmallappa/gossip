@@ -1,11 +1,8 @@
 package plat
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	//"strings"
-	"strconv"
 )
 
 import (
@@ -15,18 +12,30 @@ import (
 	//	"dev/mem"
 	//	"dev/serial"
 	//	"dev/net"
-	"util"
 )
 
-var (
-	platflags string
-	smpflag   string
-)
 
 type PlatInfo struct {
 	model   string
 	vendor  string
 	version string
+}
+
+func NewPlatInfo(m string, v string, ver string) *PlatInfo {
+	return &PlatInfo{
+		model:   m,
+		vendor:  v,
+		version: ver,
+	}
+}
+
+type PlatRegister interface {
+	Setup() Platform
+}
+
+type PlatInformer interface {
+	GetInfo() map[string]string
+	SetInfo(string, string, string)
 }
 
 func (p *PlatInfo) GetInfo() map[string]string {
@@ -40,20 +49,29 @@ func (p *PlatInfo) SetInfo(model, vendor, version string) {
 }
 
 type Plat struct {
-	PlatInfo
-	Cores    []cpu.Cores
 	NumCores int // For Easy Access, its actully len(Cores)
 	MemSize  uint64
 
+	Cores []cpu.Cores
+
 	devices []dev.Devicer // An array of all devices on platform
 
-	// uart  []serial.Serial
+	// uart  []*serial.Serial
 
-	// netdev []net.Netdev
+	// netdev []*net.Netdev
 	// VGA: Some platforms like PC
+	PlatInfo
 }
 
-var availPlats []PlatInfo
+type Platform interface {
+	PlatInformer
+	PlatController
+	PlatDebugger
+	PlatCustomizer
+}
+
+var availplats []Platform
+var nSMP int
 
 var (
 	memSize  uint64
@@ -62,15 +80,24 @@ var (
 	model    string
 )
 
-type Platformer interface {
+type PlatController interface {
 	Init() error
-	Start()
-	//ParseFlags() error
+	Start() error
+	Stop() error
+	ParseFlags() error
 }
 
 type PlatDebugger interface {
-	Pause()
-	Resume()
+	Pause() error
+	Resume() error
+}
+
+// Every Platform should implement this. for setting up
+// its own things
+type PlatCustomizer interface {
+	PreSetup() error
+	CustomSetup() error
+	PostSetup() error
 }
 
 func (p *Plat) Finalize() error {
@@ -83,116 +110,26 @@ func (p *Plat) Finalize() error {
 	return nil
 }
 
+func Register(p Platform){
+	availplats = append(availplats, p)
+}
+
 func NewPlat() *Plat {
 	return &Plat{
-		PlatInfo: PlatInfo{model: model, vendor: vendor, version: "0.0"},
-		MemSize:  memSize,
+	//PlatInfo: PlatInfo{model: model, vendor: vendor, version: "0.0"},
 	}
 }
 
-func init() {
-	util.PrintMe()
-	availPlats = make([]PlatInfo, 16)
-
-	flag.StringVar(&platflags, "plat", "", "Platforms, type ? to list")
-	flag.StringVar(&smpflag, "smp", "",
-		"-smp n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
-}
-
-/* Try to process as much as possible, rest send to specific platform
-for interpretation */
-func ParsePlatFlags() (map[string]string, error) {
-	m, e := util.ParseFlagsSubst(platflags, "plat")
-	if e != nil {
-		goto out
-	}
-	for k, v := range m {
-		switch k {
-		case "mem":
-			//p.SetMem(memParse(v))
-			memSize, _ = util.ParseMem(v)
-		case "?":
-			var s string
-			for i := range availPlats {
-				s += " vendor: " + availPlats[i].vendor + " model: " +
-					availPlats[i].model + "\n"
-			}
-			e = errors.New(s)
-		case "vendor":
-			vendor = v
-		case "model":
-			model = v
-		case "plat":
-			platname = v
-		default:
-			continue
-		}
-		// if any cases returns non-nil
-		if e != nil {
-			goto out
-		}
-		// Delete the consumed options
-		delete(m, k)
-	}
-out:
-	return m, e
-}
-
-func ParseSMPFlags() (int, error) {
-	var smp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
-
-	m, e := util.ParseFlagsSubst(smpflag, "smp")
-	for k, v := range m {
-		switch k {
-		case "maxcpus":
-			maxcpus, e = strconv.ParseUint(v, 0, 0)
-		case "cores":
-			cores, e = strconv.ParseUint(v, 0, 0)
-		case "threads":
-			threads, e = strconv.ParseUint(v, 0, 0)
-		case "sockets":
-			sockets, e = strconv.ParseUint(v, 0, 0)
-		case "smp":
-			smp, e = strconv.ParseUint(v, 0, 0)
-		default:
-			fmt.Printf("Dont understand options", k, v)
-			continue
-		}
-
-		if e != nil {
-			goto out
-		}
-
+func (p *Plat) Setup() error {
+	if model == "" {
+		return fmt.Errorf("Vendor not found, select a platform")
 	}
 
-	// Suppress error untill we figure out the meaning of 'maxcpus'
-	_ = maxcpus
+	// search for right model
+	for i := range availplats {
+		if vendor == availplats[i].GetInfo()["vendor"] {
 
-	// smp is number of cores pers socket, number threads per core
-	// and number of such sockets
-	// smp = cores * threads * sockets
-
-	// Need to compute the SMP options form what ever is given
-	// If alone smp is given, using above equation calculate other values
-	// sockets = 1
-	// cores = smp / (sockets * threads)
-	// threads = smp / (sockets * cores)
-
-	// Recalculate
-	if smp != sockets*cores*threads {
-		if sockets > 1 {
-			smp = sockets * cores * threads
-		} else {
-			cores = smp / (sockets * threads)
-			threads = smp / (sockets * cores)
 		}
 	}
-
-out:
-	return int(smp), e
-}
-
-func ParseFlags() (map[string]string, error) {
-	// TODO
-	return nil, nil
+	return nil
 }

@@ -1,9 +1,9 @@
 package mips
 
 import (
-	//"fmt"
+//"fmt"
 )
 
-func sead3Init() {
+func init() {
 	println("Init plat/mips/sead3")
 }

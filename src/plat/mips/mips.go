@@ -4,8 +4,11 @@ import (
 //"fmt"
 )
 
+// import cpu/mips as mipscpu
+// import plat/mips as mipsplat
+
 import (
-	//"cpu"
+	//mipscpu //"cpu/mips"
 	"plat"
 )
 
@@ -39,6 +42,6 @@ func (p *PlatMips) Init() error {
 	return nil
 }
 
-func init() {
-	//plat.RegisterPlatform()
+func (p *PlatMips) Setup() error {
+	return nil
 }

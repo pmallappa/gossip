@@ -30,11 +30,14 @@ const (
 // the base and only forwards offset to read.
 // Any Device can interrupt,
 // Interrupt channel is sent via Init() or Requesting a new device.
-type Interrupter interface {
-	AssertLevel(int) error
+type InterrupterEdge interface {
 	AssertEdge(int) error
-	DeAssertLevel(int) error
-	DeAssertEdge(int) error
+	DeassertEdge(int) error
+}
+
+type InterrupterLevel interface {
+	DeassertLevel(int) error
+	AssertLevel(int) error
 }
 
 type DevInfo struct {
@@ -63,6 +66,25 @@ type Device struct {
 
 type Devicer interface {
 	Initialize() error
+}
+
+type Reader interface {
+	Read(uint64) (uint64, error)
+	Read8(uint64) (uint8, error)
+	Read16(uint64) (uint16, error)
+	Read32(uint64) (uint32, error)
+}
+
+type Writer interface {
+	Write(uint64, uint64) error
+	Write8(uint64, uint8) error
+	Write16(uint64, uint16) error
+	Write32(uint64, uint32) error
+}
+
+type ReadWriter interface {
+	Reader
+	Writer
 }
 
 func NewDevice(size uint64) *Device {

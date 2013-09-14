@@ -68,6 +68,7 @@ func main() {
 	//
 	//
 	//
+	platform.Init()
 	//
 	//
 	//
