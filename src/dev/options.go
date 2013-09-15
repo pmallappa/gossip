@@ -1,6 +1,22 @@
 package dev
 
-func ParseFlags() error {
+import(
+	"util"
+)
 
-	return nil
+func ParseFlags() (map[string]string, error) {
+	m, e := util.ParseFlags(devflags)
+	if e != nil {
+		return m, e
+	}
+
+	for k, v := range m {
+		switch k {
+		case "char":
+		default:
+			v = v
+		}
+	}
+
+	return m, e
 }

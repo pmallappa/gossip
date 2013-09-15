@@ -61,6 +61,10 @@ func parseSMPFlags() (int, error) {
 	var smp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
 
 	m, e := util.ParseFlagsSubst(smpflag, "smp")
+	if e != nil {
+		return 0, e
+	}
+
 	for k, v := range m {
 		switch k {
 		case "maxcpus":

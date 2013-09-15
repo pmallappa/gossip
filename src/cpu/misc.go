@@ -30,8 +30,8 @@ func ParseFlags() (map[string]string, error) {
 		case "?":
 			var s string
 			for i := range availableCpu {
-				s += " vendor: " + availableCpu[i].vendor + " model: " +
-					availableCpu[i].model + "\n"
+				s += " vendor: " + availableCpu[i].GetInfo()["vendor"] + " model: " +
+					availableCpu[i].GetInfo()["model"] + "\n"
 			}
 			e = errors.New(s)
 		default:

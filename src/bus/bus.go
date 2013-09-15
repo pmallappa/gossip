@@ -16,7 +16,7 @@ import (
 type device struct {
 	start uint64
 	size  uint64
-	dr    BusReadWriterAll
+	dr    ReadWriterAll
 }
 
 type Bus struct {
@@ -38,44 +38,44 @@ const (
 	RRW = RRO | RWO
 )
 
-type BusReader interface {
+type Reader interface {
 	Read8(uint64) (uint8, error)
 	Read16(uint64) (uint16, error)
 	Read32(uint64) (uint32, error)
 	Read64(uint64) (uint64, error)
 }
 
-type BusWriter interface {
+type Writer interface {
 	Write8(uint64, uint8) error
 	Write16(uint64, uint16) error
 	Write32(uint64, uint32) error
 	Write64(uint64, uint64) error
 }
 
-type BusRawReader interface {
+type RawReader interface {
 	RawRead(uint64, []byte) error
 }
 
-type BusRawWriter interface {
+type RawWriter interface {
 	RawWrite(uint64, []byte) error
 }
 
-type BusReadWriter interface {
-	BusReader
-	BusWriter
+type ReadWriter interface {
+	Reader
+	Writer
 }
 
-type BusRawReadWriter interface {
-	BusRawReader
-	BusRawWriter
+type RawReadWriter interface {
+	RawReader
+	RawWriter
 }
 
-type BusReadWriterAll interface {
-	BusReadWriter
-	BusRawReadWriter
+type ReadWriterAll interface {
+	ReadWriter
+	RawReadWriter
 }
 
-func (b *Bus) getDevice(addr uint64) (BusReadWriterAll, uint64, error) {
+func (b *Bus) getDevice(addr uint64) (ReadWriterAll, uint64, error) {
 	// Need to implement the B-tree to have devices at addresses specified by Map from platform
 	return b.dev[0].dr, 0, nil
 }

@@ -3,6 +3,7 @@ package cpu
 import (
 	//"fmt"
 	"log"
+	"strconv"
 )
 
 import (
@@ -38,6 +39,15 @@ type Cpu struct {
 func (c *CpuInfo) SetFreq(freq uint64) {
 	c.freq = uint32(freq)
 }
+
+func (c *CpuInfo) GetInfo() map[string]string {
+	return map[string]string {
+		"model": c.model,
+		"vendor": c.vendor,
+		"freq": strconv.FormatUint(uint64(c.freq), 10),
+	}
+}
+
 func (c *CpuInfo) GetFreq() uint64 {
 	return uint64(c.freq)
 }
@@ -83,6 +93,7 @@ type Cores interface {
 	CpuExectuter
 	CpuStats
 	CpuController
+	GetInfo()map[string]string
 }
 
 type InstrType uint32

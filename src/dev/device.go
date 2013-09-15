@@ -2,13 +2,15 @@ package dev
 
 // system imports
 import (
-//"encoding/binary"
+	//"encoding/binary"
+	"flag"
+
 //"fmt"
 )
 
 // local imports
 import (
-//"util"
+	"bus"
 )
 
 // Each device has a host part and device part
@@ -30,12 +32,12 @@ const (
 // the base and only forwards offset to read.
 // Any Device can interrupt,
 // Interrupt channel is sent via Init() or Requesting a new device.
-type InterrupterEdge interface {
+type EdgeInterrupt interface {
 	AssertEdge(int) error
 	DeassertEdge(int) error
 }
 
-type InterrupterLevel interface {
+type LevelInterrupt interface {
 	DeassertLevel(int) error
 	AssertLevel(int) error
 }
@@ -44,6 +46,7 @@ type DevInfo struct {
 	model   string
 	vendor  string
 	version string
+	id      string
 }
 
 func (d *DevInfo) GetInfo() map[string]string {
@@ -51,10 +54,11 @@ func (d *DevInfo) GetInfo() map[string]string {
 }
 
 type Dev struct {
-	devtype DEVtype
-	//regs     []byte
+	devtype  DEVtype
 	irq      uint
 	intrctrl chan bool
+	rd       bus.Reader
+	rw       bus.Writer
 }
 
 type Device struct {
@@ -63,32 +67,19 @@ type Device struct {
 }
 
 // All devices must implement bus.Reader bus.Writer bus.RawReader bus.RawWriter
-
 type Devicer interface {
 	Initialize() error
-}
-
-type Reader interface {
-	Read(uint64) (uint64, error)
-	Read8(uint64) (uint8, error)
-	Read16(uint64) (uint16, error)
-	Read32(uint64) (uint32, error)
-}
-
-type Writer interface {
-	Write(uint64, uint64) error
-	Write8(uint64, uint8) error
-	Write16(uint64, uint16) error
-	Write32(uint64, uint32) error
-}
-
-type ReadWriter interface {
-	Reader
-	Writer
+	ParseFlags() (map[string]string, error)
 }
 
 func NewDevice(size uint64) *Device {
 	m := new(Device)
 	//m.regs = make([]byte, size)
 	return m
+}
+
+var devflags string
+
+func init() {
+	flag.StringVar(&devflags, "dev", "", "Devices, type ? to list")
 }
