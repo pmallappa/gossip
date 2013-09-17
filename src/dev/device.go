@@ -3,7 +3,7 @@ package dev
 // system imports
 import (
 	//"encoding/binary"
-	"flag"
+	//"flag"
 
 //"fmt"
 )
@@ -42,15 +42,14 @@ type LevelInterrupt interface {
 	AssertLevel(int) error
 }
 
-type DevInfo struct {
+type Info struct {
 	model   string
 	vendor  string
-	version string
 	id      string
 }
 
-func (d *DevInfo) GetInfo() map[string]string {
-	return map[string]string{"model": d.model, "vendor": d.vendor, "version": d.version}
+func (i *Info) GetInfo() map[string]string {
+	return map[string]string{"model": i.model, "vendor": i.vendor, "id": i.id}
 }
 
 type Dev struct {
@@ -59,17 +58,20 @@ type Dev struct {
 	intrctrl chan bool
 	rd       bus.Reader
 	rw       bus.Writer
+	// The options that we couldn't parse
+	// may be of some use to the actual device.
+	Opts	map[string]string
 }
 
 type Device struct {
-	DevInfo
+	Info
 	Dev
 }
 
 // All devices must implement bus.Reader bus.Writer bus.RawReader bus.RawWriter
 type Devicer interface {
 	Initialize() error
-	ParseFlags() (map[string]string, error)
+	ParseFlags(map[string]string) (map[string]string, error)
 }
 
 func NewDevice(size uint64) *Device {
@@ -78,8 +80,6 @@ func NewDevice(size uint64) *Device {
 	return m
 }
 
-var devflags string
-
 func init() {
-	flag.StringVar(&devflags, "dev", "", "Devices, type ? to list")
+	initDevFlags()
 }

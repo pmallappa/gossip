@@ -134,7 +134,7 @@ func init() {
 	util.PrintMe()
 	availplats = make([]Platform, 0, 128)
 
-	flag.StringVar(&platflags, "plat", "", "Platforms, type ? to list")
+	flag.StringVar(&platflags, "plat", "malta", "Platforms, type ? to list")
 	flag.StringVar(&smpflag, "smp", "",
 		"-smp n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
 }

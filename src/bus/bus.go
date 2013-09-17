@@ -32,8 +32,8 @@ const (
 const (
 	RO = 1 << iota
 	WO
-	RRO
-	RWO
+	RRO	//Raw Read Only
+	RWO	// Raw Read Write
 	RW  = RO | WO
 	RRW = RRO | RWO
 )

@@ -12,21 +12,21 @@ import (
 	"dev"
 )
 
-type CdevHost uint32
+type CDevHostType uint32
 
 const (
-	CHOST_UDP CdevHost = 1 << (8 + iota)
-	CHOST_PIPE
-	CHOST_FILE
-	CHOST_VC
-	CHOST_CONSOLE
-	CHOST_SOCK
-	CHOST_PARPORT
-	CHOST_TTY
+	CDevUDP CDevHostType = 1 << (8 + iota)
+	CDevPIPE
+	CDevFILE
+	CDevVC
+	CDevCONSOLE
+	CDevSOCK
+	CDevPARPORT
+	CDevTTY
 )
 
 type CharDev struct {
-	ctype		CdevHost
+	ctype		CDevHostType
 	id			uint16
 	mux			bool
 
@@ -42,6 +42,6 @@ type CharDev struct {
 }
 
 // Parse all that we can, rest will be passed it down to the actual device module
-func ParseFlags(m map[string]string) (map[string]string, error) {
+func (c *CharDev) ParseFlags(m map[string]string) (map[string]string, error) {
 	return m, nil
 }

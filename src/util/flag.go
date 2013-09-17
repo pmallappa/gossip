@@ -14,27 +14,9 @@ import (
 	//"util/logger"
 )
 
-// ParseFlags parses flags of type below
-//   -cpu model=ARMA50,freq=100,cache=256k
-// first split on ',' then split on '='
-//
-func ParseFlags(s string) (map[string]string, error) {
-	var err error = nil
-	optmap := make(map[string]string)
-	for _, opt := range strings.Split(s, ",") {
-		if idx := strings.Index(opt, "="); idx < 0 {
-			optmap[opt] = ""
-		} else {
-			// Assing key as start-to-idx, skip '=', then value as idx-to-end
-			optmap[opt[:idx]] = opt[idx+1:]
-		}
-	}
-
-	return optmap, err
-}
 
 
-func ParseFlagsSubst(s string, subst string) (map[string]string, error) {
+func _parseflags(s string, subst string) (map[string]string, error) {
 	var err error = nil
 	optmap := make(map[string]string)
 	for _, opt := range strings.Split(s, ",") {
@@ -48,6 +30,25 @@ func ParseFlagsSubst(s string, subst string) (map[string]string, error) {
 
 	return optmap, err
 }
+
+// ParseFlags parses flags of type below
+//   -cpu model=ARMA50,freq=100,cache=256k
+// first split on ',' then split on '='
+//
+func ParseFlags(s string) (map[string]string, error) {
+	return _parseflags(s, "")
+}
+
+// ParseFlags parses flags of type below
+//   -cpu model=ARMA50,freq=100,cache=256k
+// first split on ',' then split on '='
+// but case like 
+//   -device pl011,iobase=0x210934
+// returns first instance as map[subst]=pl011 
+func ParseFlagsSubst(s string, subst string) (map[string]string, error) {
+	return _parseflags(s, subst)
+}
+
 
 func ParseMem(v string) (uint64, error) {
 	var mult, mem uint64
