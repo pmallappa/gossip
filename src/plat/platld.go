@@ -39,7 +39,9 @@ var (
 
 	ld_help_str string = "-ld type=file,addr=file=<file>    - Loads raw contents of file to addr" +
 		"-ld type=elf,file=<file>          - Loads an ELF file, address is as per ELF sections" +
-		"-ld type=zero,addr=,len=          - Loads zero's at 'addr'"
+		"-ld type=zero,addr=,len=          - Loads zero's at 'addr'" +
+		"Conflicting(duplicate) address will not be detected, but can be figured out" +
+		"from Loader prints"
 
 	elfloads  []string
 	zeroloads map[uint64]uint64 //addr : size
