@@ -15,7 +15,6 @@ var (
 	smpflag   string
 )
 
-
 /* Try to process as much as possible, rest send to specific platform
 for interpretation */
 func parsePlatFlags() (map[string]string, error) {
@@ -127,8 +126,6 @@ func ParseFlags() (map[string]string, error) {
 
 	return m, nil
 }
-
-
 
 func init() {
 	util.PrintMe()

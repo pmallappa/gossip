@@ -16,15 +16,15 @@ import (
 type device struct {
 	start uint64
 	size  uint64
-	endi	uint64
+	end   uint64
 	dr    ReadWriterAll
 }
 
 // Bus is implemented as binary tree,
 type Bus struct {
-	dev *device
-	left *Bus
-	right *Bus
+	devices []*device
+	left    *Bus
+	right   *Bus
 }
 
 const (
@@ -36,8 +36,8 @@ const (
 const (
 	RO = 1 << iota
 	WO
-	RRO	//Raw Read Only
-	RWO	// Raw Read Write
+	RRO //Raw Read Only
+	RWO // Raw Read Write
 	RW  = RO | WO
 	RRW = RRO | RWO
 )
@@ -77,13 +77,6 @@ type RawReadWriter interface {
 type ReadWriterAll interface {
 	ReadWriter
 	RawReadWriter
-}
-
-func (b *Bus) getDevice(addr uint64) (ReadWriterAll, uint64, error) {
-	// Need to implement the B-tree to have devices at
-	// addresses specified by Map from platform
-	
-	return b.dev[0].dr, 0, nil
 }
 
 func (b *Bus) Read8(addr uint64) (uint8, error) {
@@ -223,13 +216,10 @@ func (b *Bus) RawWrite(addr uint64, buf []byte) error {
 	return dr.RawWrite(off, buf)
 }
 
-
-
-func (b *Bus)AddDevice(addr, size uint64, rw ReadWriterAll) error {
-	if dr, off, err := b.getDevice(addr); err == nil {
-		b.add(&device{addr, size, rw})
+func (b *Bus) AddDevice(addr, size uint64, rw ReadWriterAll) error {
+	if _, _, err := b.getDevice(addr); err == nil {
+		b.add(addr, size, rw)
 	}
 
-	return err
+	return nil
 }
-

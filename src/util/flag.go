@@ -11,10 +11,8 @@ import (
 )
 
 import (
-	//"util/logger"
+//"util/logger"
 )
-
-
 
 func _parseflags(s string, subst string) (map[string]string, error) {
 	var err error = nil
@@ -42,13 +40,12 @@ func ParseFlags(s string) (map[string]string, error) {
 // ParseFlags parses flags of type below
 //   -cpu model=ARMA50,freq=100,cache=256k
 // first split on ',' then split on '='
-// but case like 
+// but case like
 //   -device pl011,iobase=0x210934
-// returns first instance as map[subst]=pl011 
+// returns first instance as map[subst]=pl011
 func ParseFlagsSubst(s string, subst string) (map[string]string, error) {
 	return _parseflags(s, subst)
 }
-
 
 func ParseMem(v string) (uint64, error) {
 	var mult, mem uint64
