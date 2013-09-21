@@ -1,6 +1,8 @@
 package mips
 
 import (
+	"debug/elf"
+
 //"fmt"
 )
 
@@ -44,4 +46,19 @@ func (p *PlatMips) Init() error {
 
 func (p *PlatMips) Setup() error {
 	return nil
+}
+
+func (p *PlatMips) GetELFClass() []elf.Class {
+	c := make([]elf.Class, 0, 16)
+	c = append(c, elf.ELFCLASS32)
+	c = append(c, elf.ELFCLASS64)
+	return c
+}
+
+func (p *PlatMips) GetELFMachine() []elf.Machine {
+	m := make([]elf.Machine, 0, 16)
+	m = append(m, elf.EM_MIPS)
+	m = append(m, elf.EM_MIPS_RS3_LE)
+	m = append(m, elf.EM_MIPS_RS4_BE)
+	return m
 }

@@ -14,7 +14,6 @@ import (
 	//	"dev/net"
 )
 
-
 type PlatInfo struct {
 	model   string
 	vendor  string
@@ -68,10 +67,12 @@ type Platform interface {
 	PlatController
 	PlatDebugger
 	PlatCustomizer
+	PlatELFLoader
 }
 
 var availplats []Platform
 var nSMP int
+var curPlat Platform
 
 var (
 	memSize  uint64
@@ -110,7 +111,7 @@ func (p *Plat) Finalize() error {
 	return nil
 }
 
-func Register(p Platform){
+func Register(p Platform) {
 	availplats = append(availplats, p)
 }
 

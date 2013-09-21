@@ -12,7 +12,9 @@ import (
 	"plat"
 )
 
-type PlatMalta PlatMips
+type PlatMalta struct {
+	PlatMips
+}
 
 func maltaInit() error {
 	return nil
