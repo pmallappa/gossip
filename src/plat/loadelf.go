@@ -49,6 +49,12 @@ func loadELF(files []string) error {
 			if !isClassSupported(file.Class) {
 				return fmt.Errorf("Class not supported: %v", file.Class)
 			}
+			for _, proghdr := range file.Progs {
+				// load each program header
+				if proghdr.Flags&(elf.PF_R|elf.PF_X|elf.PF_W) != 0 {
+
+				}
+			}
 		} else {
 			return errors.New("Elf File problem")
 		}
