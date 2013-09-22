@@ -1,4 +1,4 @@
-package log
+package logng
 
 import (
 	"io"
@@ -21,30 +21,49 @@ const (
 type LogLevel uint32
 
 const (
-	logInfo LogLevel = iota
-	logWarning
-	logError
-	logPanic
+	PANIC LogLevel = iota
+	FATAL
+	CRITICAL
+	ERROR
+	WARNING
+	INFO
+	DEBUG
 )
+
+var logLevelString = []string{
+	PANIC:    "Panic",    // Unfavourable component error
+	FATAL:    "Fatal",    // Internal simulator Error
+	CRITICAL: "Critical", // Component, needing attention
+	ERROR:    "Error",    // Component, reporting Error
+	WARNING:  "Warning",  // Component reporting warning
+	INFO:     "Info",     //
+	DEBUG:    "Debug",    //
+}
 
 type LoggerNG struct {
 	log.Logger
 	str         string
 	logType     LoggerType
-	level       LogLevel
-	curlevel    LogLevel
+	component   string        // Component
+	fn          func() string // Dynamically Call a function for string
+	curLevel    LogLevel
 	exitOnError bool
 }
 
 func (log *LoggerNG) SetLevel(l LogLevel) {
-	log.level = l
+	log.curLevel = l
+}
+
+func (log *LoggerNG) SetComponent(s string) {
+	log.component = s
 }
 
 func ParseLogger(s string) (*LoggerNG, error) {
 	loggerstr := strings.SplitN(s, ":", 2)
-	var logger *LoggerNG = &LoggerNG{
-		logType: TcpUdp,
-	}
+
+	logger := NewLoggerNG()
+	logger.logType = TcpUdp
+
 	switch strings.ToLower(loggerstr[0]) {
 	case "", "tcp", "udp":
 		logger.logType = TcpUdp
@@ -57,31 +76,61 @@ func ParseLogger(s string) (*LoggerNG, error) {
 	return logger, nil
 }
 
-func (l *LoggerNG) InitLogger(ls string) (*log.Logger, error) {
-	var logwriter io.Writer
-	var e error
+func (l *LoggerNG) InitLogger(str string) (*log.Logger, error) {
+	var (
+		logwriter io.Writer
+		e         error
+	)
 	switch l.logType {
 	case TcpUdp:
-		if logwriter, e = telnet.Start(ls); e != nil {
+		if logwriter, e = telnet.Start(str); e != nil {
 			return nil, e
 		}
 	case File:
-		if logwriter, e = os.OpenFile(ls, os.O_WRONLY|os.O_CREATE,
+		if logwriter, e = os.OpenFile(str, os.O_WRONLY|os.O_CREATE,
 			0640); e != nil {
 			return nil, e
 		}
+	default:
+		logwriter = os.Stderr
 	}
 
 	return log.New(logwriter, "", 0), e
 }
 
 func NewLoggerNG() *LoggerNG {
-	return &LoggerNG{
-		level:       logInfo,
+	l := LoggerNG{
+		curLevel:    INFO,
 		exitOnError: false,
 	}
+
+	l.Logger.SetFlags(0)
+	return &l
 }
 
-func (l *LoggerNG) Printf(format string, v ...interface{}) {
+func (l *LoggerNG) Log(lvl LogLevel, format string, v ...interface{}) {
+	if l.curLevel > lvl {
+		return
+	}
+
+	if l.fn != nil {
+		l.Logger.Printf("%s:%s", l.component+l.fn())
+	}
+
+	if lvl < INFO {
+		l.Logger.Printf("-- %s --", logLevelString[lvl])
+	}
+
 	l.Logger.Printf(format, v...)
+
+	switch lvl {
+	case PANIC:
+		panic("-- PANIC -- ")
+	case FATAL:
+		l.Println("-- FATAL --")
+		os.Exit(1)
+	default:
+		l.Println("")
+	}
+
 }

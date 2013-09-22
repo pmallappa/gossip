@@ -1,13 +1,14 @@
 package plat
 
 import (
+	//	"bytes"
 	"debug/elf"
 	"errors"
 	"fmt"
 )
 
 import (
-//	"bus"
+//"bus"
 )
 
 type PlatELFLoader interface {
@@ -17,7 +18,7 @@ type PlatELFLoader interface {
 }
 
 func isClassSupported(c elf.Class) bool {
-	for _, class := range curPlat.GetELFClass() {
+	for _, class := range curPlatform.GetELFClass() {
 		if c == class {
 			return true
 		}
@@ -26,7 +27,7 @@ func isClassSupported(c elf.Class) bool {
 }
 
 func isMachineSupported(m elf.Machine) bool {
-	for _, machine := range curPlat.GetELFMachine() {
+	for _, machine := range curPlatform.GetELFMachine() {
 		if m == machine {
 			return true
 		}
@@ -52,7 +53,12 @@ func loadELF(files []string) error {
 			for _, proghdr := range file.Progs {
 				// load each program header
 				if proghdr.Flags&(elf.PF_R|elf.PF_X|elf.PF_W) != 0 {
-
+					p := make([]byte, proghdr.Memsz)
+					if _, e := proghdr.ReadAt(p, int64(proghdr.Off)); e != nil {
+						if _, err := curPlat.busMain.WriteAt(p, proghdr.Vaddr); err != nil {
+							return err
+						}
+					}
 				}
 			}
 		} else {

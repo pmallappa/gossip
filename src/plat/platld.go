@@ -37,11 +37,10 @@ func (f *loadOptstr) Set(value string) error {
 var (
 	load_opts loadOptstr
 
-	ld_help_str string = "-ld type=file,addr=file=<file>    - Loads raw contents of file to addr" +
-		"-ld type=elf,file=<file>          - Loads an ELF file, address is as per ELF sections" +
-		"-ld type=zero,addr=,len=          - Loads zero's at 'addr'" +
-		"Conflicting(duplicate) address will not be detected, but can be figured out" +
-		"from Loader prints"
+	ld_help_str string = "type=file,file=<file>,addr=    - Loads raw contents of file to addr\n" +
+		"\t type=elf,file=<file>    - Loads an ELF file, address is as per ELF sections\n" +
+		"\t type=zero,addr=,len=    - Loads zero's at 'addr'\n" +
+		"\t Conflicting(duplicate) address will not be detected, but can be figured out" + "from Loader prints"
 
 	elfloads  []string
 	zeroloads map[uint64]uint64 //addr : size

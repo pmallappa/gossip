@@ -3,6 +3,7 @@ package plat
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"strconv"
 )
 
@@ -29,10 +30,11 @@ func parsePlatFlags() (map[string]string, error) {
 			memSize, _ = util.ParseMem(v)
 		case "?":
 			var s string
+			s = "Available Platforms: \n"
 			for i := range availplats {
-				s += " vendor: " + availplats[i].GetInfo()["vendor"] +
-					" model: " + availplats[i].GetInfo()["model"] + "\n"
+				s += availplats[i].GetInfo()["model"] + "\n"
 			}
+			fmt.Print(s)
 			e = errors.New(s)
 		case "vendor":
 			vendor = v
@@ -127,11 +129,15 @@ func ParseFlags() (map[string]string, error) {
 	return m, nil
 }
 
+var defaultPlat string = "malta"
+
 func init() {
 	util.PrintMe()
 	availplats = make([]Platform, 0, 128)
 
-	flag.StringVar(&platflags, "plat", "malta", "Platforms, type ? to list")
+	flag.StringVar(&platflags, "plat", defaultPlat,
+		"Platforms, type ? to list")
 	flag.StringVar(&smpflag, "smp", "",
-		"-smp n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
+		"-smp n[,maxcpus=cpus][,cores=cores]"+
+			"[,threads=threads][,sockets=sockets]")
 }

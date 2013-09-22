@@ -21,7 +21,7 @@ func maltaInit() error {
 }
 
 func init() {
-	println("Init plat/mips/malta")
+	//println("Init plat/mips/malta")
 	plat.Register(NewPlatMalta())
 }
 

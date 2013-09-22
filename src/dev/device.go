@@ -2,8 +2,8 @@ package dev
 
 // system imports
 import (
-	//"encoding/binary"
-	//"flag"
+//"encoding/binary"
+//"flag"
 
 //"fmt"
 )
@@ -43,9 +43,9 @@ type LevelInterrupt interface {
 }
 
 type Info struct {
-	model   string
-	vendor  string
-	id      string
+	model  string
+	vendor string
+	id     string
 }
 
 func (i *Info) GetInfo() map[string]string {
@@ -53,14 +53,13 @@ func (i *Info) GetInfo() map[string]string {
 }
 
 type Dev struct {
-	devtype  DEVtype
-	irq      uint
-	intrctrl chan bool
-	rd       bus.Reader
-	rw       bus.Writer
+	devtype   DEVtype
+	irq       uint
+	interrupt chan bool
+	rw        bus.ReadWriterAll
 	// The options that we couldn't parse
 	// may be of some use to the actual device.
-	Opts	map[string]string
+	Opts map[string]string
 }
 
 type Device struct {
@@ -68,7 +67,7 @@ type Device struct {
 	Dev
 }
 
-// All devices must implement bus.Reader bus.Writer bus.RawReader bus.RawWriter
+// All devices must implement bus.ReadWriterAll
 type Devicer interface {
 	Initialize() error
 	ParseFlags(map[string]string) (map[string]string, error)

@@ -3,7 +3,7 @@ package main
 import (
 	//"errors"
 	"flag"
-	"fmt"
+	//"fmt"
 	"os"
 	//"strings"
 )
@@ -36,11 +36,6 @@ func init() {
 	flag.BoolVar(&help, "help", false, "Display help")
 	flag.BoolVar(&help, "h", false, "Display help")
 
-}
-
-func errExit1(errno error) {
-	flag.Usage()
-	os.Exit(1)
 }
 
 //
@@ -81,14 +76,15 @@ func parseFlags() {
 	flag.Parse()
 
 	if help {
-		errExit1(nil)
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	if _, err = plat.ParseFlags(); err != nil {
-		fmt.Printf("%v\n", err)
-		errExit1(err)
+		//fmt.Printf("%v\n", err)
+		os.Exit(1)
 	}
 	if err = parseLocal(); err != nil {
-		errExit1(err)
+		os.Exit(1)
 	}
 }

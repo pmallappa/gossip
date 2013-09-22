@@ -10,7 +10,8 @@ import (
 // import plat/mips as mipsplat
 
 import (
-	//mipscpu //"cpu/mips"
+	//"cpu"
+	//"cpu/mips"
 	"plat"
 )
 
@@ -47,6 +48,8 @@ func (p *PlatMips) Init() error {
 func (p *PlatMips) Setup() error {
 	return nil
 }
+
+// PlatELFLoader interface
 
 func (p *PlatMips) GetELFClass() []elf.Class {
 	c := make([]elf.Class, 0, 16)

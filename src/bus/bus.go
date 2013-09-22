@@ -43,25 +43,25 @@ const (
 )
 
 type Reader interface {
-	Read8(uint64) (uint8, error)
-	Read16(uint64) (uint16, error)
-	Read32(uint64) (uint32, error)
-	Read64(uint64) (uint64, error)
+	ReadAt8(val *uint8, off uint64) error
+	ReadAt16(val *uint16, off uint64) error
+	ReadAt32(val *uint32, off uint64) error
+	ReadAt64(val *uint64, off uint64) error
 }
 
 type Writer interface {
-	Write8(uint64, uint8) error
-	Write16(uint64, uint16) error
-	Write32(uint64, uint32) error
-	Write64(uint64, uint64) error
+	WriteAt8(val uint8, off uint64) error
+	WriteAt16(val uint16, off uint64) error
+	WriteAt32(val uint32, off uint64) error
+	WriteAt64(val uint64, off uint64) error
 }
 
-type RawReader interface {
-	RawRead(uint64, []byte) error
+type ReaderAt interface {
+	ReadAt(p []byte, off int64) (n int, e error)
 }
 
-type RawWriter interface {
-	RawWrite(uint64, []byte) error
+type WriterAt interface {
+	WriteAt(p []byte, off int64) (n int, e error)
 }
 
 type ReadWriter interface {
@@ -69,47 +69,47 @@ type ReadWriter interface {
 	Writer
 }
 
-type RawReadWriter interface {
-	RawReader
-	RawWriter
+type ReadWriterAt interface {
+	ReaderAt
+	WriterAt
 }
 
 type ReadWriterAll interface {
+	ReadWriterAt
 	ReadWriter
-	RawReadWriter
 }
 
-func (b *Bus) Read8(addr uint64) (uint8, error) {
+func (b *Bus) ReadAt8(val *uint8, addr uint64) error {
 	// Since we are reading a byte, no need to 'endianize'
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return dr.Read8(off)
+	return dr.ReadAt8(val, off)
 }
 
-func (b *Bus) Read16(addr uint64) (uint16, error) {
+func (b *Bus) ReadAt16(val *uint16, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return dr.Read16(off)
+	return dr.ReadAt16(val, off)
 }
 
-func (b *Bus) Read32(addr uint64) (uint32, error) {
+func (b *Bus) ReadAt32(val *uint32, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return dr.Read32(off)
+	return dr.ReadAt32(val, off)
 }
 
-func (b *Bus) Read64(addr uint64) (uint64, error) {
+func (b *Bus) ReadAt64(val *uint64, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return dr.Read64(off)
+	return dr.ReadAt64(val, off)
 }
 
 /*
@@ -166,60 +166,59 @@ func (b *Bus) WriteNG(addr uint64, val interface{}) error {
 }
 */
 
-func (b *Bus) Write8(addr uint64, val uint8) error {
+func (b *Bus) WriteAt8(val uint8, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
-	return dr.Write8(off, val)
+	return dr.WriteAt8(val, off)
 }
 
-func (b *Bus) Write16(addr uint64, val uint16) error {
+func (b *Bus) WriteAt16(val uint16, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
 
-	return dr.Write16(off, val)
+	return dr.WriteAt16(val, off)
 }
 
-func (b *Bus) Write32(addr uint64, val uint32) error {
+func (b *Bus) WriteAt32(val uint32, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
-	return dr.Write32(off, val)
+	return dr.WriteAt32(val, off)
 }
 
-func (b *Bus) Write64(addr uint64, val uint64) error {
+func (b *Bus) WriteAt64(val uint64, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
 
-	return dr.Write64(off, val)
+	return dr.WriteAt64(val, off)
 }
 
-func (b *Bus) RawRead(addr uint64, buf []byte) error {
+func (b *Bus) ReadAt(buf []byte, addr uint64) (int, error) {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return dr.RawRead(off, buf)
+	return dr.ReadAt(buf, int64(off))
 }
 
-func (b *Bus) RawWrite(addr uint64, buf []byte) error {
+func (b *Bus) WriteAt(buf []byte, addr uint64) (int, error) {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return dr.RawWrite(off, buf)
+	return dr.WriteAt(buf, int64(off))
 }
 
 func (b *Bus) AddDevice(addr, size uint64, rw ReadWriterAll) error {
 	if _, _, err := b.getDevice(addr); err == nil {
 		b.add(addr, size, rw)
 	}
-
 	return nil
 }
