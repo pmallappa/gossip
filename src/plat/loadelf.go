@@ -53,6 +53,8 @@ func loadELF(files []string) error {
 			for _, proghdr := range file.Progs {
 				// load each program header
 				if proghdr.Flags&(elf.PF_R|elf.PF_X|elf.PF_W) != 0 {
+					// MemSz will be aligned so we no need to write '0'
+					// at end of FileSz bytes
 					p := make([]byte, proghdr.Memsz)
 					if _, e := proghdr.ReadAt(p, int64(proghdr.Off)); e != nil {
 						if _, err := curPlat.busMain.WriteAt(p, proghdr.Vaddr); err != nil {

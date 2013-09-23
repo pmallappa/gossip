@@ -43,25 +43,25 @@ const (
 )
 
 type Reader interface {
-	ReadAt8(val *uint8, off uint64) error
-	ReadAt16(val *uint16, off uint64) error
-	ReadAt32(val *uint32, off uint64) error
-	ReadAt64(val *uint64, off uint64) error
+	Read8At(off uint64) (uint8, error)
+	Read16At(off uint64) (uint16, error)
+	Read32At(off uint64) (uint32, error)
+	Read64At(off uint64) (uint64, error)
 }
 
 type Writer interface {
-	WriteAt8(val uint8, off uint64) error
-	WriteAt16(val uint16, off uint64) error
-	WriteAt32(val uint32, off uint64) error
-	WriteAt64(val uint64, off uint64) error
+	Write8At(off uint64, val uint8) error
+	Write16At(off uint64, val uint16) error
+	Write32At(off uint64, val uint32) error
+	Write64At(off uint64, val uint64) error
 }
 
 type ReaderAt interface {
-	ReadAt(p []byte, off int64) (n int, e error)
+	ReadAt(p []byte, off uint64) (n int, e error)
 }
 
 type WriterAt interface {
-	WriteAt(p []byte, off int64) (n int, e error)
+	WriteAt(p []byte, off uint64) (n int, e error)
 }
 
 type ReadWriter interface {
@@ -79,37 +79,38 @@ type ReadWriterAll interface {
 	ReadWriter
 }
 
-func (b *Bus) ReadAt8(val *uint8, addr uint64) error {
+func (b *Bus) Read8At(addr uint64) (uint8, error) {
 	// Since we are reading a byte, no need to 'endianize'
-	dr, off, err := b.getDevice(addr)
-	if err != nil {
-		return err
+	var err error
+	if dr, off, err := b.getDevice(addr); err == nil {
+		return dr.Read8At(off)
 	}
-	return dr.ReadAt8(val, off)
+
+	return 0, err
 }
 
-func (b *Bus) ReadAt16(val *uint16, addr uint64) error {
-	dr, off, err := b.getDevice(addr)
-	if err != nil {
-		return err
+func (b *Bus) Read16At(addr uint64) (uint16, error) {
+	var err error
+	if dr, off, err := b.getDevice(addr); err == nil {
+		return dr.Read16At(off)
 	}
-	return dr.ReadAt16(val, off)
+	return 0, err
 }
 
-func (b *Bus) ReadAt32(val *uint32, addr uint64) error {
-	dr, off, err := b.getDevice(addr)
-	if err != nil {
-		return err
+func (b *Bus) Read32At(addr uint64) (uint32, error) {
+	var err error
+	if dr, off, err := b.getDevice(addr); err == nil {
+		return dr.Read32At(off)
 	}
-	return dr.ReadAt32(val, off)
+	return 0, err
 }
 
-func (b *Bus) ReadAt64(val *uint64, addr uint64) error {
-	dr, off, err := b.getDevice(addr)
-	if err != nil {
-		return err
+func (b *Bus) Read64At(addr uint64) (uint64, error) {
+	var err error
+	if dr, off, err := b.getDevice(addr); err == nil {
+		return dr.Read64At(off)
 	}
-	return dr.ReadAt64(val, off)
+	return 0, err
 }
 
 /*
@@ -166,38 +167,38 @@ func (b *Bus) WriteNG(addr uint64, val interface{}) error {
 }
 */
 
-func (b *Bus) WriteAt8(val uint8, addr uint64) error {
+func (b *Bus) Write8At(val uint8, addr uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
-	return dr.WriteAt8(val, off)
+	return dr.Write8At(off, val)
 }
 
-func (b *Bus) WriteAt16(val uint16, addr uint64) error {
+func (b *Bus) Write16At(addr uint64, val uint16) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
 
-	return dr.WriteAt16(val, off)
+	return dr.Write16At(off, val)
 }
 
-func (b *Bus) WriteAt32(val uint32, addr uint64) error {
+func (b *Bus) Write32At(addr uint64, val uint32) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
-	return dr.WriteAt32(val, off)
+	return dr.Write32At(off, val)
 }
 
-func (b *Bus) WriteAt64(val uint64, addr uint64) error {
+func (b *Bus) Write64At(addr uint64, val uint64) error {
 	dr, off, err := b.getDevice(addr)
 	if err != nil {
 		return err
 	}
 
-	return dr.WriteAt64(val, off)
+	return dr.Write64At(off, val)
 }
 
 func (b *Bus) ReadAt(buf []byte, addr uint64) (int, error) {
@@ -205,7 +206,7 @@ func (b *Bus) ReadAt(buf []byte, addr uint64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return dr.ReadAt(buf, int64(off))
+	return dr.ReadAt(buf, off)
 }
 
 func (b *Bus) WriteAt(buf []byte, addr uint64) (int, error) {
@@ -213,7 +214,7 @@ func (b *Bus) WriteAt(buf []byte, addr uint64) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return dr.WriteAt(buf, int64(off))
+	return dr.WriteAt(buf, off)
 }
 
 func (b *Bus) AddDevice(addr, size uint64, rw ReadWriterAll) error {

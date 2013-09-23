@@ -38,5 +38,6 @@ func (b *Bus) add(addr, size uint64, rw ReadWriterAll) error {
 		}
 	}
 	b.devices = append(b.devices, &device{addr, size, addr + size, rw})
+	b.sort()
 	return nil
 }
