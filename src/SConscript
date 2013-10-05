@@ -11,7 +11,7 @@ utils = SConscript(join('util', 'SConscript'),
                   exports={'env': env, 'variant': 'util', 'idir': idir},
                   duplicate=0)
 
-dirs=['cpu', 'plat'] #, 'dev']
+dirs=['util', 'cpu', 'plat'] #, 'dev']
 libs = []
 
 for variant in dirs:

@@ -1,6 +1,7 @@
 package logng
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -58,36 +59,52 @@ func (log *LoggerNG) SetComponent(s string) {
 	log.component = s
 }
 
+//
+// ParseLogger understands any of the following options
+//				log=file:<path>
+//				log=file
+//				log=tcp:address:port
+// for the second option we rely on the 'util/telnet' module
 func ParseLogger(s string) (*LoggerNG, error) {
 	loggerstr := strings.SplitN(s, ":", 2)
 
-	logger := NewLoggerNG()
-	logger.logType = TcpUdp
+	l := NewLoggerNG()
+	l.logType = File
 
 	switch strings.ToLower(loggerstr[0]) {
-	case "", "tcp", "udp":
-		logger.logType = TcpUdp
-	case "file":
-		fallthrough
+	case "tcp", "udp":
+		l.logType = TcpUdp
+	case "", "file":
 	default:
-		logger.logType = File
+		return nil, fmt.Errorf("Unknown description for logger '%s'", s)
 	}
-	logger.str = loggerstr[1]
-	return logger, nil
+
+	l.str = loggerstr[1]
+
+	return l, nil
 }
 
-func (l *LoggerNG) InitLogger(str string) (*log.Logger, error) {
+func (l *LoggerNG) InitLogger() (*log.Logger, error) {
 	var (
 		logwriter io.Writer
 		e         error
 	)
+
 	switch l.logType {
 	case TcpUdp:
-		if logwriter, e = telnet.Start(str); e != nil {
+		t := telnet.NewTelnet()
+		s := strings.SplitN(l.str, ":", 2)
+		if s[1] == "" {
+			s[1] = "21"
+		}
+		if s[0] == "" {
+			s[0] = "localhost"
+		}
+		if e = t.Connect(s[0], s[1]); e != nil {
 			return nil, e
 		}
 	case File:
-		if logwriter, e = os.OpenFile(str, os.O_WRONLY|os.O_CREATE,
+		if logwriter, e = os.OpenFile(l.str, os.O_WRONLY|os.O_CREATE,
 			0640); e != nil {
 			return nil, e
 		}

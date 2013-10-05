@@ -7,7 +7,7 @@ src_local = ['telnet.go']
 
 telnet_env = env.Clone()
 telnet_a = telnet_env.Go('telnet', src_local)
-telnet = telnet_env.GoPack('telnet', telnet_a)
+telnet = telnet_env.GoPack('telnet', src_local)
 telnet_env.Install(idir, telnet)
 
 Return('telnet')

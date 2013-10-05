@@ -55,6 +55,9 @@ func NewTelnet() *Telnet {
 	return &t
 }
 
+// wait for incoming connection only first time,
+// After connection established and closed, All writes are ignored
+// All reads return with bytes read as 0
 func connect(c chan bool, listener net.Listener, t *Telnet) {
 	var e error
 	t.Conn, e = listener.Accept()
@@ -65,7 +68,8 @@ func connect(c chan bool, listener net.Listener, t *Telnet) {
 	c <- true
 }
 
-func (t *Telnet) ConnectTimeout(proto string, addr string, timeout uint32) error {
+func (t *Telnet) ConnectTimeout(proto string, addr string,
+	timeout uint32) error {
 	listener, e := net.Listen(proto, addr)
 	if e != nil {
 		fmt.Printf("Telnet Listen Error %v", e)
@@ -99,8 +103,8 @@ func (t *Telnet) ConnectTimeout(proto string, addr string, timeout uint32) error
 	return e
 }
 
-func (t *Telnet) Connect(proto string, addr string) {
-	t.ConnectTimeout(proto, addr, 0)
+func (t *Telnet) Connect(proto string, addr string) error {
+	return t.ConnectTimeout(proto, addr, 0)
 }
 
 func (t *Telnet) Start() error {

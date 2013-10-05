@@ -3,23 +3,24 @@ from os.path import join
 
 Import('env', 'variant', 'idir')
 
-dirs=['telnet']
-src_local = ['debug.go', 'flag.go', 'util.go']
+dirs=['flag' ]#, 'telnet', 'logng']
 
-util_env = env.Clone()
-util_a = util_env.Go('util', src_local)
-util = util_env.GoPack('util', util_a)
-util_env.Install(idir, util)
+src_local = ['debug.go', 'util.go']
+
+#util_env = env.Clone()
+#util_a = util_env.Go('util', src_local)
+#util = util_env.GoPack('util', util_a)
+#util_env.Install(idir, util)
 
 objs = []
 
 idir = join(idir, variant)
 for variant in dirs:
 	objs += SConscript(join(variant, 'SConscript'),
-			   exports = {'env' : util_env, 'variant': variant, 'idir': idir},
+			   exports = {'env' : env, 'variant': variant, 'idir': idir},
 			   #variant_dir=sd,
 			   duplicate=0)
 
-Depends(util, objs)
+Depends(src_local, objs)
 
-Return(['util', 'objs'])
+Return(['objs', 'src_local'])
