@@ -257,11 +257,33 @@ func (t *Telnet) Read(buf []byte) (int, error) {
 	return n, nil
 }
 
+func (t *Telnet) __readInterpret(c byte, again bool, err error) {
+	return
+}
+
+func (t *Telnet) __readByte() (c byte, again bool, err error) {
+	if c, err = t.bufrd.ReadByte(); err != nil {
+		return 0, false, err
+	}
+
+	if c == cmd_IAC {
+	}
+	return
+}
+
 // bufio.Reader
 func (t *Telnet) ReadByte() (c byte, err error) {
 	// TODO: We have to interpret the 'telnet' commands and options
 	// Send the left overs to whoever asking
-	return t.bufrd.ReadByte()
+	var again bool
+	for {
+		if c, again, err = t.__readByte(); again == false || err != nil {
+			c = 0
+			break
+		}
+	}
+
+	return
 }
 
 func (t *Telnet) ReadBytes(delim byte) (line []byte, err error) {
