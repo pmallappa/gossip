@@ -100,7 +100,7 @@ func (l *LoggerNG) InitLogger() (*log.Logger, error) {
 		if s[0] == "" {
 			s[0] = "localhost"
 		}
-		if e = t.Connect(s[0], s[1]); e != nil {
+		if e = t.ListenTimeout(s[0], s[1], 20); e != nil {
 			return nil, e
 		}
 	case File:
