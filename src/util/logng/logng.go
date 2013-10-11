@@ -41,7 +41,7 @@ var logLevelString = []string{
 	DEBUG:    "Debug",    //
 }
 
-type LoggerNG struct {
+type logng struct {
 	log.Logger
 	str         string
 	logType     LoggerType
@@ -51,12 +51,16 @@ type LoggerNG struct {
 	exitOnError bool
 }
 
-func (log *LoggerNG) SetLevel(l LogLevel) {
+func (log *logng) SetLevel(l LogLevel) {
 	log.curLevel = l
 }
 
-func (log *LoggerNG) SetComponent(s string) {
+func (log *logng) SetComponent(s string) {
 	log.component = s
+}
+
+func (log *logng) SetFn(fn func() string) {
+	log.fn = fn
 }
 
 //
@@ -65,7 +69,7 @@ func (log *LoggerNG) SetComponent(s string) {
 //				log=file
 //				log=tcp:address:port
 // for the second option we rely on the 'util/telnet' module
-func ParseLogger(s string) (*LoggerNG, error) {
+func ParseLogger(s string) (*logng, error) {
 	loggerstr := strings.SplitN(s, ":", 2)
 
 	l := NewLoggerNG()
@@ -84,7 +88,7 @@ func ParseLogger(s string) (*LoggerNG, error) {
 	return l, nil
 }
 
-func (l *LoggerNG) InitLogger() (*log.Logger, error) {
+func (l *logng) InitLogger() (*log.Logger, error) {
 	var (
 		logwriter io.Writer
 		e         error
@@ -92,7 +96,7 @@ func (l *LoggerNG) InitLogger() (*log.Logger, error) {
 
 	switch l.logType {
 	case TcpUdp:
-		t := telnet.NewTelnet()
+		t := telnet.NewTelnetServer()
 		s := strings.SplitN(l.str, ":", 2)
 		if s[1] == "" {
 			s[1] = "21"
@@ -115,8 +119,8 @@ func (l *LoggerNG) InitLogger() (*log.Logger, error) {
 	return log.New(logwriter, "", 0), e
 }
 
-func NewLoggerNG() *LoggerNG {
-	l := LoggerNG{
+func NewLoggerNG() *logng {
+	l := logng{
 		curLevel:    INFO,
 		exitOnError: false,
 	}
@@ -125,13 +129,13 @@ func NewLoggerNG() *LoggerNG {
 	return &l
 }
 
-func (l *LoggerNG) Log(lvl LogLevel, format string, v ...interface{}) {
+func (l *logng) LogLevel(lvl LogLevel, format string, v ...interface{}) {
 	if l.curLevel > lvl {
 		return
 	}
 
 	if l.fn != nil {
-		l.Logger.Printf("%s:%s", l.component+l.fn())
+		l.Logger.Printf("%s:%s", l.component, l.fn())
 	}
 
 	if lvl < INFO {
@@ -150,4 +154,13 @@ func (l *LoggerNG) Log(lvl LogLevel, format string, v ...interface{}) {
 		l.Println("")
 	}
 
+}
+
+func (l *logng) Log(format string, v ...interface{}) {
+	l.LogLevel(l.curLevel, format, v...)
+}
+
+type LoggerNG interface {
+	LogLevel(lvl LogLevel, format string, v ...interface{})
+	Log(format string, v ...interface{})
 }

@@ -10,7 +10,7 @@ import (
 
 func zeroLoad() error {
 	for addr, length := range zeroloads {
-		curPlat.logger.Log(logng.INFO,
+		curPlat.logger.LogLevel(logng.INFO,
 			"Writing zeros to %x bytes @ %x", addr, length)
 		buf := make([]byte, 1024)
 		for length > 0 {

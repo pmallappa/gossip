@@ -64,7 +64,7 @@ type Plat struct {
 	// netdev []*net.Netdev
 	// VGA: Some platforms like PC
 
-	logger *logng.LoggerNG
+	logger logng.LoggerNG
 }
 
 type Platform interface {

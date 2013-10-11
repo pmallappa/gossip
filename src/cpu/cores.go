@@ -2,12 +2,11 @@ package cpu
 
 import (
 	//"fmt"
-	"log"
 	"strconv"
 )
 
 import (
-//"util"
+	"util/logng"
 )
 
 type ExcptType uint32
@@ -25,7 +24,7 @@ type CpuInfo struct {
 }
 
 type CpuCore struct {
-	logger *log.Logger
+	logger logng.LoggerNG
 	id     uint32 // SMP ID
 	cycle  uint64 // Processor cycle, modified after every instruction
 	excpt  Exception
@@ -41,10 +40,10 @@ func (c *CpuInfo) SetFreq(freq uint64) {
 }
 
 func (c *CpuInfo) GetInfo() map[string]string {
-	return map[string]string {
-		"model": c.model,
+	return map[string]string{
+		"model":  c.model,
 		"vendor": c.vendor,
-		"freq": strconv.FormatUint(uint64(c.freq), 10),
+		"freq":   strconv.FormatUint(uint64(c.freq), 10),
 	}
 }
 
@@ -55,15 +54,23 @@ func (c *CpuInfo) SetInfo(vendor string, model string) {
 	c.vendor = vendor
 	c.model = model
 }
-func (c *CpuCore) SetLogger(l *log.Logger) {
+func (c *CpuCore) SetLogger(l logng.LoggerNG) {
 	c.logger = l
-	c.logger.SetPrefix("CPU" + string(c.id))
+	//c.logger.SetPrefix("CPU" + string(c.id))
 }
 func (c *CpuCore) GetID() uint32 { // Return CPU ID
 	return c.id
 }
 func (c *CpuCore) GetCycle() uint64 {
 	return c.cycle
+}
+
+func (c *CpuCore) _getCycles() string {
+	string(c.GetCycle)
+}
+
+func (c *CpuCore) Setup() error {
+	c.logger.SetFn(_getCycles)
 }
 
 type CpuController interface {
@@ -93,7 +100,7 @@ type Cores interface {
 	CpuExectuter
 	CpuStats
 	CpuController
-	GetInfo()map[string]string
+	GetInfo() map[string]string
 }
 
 type InstrType uint32
@@ -102,4 +109,14 @@ type InstrType uint32
 type CpuError struct {
 	Op  string
 	Err error
+}
+
+// Logger interface
+func (c *CpuCore) LogLevel(lvl logng.LogLevel, format string,
+	v ...interface{}) {
+	c.logger.LogLevel(lvl, format, v...)
+}
+
+func (c *CpuCore) Log(format string, v ...interface{}) {
+	c.logger.Log(format, v...)
 }

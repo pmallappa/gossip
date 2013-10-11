@@ -5,7 +5,7 @@ import (
 )
 
 import (
-	//"fmt"
+	"fmt"
 	"net"
 	"time"
 )
@@ -17,39 +17,48 @@ var (
 )
 
 func dialAfter(c chan error, server string, proto string, t time.Duration) {
-	var err error
 	time.After(t * time.Second)
-	_, err = net.Dial(server, proto)
+	conn, err := net.Dial(server, proto)
+	fmt.Printf("Client returning conn:%v err:%v\n", conn, err)
 	c <- err
 }
 
 func Test_Telent(t *testing.T) {
-	tel := NewTelnet()
-	defer tel.Close()
+	telserve := NewTelnetServer()
+	defer telserve.Close()
 	server := ":2000"
 	go dialAfter(ch, proto, server, 1)
-	if e := tel.ListenTimeout(proto, server, 3); e != nil {
+	if e := telserve.ListenTimeout(proto, server, 3); e != nil {
 		t.Errorf("Error starting server %s", e)
 	}
-	e := <-ch
-	if e != nil {
-		t.Errorf("Client returned: %v", e)
+	err := <-ch
+	if err != nil {
+		t.Errorf("Client returned: %v", err)
 	}
 
 }
 
 func Test_Telnet1(t *testing.T) {
-	tel := NewTelnet()
-	defer tel.Close()
+	//telserve := NewTelnetServer()
+
 	// Need to change address, as the old port may
 	// not be available for sometime
+	ch1 := make(chan error)
 	server := ":2001"
-	go dialAfter(ch, proto, server, 4)
-	if e := tel.ListenTimeoutProgress(proto, server, 3); e != nil {
-		// We should see some error, verify its timeout error
+	go dialAfter(ch1, proto, server, 7)
+	//if e := telserve.ListenTimeoutProgress(proto, server, 3); e != nil {
+	// We should see some error, verify its timeout error
+	//}
+	//telserve.Close()
+	err := <-ch1
+	if err == nil {
+		t.Errorf("Client returned: %v", err)
 	}
-	e := <-ch
-	if e == nil {
-		t.Errorf("Client returned: %v", e)
-	}
+
 }
+
+// func Test_Telnet2(t *testing.T) {
+// 	server = ":3000"
+// 	go dialAfter(ch, proto, server, 1)
+// 	_ = <-ch
+// }

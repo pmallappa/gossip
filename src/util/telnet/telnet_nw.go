@@ -52,6 +52,11 @@ type Telnet struct {
 	unixCRLF bool
 }
 
+type TelnetServer struct {
+	Telnet
+	listn net.Listener
+}
+
 const (
 	CR  = byte('\r')
 	LF  = byte('\n')
@@ -169,10 +174,13 @@ func NewTelnet() *Telnet {
 	}
 }
 
-func connect(c chan error, listener net.Listener, t *Telnet) {
+func NewTelnetServer() *TelnetServer {
+	return &TelnetServer{}
+}
+
+func connect(c chan error, t *TelnetServer) {
 	var e error
-	t.conn, e = listener.Accept()
-	if e != nil {
+	if t.conn, e = t.listn.Accept(); e != nil {
 		c <- e
 		return
 	}
@@ -190,39 +198,42 @@ func connect(c chan error, listener net.Listener, t *Telnet) {
 //        Dial("tcp", "12.34.56.78:80")      OR  Dial("tcp", "google.com:http")
 //        Dial("tcp", "[2001:db8::1]:http")  OR  Dial("tcp", "[fe80::1%lo0]:80")
 //        Dial("ip4:1", "127.0.0.1")         OR  Dial("ip6:ospf", "::1")
-func (t *Telnet) ListenTimeout(proto, addr string, dur time.Duration) error {
-	var e error
-	var listn net.Listener
-	if listn, e = net.Listen(proto, addr); e != nil {
-		return e
+func (t *TelnetServer) ListenTimeout(proto, addr string, dur time.Duration) (e error) {
+	if t.listn, e = net.Listen(proto, addr); e != nil {
+		return
 	}
-	con := make(chan error)
-	go connect(con, listn, t)
+
+	con_ch := make(chan error)
+	go connect(con_ch, t)
 
 	select {
 	case <-time.After(dur):
 
-	case e = <-con:
+	case e = <-con_ch:
 	}
 	if e != nil {
 		fmt.Printf("%v", e)
 	}
 	if t.conn != nil {
-		fmt.Printf("\n")
+		fmt.Printf("Connected: listn: %v, conn:%v\n", t.listn, t.conn)
 	}
-	return e
+	return
 }
 
-func (t *Telnet) ListenTimeoutProgress(proto, addr string, dur time.Duration) error {
+func (t *TelnetServer) ListenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
 	timeout := int(dur)
 	for ; timeout > 0; timeout-- {
-		//fmt.Printf("Waiting %d seconds for connection \r", timeout)
-		if e := t.ListenTimeout(proto, addr, 1); e != nil {
-			return e
+		fmt.Printf("Waiting %d seconds for connection \n", timeout)
+		if e = t.ListenTimeout(proto, addr, 1); e != nil {
+			return
+		}
+		// In case we are connected we are out
+		if t.conn != nil {
+			return
 		}
 	}
 
-	return nil
+	return
 }
 
 // io.Writer interface
@@ -257,7 +268,7 @@ func (t *Telnet) Read(buf []byte) (int, error) {
 	return n, nil
 }
 
-func (t *Telnet) __readInterpret(c byte, again bool, err error) {
+func (t *Telnet) __execCMD(c byte, again bool, err error) {
 	return
 }
 
@@ -267,6 +278,7 @@ func (t *Telnet) __readByte() (c byte, again bool, err error) {
 	}
 
 	if c == cmd_IAC {
+
 	}
 	return
 }
@@ -303,5 +315,12 @@ func (t *Telnet) ReadLine() (line []byte, isPrefix bool, err error) {
 // func (t *Telnet) ReadString(delim byte) (line string, err error)    {}
 
 func (t *Telnet) Close() {
+	fmt.Printf("Closing conn:%v\n", t.conn)
 	t.conn.Close()
+}
+
+func (ts *TelnetServer) Close() {
+	fmt.Printf("Closing listn:%v conn:%v\n", ts.listn, ts.conn)
+	ts.Telnet.Close()
+	ts.listn.Close()
 }

@@ -7,7 +7,7 @@ import (
 
 import (
 	"util"
-	logng "util/logng"
+	"util/logng"
 )
 
 // Static Declaration to pass values to new CPU's
@@ -21,12 +21,12 @@ func ParseFlags() (map[string]string, error) {
 		case "freq":
 			cpu.freq, e = util.ParseFreq(v)
 		case "log":
-			var logger *logng.LoggerNG
-			if logger, e = logng.ParseLogger(v); e != nil {
+			if logger, e := logng.ParseLogger(v); e != nil {
 				return nil, e
+			} else {
+				//cpu.SetLogger(logger)
+				logger = logger
 			}
-			//cpu.SetLogger(logger)
-			logger = logger
 		case "?":
 			var s string
 			for i := range availableCpu {
@@ -44,5 +44,6 @@ func ParseFlags() (map[string]string, error) {
 		// Delete the consumed options
 		delete(m, k)
 	}
+
 	return m, e
 }
