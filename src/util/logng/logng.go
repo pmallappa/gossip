@@ -1,176 +1,234 @@
 package logng
 
+// Requirements,
+//     Caller calls like
+//                    <object>.Log(fmt, ...)
+//                    <object>.Printf(fmt, ...)
+//                    <object>.Log.V(INFO).Printf(fmt, ...)
+//                    <object>.Info(string)
+//                    <object>.Critical(string)
+//                    <object>.Error(string)
+//                    <object>.Panic(string)
+// where <object> can be package name for logging, or components can embed the
+// logger to log to their own file/telnet connection (helpful in debugging
+// particular component)
+//
+// Additional information like componenet name, UUID etc can be added to logger
+// along with Date/time info
+// And allows objects to register a callback function to send more information
+//
+// "INFO", will print all the things the simulator is doing, used for debugging the simulator
+// "DEBUG", allows to debug the Components
+// "WARNING", is unexpected things, but simulator can still run
+// "CRITICAL", is unexpected things, needing immediate attention, but simulator can still run
+// "ERROR", unwanted thing happening, simulator can't run, waits for
+//          debugger/cli to fix the condition, should print caller's location
+// "FATAL", Unfavourable condition, simulator will exit, should print callers location
+// By default LogLevel is set to "WARNING", All the levels above the current
+// LogLevel will be logged, all logs below will be discarded
+//
+// -log level=INFO,out=file:<path>
+// -log level=WARNING,out=tcp:localhost:2000
+//          if 'out' is not given STDOUT is assumed
+//
+//
+//
+//
+
 import (
+	//"runtime"
+	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
 import (
-	"util/telnet"
+//"util"
+//"util/telnet"
 )
 
-type LoggerType uint32
+type LogLevel uint8
 
 const (
-	TcpUdp LoggerType = 1 << iota
-	File
-)
-
-type LogLevel uint32
-
-const (
-	PANIC LogLevel = iota
-	FATAL
+	INFO LogLevel = iota
+	DEBUG
+	WARNING
 	CRITICAL
 	ERROR
-	WARNING
-	INFO
-	DEBUG
+	FATAL
 )
 
-var logLevelString = []string{
-	PANIC:    "Panic",    // Unfavourable component error
-	FATAL:    "Fatal",    // Internal simulator Error
-	CRITICAL: "Critical", // Component, needing attention
-	ERROR:    "Error",    // Component, reporting Error
-	WARNING:  "Warning",  // Component reporting warning
-	INFO:     "Info",     //
-	DEBUG:    "Debug",    //
+var levelToName = []string{
+	INFO:     "INFO",
+	DEBUG:    "DEBUG",
+	WARNING:  "WARNING",
+	CRITICAL: "CRITICAL",
+	ERROR:    "ERROR",
+	FATAL:    "FATAL",
 }
 
-type logng struct {
+var nameToLevel = map[string]LogLevel{
+	"INFO":     INFO,
+	"DEBUG":    DEBUG,
+	"WARNING":  WARNING,
+	"CRITICAL": CRITICAL,
+	"ERROR":    ERROR,
+	"FATAL":    FATAL,
+}
+
+// This one is for one without any object, but want to log,
+// This will connect whatever is given on the commandline or to STDERR
+var stderrargs string
+var stderr LogNG
+
+func (l *LogNG) Set(str string) (e error) {
+	for _, val := range strings.Split(str, ",") {
+		args := strings.Split(val, "=")
+		switch args[0] {
+		case "level":
+			l.level = nameToLevel[strings.ToUpper(args[1])]
+		case "out":
+			// if strings.HasPrefix(args[1], "tcp:") ||
+			// 	strings.HasPrefix(args[1], "udp:") {
+			// 	// Open a telnet session,
+			// 	return
+			// }
+			if strings.HasPrefix(args[1], "file:") {
+				args[1] = args[1][5:]
+				// Else its a file, open the file
+				if l.writer, e = os.OpenFile(args[1], os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640); e != nil {
+					return
+				}
+			} else {
+				// Store for whoever wants to use
+				l.args += val
+			}
+
+		}
+	}
+	// If we are still not set
+	l.writer = os.Stderr
+	return
+}
+
+func init() {
+	flag.StringVar(&stderrargs, "log", "", "Set the log output and level"+
+		"eg: -log level=<l>,out=file:<path>"+
+		" OR -log level=<l>,out=<custom_arg>"+
+		" valid <l>are INFO,DEBUG,WARNING,CRITICAL,FATAL")
+
+	// If nothing is set, STDERR is opened
+
+	// We dont want to be silent while starting, later the driver can set the
+	// level to WARNING, to suppress the storm
+	stderr.level = INFO
+}
+
+type LogNG struct {
+	// level is the current level, checked everytime before logging
+	level LogLevel
+
+	// Use the actual logger, it has lot of feature, we dont want to re-invent
+	// the wheel
 	log.Logger
-	str         string
-	logType     LoggerType
-	component   string        // Component
-	fn          func() string // Dynamically Call a function for string
-	curLevel    LogLevel
-	exitOnError bool
+
+	// Extra args, that we were unable to Parse()
+	args string
 }
 
-func (log *logng) SetLevel(l LogLevel) {
-	log.curLevel = l
+// Create new logger with given string, which is parsed using Set
+func New(str string) (l *LogNG, e error) {
+	l = new(LogNG)
+	e = l.Set(str)
+
+	return
 }
 
-func (log *logng) SetComponent(s string) {
-	log.component = s
+func (l *LogNG) EnableDate() {
+	l.Logger.SetFlag(log.Ldate)
 }
 
-func (log *logng) SetFn(fn func() string) {
-	log.fn = fn
-}
-
-//
-// ParseLogger understands any of the following options
-//				log=file:<path>
-//				log=file
-//				log=tcp:address:port
-// for the second option we rely on the 'util/telnet' module
-func ParseLogger(s string) (*logng, error) {
-	loggerstr := strings.SplitN(s, ":", 2)
-
-	l := NewLoggerNG()
-	l.logType = File
-
-	switch strings.ToLower(loggerstr[0]) {
-	case "tcp", "udp":
-		l.logType = TcpUdp
-	case "", "file":
-	default:
-		return nil, fmt.Errorf("Unknown description for logger '%s'", s)
+func (l *LogNG) Info(args ...interface{}) {
+	if l.level > INFO {
+		l.Logger.Info(args...)
 	}
-
-	l.str = loggerstr[1]
-
-	return l, nil
 }
 
-func (l *logng) InitLogger() (*log.Logger, error) {
-	var (
-		logwriter io.Writer
-		e         error
-	)
-
-	switch l.logType {
-	case TcpUdp:
-		t := telnet.NewTelnetServer()
-		s := strings.SplitN(l.str, ":", 2)
-		if s[1] == "" {
-			s[1] = "21"
-		}
-		if s[0] == "" {
-			s[0] = "localhost"
-		}
-		if e = t.ListenTimeout(s[0], s[1], 20); e != nil {
-			return nil, e
-		}
-	case File:
-		if logwriter, e = os.OpenFile(l.str, os.O_WRONLY|os.O_CREATE,
-			0640); e != nil {
-			return nil, e
-		}
-	default:
-		logwriter = os.Stderr
+func (l *LogNG) Infoln(args ...interface{}) {
+	if l.level <= INFO {
+		l.Logger.Infoln(args...)
 	}
-
-	return log.New(logwriter, "", 0), e
 }
 
-func NewLoggerNG() *logng {
-	l := logng{
-		curLevel:    INFO,
-		exitOnError: false,
+func (l *LogNG) Infof(fmt string, args ...interface{}) {
+	if l.level <= INFO {
+		l.Logger.Infof(fmt, args...)
 	}
-
-	l.Logger.SetFlags(0)
-	return &l
 }
 
-func (l *logng) LogLevel(lvl LogLevel, format string, v ...interface{}) {
-	if l.curLevel > lvl {
-		return
+func (l *LogNG) Warning(args ...interface{}) {
+	if l.level <= WARNING {
+		l.Logger.Warning(args...)
 	}
+}
 
-	if l.fn != nil {
-		l.Logger.Printf("%s:%s", l.component, l.fn())
+func (l *LogNG) Warningln(args ...interface{}) {
+	if l.level <= WARNING {
+		l.Logger.Warning(args...)
 	}
+}
 
-	if lvl < INFO {
-		l.Logger.Printf("-- %s --", logLevelString[lvl])
+func (l *LogNG) Warningf(fmt string, args ...interface{}) {
+	if l.level <= WARNING {
+		l.Logger.Printf(fmt, args...)
 	}
+}
 
-	l.Logger.Printf(format, v...)
-
-	switch lvl {
-	case PANIC:
-		panic("-- PANIC -- ")
-	case FATAL:
-		l.Println("-- FATAL --")
-		os.Exit(1)
-	default:
-		l.Println("")
+func (l *LogNG) Error(args ...interface{}) {
+	if l.level <= ERROR {
+		l.Logger.Error(args...)
 	}
-
 }
 
-func (l *logng) Log(format string, v ...interface{}) {
-	l.LogLevel(l.curLevel, format, v...)
+func (l *LogNG) Errorln(args ...interface{}) {
+	if l.level <= ERROR {
+		l.Logger.Error(args...)
+	}
 }
 
-type LoggerNG interface {
-	LogLevel(lvl LogLevel, format string, v ...interface{})
-	Log(format string, v ...interface{})
+func (l *LogNG) Errorf(fmt string, args ...interface{}) {
+	if l.level <= ERROR {
+		l.Logger.Printf(fmt, args...)
+	}
 }
 
-type NilLogger bool
-
-func (l *NilLogger) LogLevel(lvl LogLevel, format string, v ...interface{}) {
-
+func (l *LogNG) Fatal(args ...interface{}) {
+	if l.level <= FATAL {
+		f := l.Logger.Flags()
+		l.Logger.SetFlags(log.Llongfile)
+		l.Logger.Fatal(args...)
+		l.Logger.SetFlags(f)
+	}
 }
 
-func (l *NilLogger) Panic(fmt string, v ...interface{}) {
+func (l *LogNG) Fatalln(args ...interface{}) {
+	if l.level <= FATAL {
+		// We want to report where the Fatal error happened
+		f := l.Logger.Flags()
+		l.Logger.SetFlags(log.Llongfile)
+		l.Logger.Fatal(args...)
+		l.Logger.SetFlags(f)
+	}
+}
 
+func (l *LogNG) Fatalf(fmt string, args ...interface{}) {
+	if l.level <= FATAL {
+		f := l.Logger.Flags()
+		l.Logger.SetFlags(log.Llongfile)
+		l.Logger.Fatalf(fmt, args...)
+		l.Logger.SetFlags(f)
+	}
 }
