@@ -66,11 +66,12 @@ func (c *CpuCore) GetCycle() uint64 {
 }
 
 func (c *CpuCore) _getCycles() string {
-	string(c.GetCycle)
+	return strconv.Itoa(int(c.cycle))
 }
 
 func (c *CpuCore) Setup() error {
-	c.logger.SetFn(_getCycles)
+	//c.logger.SetFn(_getCycles)
+	return nil
 }
 
 type CpuController interface {

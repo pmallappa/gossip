@@ -12,7 +12,7 @@ type RegAccess uint8
 
 // By Default All Registers are Read/Write
 const (
-	RDWR RegAccess = 0 
+	RDWR RegAccess = 0
 	INVALID
 	RDONLY = 1 << iota
 	WRONLY
@@ -52,6 +52,11 @@ func (r *Reg) SetName(s string) error {
 	return nil
 }
 
+func (r *Reg) SetVal(v uint64) error {
+	r.Val = v
+	return nil
+}
+
 // UpdateFields is to generate individual fields from Red.Val
 // This is only called when theres no fields,
 // Specific register need not implement this
@@ -66,16 +71,6 @@ func (r *Reg) UpdateReg() error {
 }
 func (r *Reg) SetAccess(t RegAccess) {
 	r.access = t
-}
-
-type CoreReg struct {
-	Reg
-	Alias string
-}
-
-type CopReg struct {
-	Reg
-	Valid bool
 }
 
 func (r *CopReg) SetVal(v uint64) error {
@@ -96,6 +91,16 @@ func (r *CopReg) SetVal(v uint64) error {
 	r.Val = v
 
 	return e
+}
+
+type CoreReg struct {
+	Reg
+	Alias string
+}
+
+type CopReg struct {
+	Reg
+	Valid bool
 }
 
 type FpReg struct {
