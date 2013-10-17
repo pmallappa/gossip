@@ -11,7 +11,7 @@ import (
 
 var cpu_opts string
 
-var availableCpu []Cores
+var availableCpu []*Cores
 
 func init() {
 	availableCpu = make([]Cores, 0, 64)
@@ -24,10 +24,6 @@ func InitGeneric() {
 	util.PrintMe()
 }
 
-func RegisterCpu(cpu *CpuInfo) {
+func RegisterCpu(cpu *Core) {
 	//availableCpu = append(availableCpu, cpu)
-}
-
-func SetLogger(l *log.Logger) {
-	l = l
 }

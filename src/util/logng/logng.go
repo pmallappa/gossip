@@ -164,3 +164,13 @@ type LoggerNG interface {
 	LogLevel(lvl LogLevel, format string, v ...interface{})
 	Log(format string, v ...interface{})
 }
+
+type NilLogger bool
+
+func (l *NilLogger) LogLevel(lvl LogLevel, format string, v ...interface{}) {
+
+}
+
+func (l *NilLogger) Panic(fmt string, v ...interface{}) {
+
+}

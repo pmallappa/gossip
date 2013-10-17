@@ -14,32 +14,32 @@ type ExcptType uint32
 // Types of Cpu Exceptions
 type Exception struct {
 	Type  ExcptType
-	instr string
+	instr Instr
 }
 
-type CpuInfo struct {
+type cpuInfo struct {
 	freq   uint32 // Hz
 	vendor string // Eg, TI, Qualcomm, NetLogic
 	model  string // Eg, OMAP3, SnapDragon, XLP
 }
 
 type CpuCore struct {
-	logger logng.LoggerNG
-	id     uint32 // SMP ID
-	cycle  uint64 // Processor cycle, modified after every instruction
-	excpt  Exception
+	logng.LogNG
+	id    uint32 // SMP ID
+	cycle uint64 // Processor cycle, modified after every instruction
+	excpt Exception
 }
 
 type Cpu struct {
-	CpuInfo
+	cpuInfo
 	CpuCore
 }
 
-func (c *CpuInfo) SetFreq(freq uint64) {
+func (c *cpuInfo) SetFreq(freq uint64) {
 	c.freq = uint32(freq)
 }
 
-func (c *CpuInfo) GetInfo() map[string]string {
+func (c *cpuInfo) GetCpuInfo() map[string]string {
 	return map[string]string{
 		"model":  c.model,
 		"vendor": c.vendor,
@@ -47,17 +47,19 @@ func (c *CpuInfo) GetInfo() map[string]string {
 	}
 }
 
-func (c *CpuInfo) GetFreq() uint64 {
+func (c *cpuInfo) GetFreq() uint64 {
 	return uint64(c.freq)
 }
-func (c *CpuInfo) SetInfo(vendor string, model string) {
+
+func (c *cpuInfo) SetCpuInfo(vendor string, model string) {
 	c.vendor = vendor
 	c.model = model
 }
-func (c *CpuCore) SetLogger(l logng.LoggerNG) {
-	c.logger = l
-	//c.logger.SetPrefix("CPU" + string(c.id))
+
+func (c *CpuCore) SetOutput(w io.Writer) {
+	c.LogNG.SetOutput(w)
 }
+
 func (c *CpuCore) GetID() uint32 { // Return CPU ID
 	return c.id
 }
@@ -66,11 +68,11 @@ func (c *CpuCore) GetCycle() uint64 {
 }
 
 func (c *CpuCore) _getCycles() string {
-	string(c.GetCycle)
+	return strconv.FormaUint(c.cycle, 10)
 }
 
 func (c *CpuCore) Setup() error {
-	c.logger.SetFn(_getCycles)
+	//	c.logger.SetFn(_getCycles)
 }
 
 type CpuController interface {
@@ -109,14 +111,4 @@ type InstrType uint32
 type CpuError struct {
 	Op  string
 	Err error
-}
-
-// Logger interface
-func (c *CpuCore) LogLevel(lvl logng.LogLevel, format string,
-	v ...interface{}) {
-	c.logger.LogLevel(lvl, format, v...)
-}
-
-func (c *CpuCore) Log(format string, v ...interface{}) {
-	c.logger.Log(format, v...)
 }
