@@ -14,7 +14,7 @@ type ExcptType uint32
 // Types of Cpu Exceptions
 type Exception struct {
 	Type  ExcptType
-	instr string
+	instr Instr
 }
 
 type CpuInfo struct {
@@ -24,10 +24,10 @@ type CpuInfo struct {
 }
 
 type CpuCore struct {
-	logger logng.LoggerNG
-	id     uint32 // SMP ID
-	cycle  uint64 // Processor cycle, modified after every instruction
-	excpt  Exception
+	logng.LogNG
+	id    uint32 // SMP ID
+	cycle uint64 // Processor cycle, modified after every instruction
+	excpt Exception
 }
 
 type Cpu struct {
@@ -54,10 +54,11 @@ func (c *CpuInfo) SetInfo(vendor string, model string) {
 	c.vendor = vendor
 	c.model = model
 }
-func (c *CpuCore) SetLogger(l logng.LoggerNG) {
-	c.logger = l
-	//c.logger.SetPrefix("CPU" + string(c.id))
+
+func (c *CpuCore) SetOutput(w io.Writer) {
+	c.LogNG.SetOutput(w)
 }
+
 func (c *CpuCore) GetID() uint32 { // Return CPU ID
 	return c.id
 }
@@ -66,12 +67,11 @@ func (c *CpuCore) GetCycle() uint64 {
 }
 
 func (c *CpuCore) _getCycles() string {
-	return strconv.Itoa(int(c.cycle))
+	return strconv.FormaUint(c.cycle, 10)
 }
 
 func (c *CpuCore) Setup() error {
-	//c.logger.SetFn(_getCycles)
-	return nil
+	//	c.logger.SetFn(_getCycles)
 }
 
 type CpuController interface {
@@ -110,14 +110,4 @@ type InstrType uint32
 type CpuError struct {
 	Op  string
 	Err error
-}
-
-// Logger interface
-func (c *CpuCore) LogLevel(lvl logng.LogLevel, format string,
-	v ...interface{}) {
-	c.logger.LogLevel(lvl, format, v...)
-}
-
-func (c *CpuCore) Log(format string, v ...interface{}) {
-	c.logger.Log(format, v...)
 }

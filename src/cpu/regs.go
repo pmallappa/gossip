@@ -21,88 +21,66 @@ const (
 
 type Register interface {
 	SetVal(uint64) error
-	GetVal() (uint64, error)
+	GetVal() uint64
 	GetName() string
-	SetName(string) error
+	SetName(string)
 	UpdateFields(uint64) error
 	UpdateReg() error
 }
 
 // Co processor Registers
-type Reg struct {
-	Name         string
-	Val          uint64
-	ResetVal     uint64
-	ReservedOne  uint64    // Read as One
-	ReservedZero uint64    // Read as Zero,
-	access       RegAccess // RDRW,RDONLY,RDRW
+type Gpr struct {
+	name   string
+	val    uint64
+	access RegAccess // RDRW,RDONLY,RDRW
 }
 
-func (r *Reg) GetVal() (uint64, error) {
-	val := r.Val
-	val |= r.ReservedOne
-	val &= ^r.ReservedZero
-	return val, nil
-}
-func (r *Reg) GetName() string {
-	return r.Name
-}
-func (r *Reg) SetName(s string) error {
-	r.Name = s
-	return nil
-}
+func (r *Gpr) GetVal() uint64        { return r.val }
+func (r *Gpr) GetName() string       { return r.name }
+func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
+func (r *Gpr) SetVal(v uint64)       { r.val = v }
+func (r *Gpr) SetName(s string)      { r.name = s }
 
-func (r *Reg) SetVal(v uint64) error {
-	r.Val = v
-	return nil
-}
-
-// UpdateFields is to generate individual fields from Red.Val
+// UpdateFields is to generate individual fields from Reg.Val
 // This is only called when theres no fields,
 // Specific register need not implement this
-func (r *Reg) UpdateFields(uint64) error {
-	return nil
-}
+func (r *Gpr) UpdateFields(v uint64) error { return r.SetVal(v) }
 
 // UpdateReg updates Reg.Val from specific fields. This function does
 // the opposite of UpdateFields
-func (r *Reg) UpdateReg() error {
-	return nil
-}
-func (r *Reg) SetAccess(t RegAccess) {
-	r.access = t
+func (r *Gpr) UpdateReg() (e error) { return }
+
+type SpclReg struct { // Special Register
+	Gpr
+	resetVal  uint64
+	rsrvdOne  uint64 // Read as One
+	rsrvdZero uint64 // Read as Zero,
+	Valid     bool
 }
 
-func (r *CopReg) SetVal(v uint64) error {
-	var e error = nil
-	if r.ReservedZero&v != 0 {
+func (r *SpclReg) SetVal(v uint64) (e error) {
+	if r.rsrvdZero&v != 0 {
 		e = fmt.Errorf("writing to reserved fields of %s field(s): %x",
-			r.Name, r.ReservedZero&v)
+			r.Name, r.rsrvdZero&v)
 	}
-	if r.ReservedOne&v != 0 {
+	if r.rsrvdOne&v != 0 {
 		e = fmt.Errorf("writing to reserved fields of %s field(s): %x",
-			r.Name, r.ReservedOne&v)
+			r.Name, r.rsrvdOne&v)
 	}
 	// We will simulate hardware hard-wired bits.
 	// RAZ and RAO will not be changed
-	v |= r.ReservedOne
-	v &= ^r.ReservedZero
+	v |= r.rsrvdOne
+	v &= ^r.resrvdZero
 
-	r.Val = v
+	r.val = v
 
-	return e
-}
-
-type CoreReg struct {
-	Reg
-	Alias string
+	return
 }
 
 type CopReg struct {
-	Reg
-	Valid bool
+	SpclReg
 }
 
 type FpReg struct {
-	Reg
+	SpclReg
 }
