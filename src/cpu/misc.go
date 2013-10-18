@@ -11,7 +11,7 @@ import (
 )
 
 // Static Declaration to pass values to new CPU's
-var cpu CpuInfo
+var cpu InfoT
 
 func ParseFlags() (map[string]string, error) {
 	var e error
@@ -30,8 +30,8 @@ func ParseFlags() (map[string]string, error) {
 		case "?":
 			var s string
 			for i := range availableCpu {
-				s += " vendor: " + availableCpu[i].GetInfo()["vendor"] + " model: " +
-					availableCpu[i].GetInfo()["model"] + "\n"
+				s += " vendor: " + availableCpu[i].Info()["vendor"] + " model: " +
+					availableCpu[i].Info()["model"] + "\n"
 			}
 			e = errors.New(s)
 		default:

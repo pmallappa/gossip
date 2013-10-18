@@ -38,11 +38,12 @@ package logng
 import (
 	//"runtime"
 	"flag"
-	"fmt"
-	"io"
+	//"fmt"
+	//"io"
+	"log"
 	"os"
 	"strings"
-	"sync"
+	//"sync"
 )
 
 import (
@@ -84,7 +85,7 @@ var nameToLevel = map[string]LogLevel{
 var stderrargs string
 var stderr LogNG
 
-func (l *LogNG) Set(str string) (e error) {
+func (l *LogNG) Set(str string) error {
 	for _, val := range strings.Split(str, ",") {
 		args := strings.Split(val, "=")
 		switch args[0] {
@@ -99,19 +100,27 @@ func (l *LogNG) Set(str string) (e error) {
 			if strings.HasPrefix(args[1], "file:") {
 				args[1] = args[1][5:]
 				// Else its a file, open the file
-				if l.writer, e = os.OpenFile(args[1], os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640); e != nil {
-					return
+				if writer, e := os.OpenFile(args[1], os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640); e != nil {
+					return e
+				} else {
+					l.log = log.New(writer, "", 0)
 				}
 			} else {
 				// Store for whoever wants to use
-				l.args += val
+				if l.args == "" {
+					l.args += val
+				} else {
+					l.args += "," + val
+				}
 			}
 
 		}
 	}
+
 	// If we are still not set
-	l.writer = os.Stderr
-	return
+	l.log = log.New(os.Stderr, "", 0)
+
+	return nil
 }
 
 func init() {
@@ -133,102 +142,108 @@ type LogNG struct {
 
 	// Use the actual logger, it has lot of feature, we dont want to re-invent
 	// the wheel
-	log.Logger
+	log *log.Logger
 
 	// Extra args, that we were unable to Parse()
 	args string
 }
 
 // Create new logger with given string, which is parsed using Set
-func New(str string) (l *LogNG, e error) {
-	l = new(LogNG)
-	e = l.Set(str)
+func New(str string) *LogNG {
+	l := &LogNG{
+		level: WARNING,
+	}
+	l.Set(str)
 
-	return
+	return l
 }
 
-func (l *LogNG) EnableDate() {
-	l.Logger.SetFlag(log.Ldate)
-}
+func (l *LogNG) Args() string { return l.args }
+
+func (l *LogNG) EnableDate() { l.log.SetFlags(log.Ldate) }
 
 func (l *LogNG) Info(args ...interface{}) {
 	if l.level > INFO {
-		l.Logger.Info(args...)
+		l.log.Print(args...)
 	}
 }
 
 func (l *LogNG) Infoln(args ...interface{}) {
 	if l.level <= INFO {
-		l.Logger.Infoln(args...)
+		l.log.Println(args...)
 	}
 }
 
 func (l *LogNG) Infof(fmt string, args ...interface{}) {
 	if l.level <= INFO {
-		l.Logger.Infof(fmt, args...)
+		l.log.Printf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Warning(args ...interface{}) {
 	if l.level <= WARNING {
-		l.Logger.Warning(args...)
+		l.log.Print(args...)
 	}
 }
 
 func (l *LogNG) Warningln(args ...interface{}) {
 	if l.level <= WARNING {
-		l.Logger.Warning(args...)
+		l.log.Println(args...)
 	}
 }
 
 func (l *LogNG) Warningf(fmt string, args ...interface{}) {
 	if l.level <= WARNING {
-		l.Logger.Printf(fmt, args...)
+		l.log.Printf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Error(args ...interface{}) {
 	if l.level <= ERROR {
-		l.Logger.Error(args...)
+		l.log.Fatal(args...)
 	}
 }
 
 func (l *LogNG) Errorln(args ...interface{}) {
 	if l.level <= ERROR {
-		l.Logger.Error(args...)
+		l.log.Fatalln(args...)
 	}
 }
 
 func (l *LogNG) Errorf(fmt string, args ...interface{}) {
 	if l.level <= ERROR {
-		l.Logger.Printf(fmt, args...)
+		l.log.Fatalf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Fatal(args ...interface{}) {
 	if l.level <= FATAL {
-		f := l.Logger.Flags()
-		l.Logger.SetFlags(log.Llongfile)
-		l.Logger.Fatal(args...)
-		l.Logger.SetFlags(f)
+		f := l.log.Flags()
+		l.log.SetFlags(log.Llongfile)
+		l.log.Panic(args...)
+		l.log.SetFlags(f)
 	}
 }
 
 func (l *LogNG) Fatalln(args ...interface{}) {
 	if l.level <= FATAL {
 		// We want to report where the Fatal error happened
-		f := l.Logger.Flags()
-		l.Logger.SetFlags(log.Llongfile)
-		l.Logger.Fatal(args...)
-		l.Logger.SetFlags(f)
+		f := l.log.Flags()
+		l.log.SetFlags(log.Llongfile)
+		l.log.Panicln(args...)
+		l.log.SetFlags(f)
 	}
 }
 
 func (l *LogNG) Fatalf(fmt string, args ...interface{}) {
 	if l.level <= FATAL {
-		f := l.Logger.Flags()
-		l.Logger.SetFlags(log.Llongfile)
-		l.Logger.Fatalf(fmt, args...)
-		l.Logger.SetFlags(f)
+		f := l.log.Flags()
+		l.log.SetFlags(log.Llongfile)
+		l.log.Panicf(fmt, args...)
+		l.log.SetFlags(f)
 	}
+}
+
+func ParseLogger(s string) (*LogNG, error) {
+	return nil, nil
 }

@@ -2,7 +2,6 @@ package cpu
 
 import (
 	"flag"
-	"log"
 )
 
 import (
@@ -11,10 +10,10 @@ import (
 
 var cpu_opts string
 
-var availableCpu []*Cores
+var availableCpu []*Core
 
 func init() {
-	availableCpu = make([]Cores, 0, 64)
+	availableCpu = make([]*Core, 0, 64)
 	util.PrintMe()
 	flag.StringVar(&cpu_opts, "cpu", "",
 		"CPU's, type ? to list, but -plat should be provided")

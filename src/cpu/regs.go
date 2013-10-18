@@ -21,8 +21,8 @@ const (
 
 type Register interface {
 	SetVal(uint64) error
-	GetVal() uint64
-	GetName() string
+	Val() uint64
+	Name() string
 	SetName(string)
 	UpdateFields(uint64) error
 	UpdateReg() error
@@ -35,8 +35,8 @@ type Gpr struct {
 	access RegAccess // RDRW,RDONLY,RDRW
 }
 
-func (r *Gpr) GetVal() uint64        { return r.val }
-func (r *Gpr) GetName() string       { return r.name }
+func (r *Gpr) Val() uint64           { return r.val }
+func (r *Gpr) Name() string          { return r.name }
 func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
 func (r *Gpr) SetVal(v uint64)       { r.val = v }
 func (r *Gpr) SetName(s string)      { r.name = s }
@@ -44,7 +44,7 @@ func (r *Gpr) SetName(s string)      { r.name = s }
 // UpdateFields is to generate individual fields from Reg.Val
 // This is only called when theres no fields,
 // Specific register need not implement this
-func (r *Gpr) UpdateFields(v uint64) error { return r.SetVal(v) }
+func (r *Gpr) UpdateFields(v uint64) error { r.SetVal(v); return nil }
 
 // UpdateReg updates Reg.Val from specific fields. This function does
 // the opposite of UpdateFields
@@ -70,7 +70,7 @@ func (r *SpclReg) SetVal(v uint64) (e error) {
 	// We will simulate hardware hard-wired bits.
 	// RAZ and RAO will not be changed
 	v |= r.rsrvdOne
-	v &= ^r.resrvdZero
+	v &= ^r.rsrvdZero
 
 	r.val = v
 
