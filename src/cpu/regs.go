@@ -38,7 +38,7 @@ type Gpr struct {
 func (r *Gpr) Val() uint64           { return r.val }
 func (r *Gpr) Name() string          { return r.name }
 func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
-func (r *Gpr) SetVal(v uint64)       { r.val = v }
+func (r *Gpr) SetVal(v uint64) error { r.val = v; return nil }
 func (r *Gpr) SetName(s string)      { r.name = s }
 
 // UpdateFields is to generate individual fields from Reg.Val

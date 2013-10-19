@@ -5,13 +5,12 @@ import (
 )
 
 import (
-	"util/logng"
+//"util/logng"
 )
 
 func zeroLoad() error {
 	for addr, length := range zeroloads {
-		curPlat.logger.LogLevel(logng.INFO,
-			"Writing zeros to %x bytes @ %x", addr, length)
+		curPlat.logger.Infof("Writing zeros to %x bytes @ %x", addr, length)
 		buf := make([]byte, 1024)
 		for length > 0 {
 			if length > uint64(len(buf)) {

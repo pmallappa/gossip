@@ -54,7 +54,7 @@ type Plat struct {
 	NumCores int // For Easy Access, its actully len(Cores)
 	MemSize  uint64
 
-	Cores []cpu.Cores
+	Cores []cpu.Core
 
 	//devices []dev.Devicer // An array of all devices on platform
 
@@ -64,7 +64,7 @@ type Plat struct {
 	// netdev []*net.Netdev
 	// VGA: Some platforms like PC
 
-	logger logng.LoggerNG
+	logger *logng.LogNG
 }
 
 type Platform interface {
@@ -126,7 +126,7 @@ func Register(p Platform) {
 func NewPlat() *Plat {
 	return &Plat{
 		//PlatInfo: PlatInfo{model: model, vendor: vendor, version: "0.0"},
-		logger: logng.NewLoggerNG(),
+		logger: logng.New(""),
 	}
 }
 

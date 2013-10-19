@@ -85,6 +85,10 @@ var nameToLevel = map[string]LogLevel{
 var stderrargs string
 var stderr LogNG
 
+func (l *LogNG) SetLevel(lvl LogLevel) {
+	l.level = lvl
+}
+
 func (l *LogNG) Set(str string) error {
 	for _, val := range strings.Split(str, ",") {
 		args := strings.Split(val, "=")
