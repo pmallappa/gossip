@@ -12,11 +12,11 @@ type RegAccess uint8
 
 // By Default All Registers are Read/Write
 const (
-	RDWR RegAccess = 0
-	INVALID
-	RDONLY = 1 << iota
+	RDWR RegAccess = iota
+	RDONLY
 	WRONLY
 	RESERVED
+	INVALID
 )
 
 type Register interface {
@@ -55,9 +55,10 @@ type SpclReg struct { // Special Register
 	resetVal  uint64
 	rsrvdOne  uint64 // Read as One
 	rsrvdZero uint64 // Read as Zero,
-	Valid     bool
+	valid     bool
 }
 
+func (r *SpclReg) Valid() bool {return r.valid}
 func (r *SpclReg) SetVal(v uint64) (e error) {
 	if r.rsrvdZero&v != 0 {
 		e = fmt.Errorf("writing to reserved fields of %s field(s): %x",
