@@ -20,7 +20,7 @@ const (
 )
 
 type Register interface {
-	SetVal(uint64) error
+	Set(uint64) error
 	Val() uint64
 	Name() string
 	SetName(string)
@@ -38,13 +38,13 @@ type Gpr struct {
 func (r *Gpr) Val() uint64           { return r.val }
 func (r *Gpr) Name() string          { return r.name }
 func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
-func (r *Gpr) SetVal(v uint64) error { r.val = v; return nil }
+func (r *Gpr) Set(v uint64) error    { r.val = v; return nil }
 func (r *Gpr) SetName(s string)      { r.name = s }
 
 // UpdateFields is to generate individual fields from Reg.Val
 // This is only called when theres no fields,
 // Specific register need not implement this
-func (r *Gpr) UpdateFields(v uint64) error { r.SetVal(v); return nil }
+func (r *Gpr) UpdateFields(v uint64) error { r.Set(v); return nil }
 
 // UpdateReg updates Reg.Val from specific fields. This function does
 // the opposite of UpdateFields
@@ -58,8 +58,8 @@ type SpclReg struct { // Special Register
 	valid     bool
 }
 
-func (r *SpclReg) Valid() bool {return r.valid}
-func (r *SpclReg) SetVal(v uint64) (e error) {
+func (r *SpclReg) Valid() bool { return r.valid }
+func (r *SpclReg) Set(v uint64) (e error) {
 	if r.rsrvdZero&v != 0 {
 		e = fmt.Errorf("writing to reserved fields of %s field(s): %x",
 			r.Name, r.rsrvdZero&v)

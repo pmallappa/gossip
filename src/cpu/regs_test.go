@@ -1,14 +1,19 @@
 package cpu
 
-import(
-"testing"
+import (
+	"testing"
 )
 
-func (testing *T) TestGpr() {
+func TestGpr(t *testing.T) {
 	var reg Gpr
 	reg.SetName("Myreg")
 	if reg.Name != "Myreg" {
-		T.Fail("Name not updated")
+		t.Error("Name not updated")
+	}
+
+	reg.Set(0x03)
+	if reg.Val() != 0x03 {
+		t.Error("Value not found")
 	}
 
 }
