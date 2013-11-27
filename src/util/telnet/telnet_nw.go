@@ -72,84 +72,84 @@ const (
 type telnetCMD byte
 
 const (
-	cmd_EOF        telnetCMD = 236 + iota // End of file
-	cmd_SUSP                              // 237: Suspend process
-	cmd_ABORT                             // Abort process
-	cmd_EOR                               // end of record
-	cmd_NOP                               // 240: nop
-	cmd_DM                                // data mark
-	cmd_BREAK                             // break
-	cmd_IP                                // interrupt process
-	cmd_AO                                // abort output
-	cmd_AYT                               // 245: Are You There
-	cmd_EC                                // delete current character
-	cmd_EL                                // delete current line
-	cmd_GA                                // Line reverse
-	cmd_SE                                // end of sub negotiation
-	cmd_SB                                // 250: Subnegotiation
-	cmd_WILL                              // Indicating Option *WILL* be used
-	cmd_WONT                              // Indicating option *WONT* be used
-	cmd_DO                                // Commanding, to use Option
-	cmd_DONT                              // Response, Option not supported
-	cmd_IAC                               // 255: Interpret As Command
+	cmd_EOF        = 236 + iota // End of file
+	cmd_SUSP                    // 237: Suspend process
+	cmd_ABORT                   // Abort process
+	cmd_EOR                     // end of record
+	cmd_SE                      // 240: end of sub negotiation
+	cmd_NOP                     // 241: nop
+	cmd_DM                      // data mark
+	cmd_BREAK                   // break
+	cmd_IP                      // interrupt process
+	cmd_AO                      // abort output
+	cmd_AYT                     // 246: Are You There
+	cmd_EC                      // delete current character
+	cmd_EL                      // delete current line
+	cmd_GA                      // Line reverse
+	cmd_SB                      // 250: Subnegotiation
+	cmd_WILL                    // Indicating Option *WILL* be used
+	cmd_WONT                    // Indicating option *WONT* be used
+	cmd_DO                      // Commanding, to use Option
+	cmd_DONT                    // Response, Option not supported
+	cmd_IAC                     // 255: Interpret As Command
 	cmd_FIRSTENTRY = cmd_EOF
 )
 
 var cmdStrings = []string{
 	"EOF", "SUSP", "ABORT", "EOR",
-	"NOP", "DM", "BREAK", "IP",
+	"SE", "NOP", "DM", "BREAK", "IP",
 	"AO", "AYT", "EC", "EL", "GA",
-	"SE", "SB", "WILL", "WONT", "DO",
+	"SB", "WILL", "WONT", "DO",
 	"DONT", "IAC",
 }
 
 type telnetOPT byte
 
 const (
-	opt_BINARY         telnetOPT = iota // 8-bit data path
-	opt_ECHO                            // echo
-	opt_RCP                             // prepare to reconnect
-	opt_SGA                             // suppress go ahead
-	opt_NAMS                            // approximate message size
-	opt_STATUS                          // give status
-	opt_TM                              // timing mark
-	opt_RCTE                            // remote controlled transmission and echo
-	opt_NAOL                            // negotiate about output line width
-	opt_NAOP                            // negotiate about output page size
-	opt_NAOCRD                          // negotiate about CR disposition
-	opt_NAOHTS                          // negotiate about horizontal tabstops
-	opt_NAOHTD                          // negotiate about horizontal tab disposition
-	opt_NAOFFD                          // negotiate about formfeed disposition
-	opt_NAOVTS                          // negotiate about vertical tab stops
-	opt_NAOVTD                          // negotiate about vertical tab disposition
-	opt_NAOLFD                          // negotiate about output LF disposition
-	opt_XASCII                          // extended ascic character set
-	opt_LOGOUT                          // force logout
-	opt_BM                              // byte macro
-	opt_DET                             // data entry terminal
-	opt_SUPDUP                          // supdup protocol
-	opt_SUPDUPOUTPUT                    // supdup output
-	opt_SNDLOC                          // send location
-	opt_TTYPE                           // terminal type
-	opt_EOR                             // end or record
-	opt_TUID                            // TACACS user identification
-	opt_OUTMRK                          // output marking
-	opt_TTYLOC                          // terminal location number
-	opt_3270REGIME                      // 3270 regime
-	opt_X3PAD                           // X.3 PAD
-	opt_NAWS                            // window size
-	opt_TSPEED                          // terminal speed
-	opt_LFLOW                           // remote flow control
-	opt_LINEMODE                        // Linemode option
-	opt_XDISPLOC                        // X Display Location
-	opt_OLD_ENVIRON                     // Old - Environment variables
-	opt_AUTHENTICATION                  // Authenticate
-	opt_ENCRYPT                         // Encryption option
-	opt_NEW_ENVIRON                     // New - Environment variables
-	opt_EXOPL          = 255            // extended-options-list
+	opt_BINARY         = iota // 8-bit data path
+	opt_ECHO                  // echo
+	opt_RCP                   // prepare to reconnect
+	opt_SGA                   // suppress go ahead
+	opt_NAMS                  // approximate message size
+	opt_STATUS                // give status
+	opt_TM                    // timing mark
+	opt_RCTE                  // remote controlled transmission and echo
+	opt_NAOL                  // negotiate about output line width
+	opt_NAOP                  // negotiate about output page size
+	opt_NAOCRD                // negotiate about CR disposition
+	opt_NAOHTS                // negotiate about horizontal tabstops
+	opt_NAOHTD                // negotiate about horizontal tab disposition
+	opt_NAOFFD                // negotiate about formfeed disposition
+	opt_NAOVTS                // negotiate about vertical tab stops
+	opt_NAOVTD                // negotiate about vertical tab disposition
+	opt_NAOLFD                // negotiate about output LF disposition
+	opt_XASCII                // extended ascic character set
+	opt_LOGOUT                // force logout
+	opt_BM                    // byte macro
+	opt_DET                   // data entry terminal
+	opt_SUPDUP                // supdup protocol
+	opt_SUPDUPOUTPUT          // supdup output
+	opt_SNDLOC                // send location
+	opt_TTYPE                 // terminal type
+	opt_EOR                   // end or record
+	opt_TUID                  // TACACS user identification
+	opt_OUTMRK                // output marking
+	opt_TTYLOC                // terminal location number
+	opt_3270REGIME            // 3270 regime
+	opt_X3PAD                 // X.3 PAD
+	opt_NAWS                  // window size
+	opt_TSPEED                // terminal speed
+	opt_LFLOW                 // remote flow control
+	opt_LINEMODE              // Linemode option
+	opt_XDISPLOC              // X Display Location
+	opt_OLD_ENVIRON           // Old - Environment variables
+	opt_AUTHENTICATION        // Authenticate
+	opt_ENCRYPT               // Encryption option
+	opt_NEW_ENVIRON           // New - Environment variables
+	opt_EXOPL          = 255  // extended-options-list
 )
 
-var optStrings = []string{
+var optStrings = [255]string{
 	"BINARY", "ECHO", "RCP", "SGA", "NAMS",
 	"STATUS", "TM", "RCTE", "NAOL", "NAOP",
 	"NAOCRD", "NAOHTS", "NAOHTD", "NAOFFD",
@@ -159,7 +159,7 @@ var optStrings = []string{
 	"TTYLOC", "3270REGIME", "X3PAD", "NAWS",
 	"TSPEED", "LFLOW", "LINEMODE", "XDISPLOC",
 	"OLD_ENVIRON", "AUTHENTICATION", "ENCRYPT",
-	"NEW_ENVIRON", "EXOPL",
+	"NEW_ENVIRON",
 }
 
 //
@@ -213,7 +213,7 @@ func (t *TelnetServer) ListenTimeout(proto, addr string, dur time.Duration) (e e
 	go connect(con_ch, t)
 
 	select {
-	case <-time.After(dur):
+	case <-time.After(dur * time.Second):
 	case e = <-con_ch:
 	}
 
@@ -282,10 +282,15 @@ func (t *Telnet) Read(buf []byte) (int, error) {
 	return n, nil
 }
 
-func (t *Telnet) __execCMD(c telnetCMD) (err error) {
-	//if t.debug {
-	fmt.Printf("Command recieved %s\n", optStrings[c])
-	//}
+func printcmd(c byte) {
+	fmt.Printf("Command recieved %s\n", cmdStrings[c-cmd_FIRSTENTRY])
+}
+func printopt(c byte) {
+	fmt.Printf("Option recieved %s\n", optStrings[c-opt_BINARY])
+}
+
+func (t *Telnet) __execCMD(c byte) (err error) {
+
 	switch c {
 	case cmd_ABORT:
 	case cmd_SUSP:
@@ -301,22 +306,35 @@ func (t *Telnet) __execCMD(c telnetCMD) (err error) {
 	case cmd_GA:
 	case cmd_SE:
 	case cmd_SB:
-	case cmd_WILL:
-	case cmd_WONT:
-	case cmd_DO:
-	case cmd_DONT:
 	}
+
 	return
 }
 
-func (t *Telnet) __readByte() (c byte, err error) {
+func (t *Telnet) __readByte() (c byte, again bool, err error) {
+	// We have to interpret the 'telnet' commands and options
+	// Send the left overs to whoever asking
+
 	if c, err = t.bufrd.ReadByte(); err != nil {
-		return 0, err
+		return 0, false, err
 	}
 
-	cmd := telnetCMD(c)
-	if cmd == cmd_IAC {
-		err = t.__execCMD(cmd)
+	if c == cmd_IAC {
+		printcmd(c)
+		if c, err = t.bufrd.ReadByte(); err != nil {
+			return 0, false, err
+		}
+		printcmd(c)
+		switch c {
+		case cmd_WILL:
+			//t.Do()
+		case cmd_WONT:
+		case cmd_DO:
+		case cmd_DONT:
+		default:
+			again = true
+			err = t.__execCMD(c)
+		}
 	}
 
 	return
@@ -324,15 +342,12 @@ func (t *Telnet) __readByte() (c byte, err error) {
 
 // bufio.Reader
 func (t *Telnet) ReadByte() (c byte, err error) {
-	// TODO: We have to interpret the 'telnet' commands and options
-	// Send the left overs to whoever asking
-	for {
-		if c, err = t.__readByte(); err != nil {
+	again := true
+	for again {
+		if c, again, err = t.__readByte(); err != nil {
 			c = 0
-			break
 		}
 	}
-
 	return
 }
 
@@ -348,6 +363,10 @@ func (t *Telnet) ReadBytes(delim byte) (line []byte, err error) {
 			break
 		}
 		line = append(line, c)
+
+		if c == delim {
+			break
+		}
 	}
 	return
 }
