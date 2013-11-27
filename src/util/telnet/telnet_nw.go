@@ -50,6 +50,12 @@ type Telnet struct {
 	bufrd    *bufio.Reader
 	bufwr    *bufio.Writer // Dont know if buffered writer required
 	unixCRLF bool
+
+	debug bool
+}
+
+func (t *Telnet) EnableDebug() {
+	t.debug = true
 }
 
 type TelnetServer struct {
@@ -66,26 +72,26 @@ const (
 type telnetCMD byte
 
 const (
-	cmd_EOF        = 236 + iota // End of file
-	cmd_SUSP                    // Suspend process
-	cmd_ABORT                   // Abort process
-	cmd_EOR                     // end of record
-	cmd_NOP                     // nop
-	cmd_DM                      // data mark
-	cmd_BREAK                   // break
-	cmd_IP                      // interrupt process
-	cmd_AO                      // abort output
-	cmd_AYT                     // Are You There
-	cmd_EC                      // delete current character
-	cmd_EL                      // delete current line
-	cmd_GA                      // Line reverse
-	cmd_SE                      // end of sub negotiation
-	cmd_SB                      // Subnegotiation
-	cmd_WILL                    // Indicating Option *WILL* be used
-	cmd_WONT                    // Indicating option *WONT* be used
-	cmd_DO                      // Commanding, to use Option
-	cmd_DONT                    // Response, Option not supported
-	cmd_IAC                     // Interpret As Command
+	cmd_EOF        telnetCMD = 236 + iota // End of file
+	cmd_SUSP                              // 237: Suspend process
+	cmd_ABORT                             // Abort process
+	cmd_EOR                               // end of record
+	cmd_NOP                               // 240: nop
+	cmd_DM                                // data mark
+	cmd_BREAK                             // break
+	cmd_IP                                // interrupt process
+	cmd_AO                                // abort output
+	cmd_AYT                               // 245: Are You There
+	cmd_EC                                // delete current character
+	cmd_EL                                // delete current line
+	cmd_GA                                // Line reverse
+	cmd_SE                                // end of sub negotiation
+	cmd_SB                                // 250: Subnegotiation
+	cmd_WILL                              // Indicating Option *WILL* be used
+	cmd_WONT                              // Indicating option *WONT* be used
+	cmd_DO                                // Commanding, to use Option
+	cmd_DONT                              // Response, Option not supported
+	cmd_IAC                               // 255: Interpret As Command
 	cmd_FIRSTENTRY = cmd_EOF
 )
 
@@ -100,47 +106,47 @@ var cmdStrings = []string{
 type telnetOPT byte
 
 const (
-	opt_BINARY         = iota // 8-bit data path */
-	opt_ECHO                  // echo */
-	opt_RCP                   // prepare to reconnect
-	opt_SGA                   // suppress go ahead
-	opt_NAMS                  // approximate message size
-	opt_STATUS                // give status
-	opt_TM                    // timing mark
-	opt_RCTE                  // remote controlled transmission and echo
-	opt_NAOL                  // negotiate about output line width
-	opt_NAOP                  // negotiate about output page size
-	opt_NAOCRD                // negotiate about CR disposition
-	opt_NAOHTS                // negotiate about horizontal tabstops
-	opt_NAOHTD                // negotiate about horizontal tab disposition
-	opt_NAOFFD                // negotiate about formfeed disposition
-	opt_NAOVTS                // negotiate about vertical tab stops
-	opt_NAOVTD                // negotiate about vertical tab disposition
-	opt_NAOLFD                // negotiate about output LF disposition
-	opt_XASCII                // extended ascic character set
-	opt_LOGOUT                // force logout
-	opt_BM                    // byte macro
-	opt_DET                   // data entry terminal
-	opt_SUPDUP                // supdup protocol
-	opt_SUPDUPOUTPUT          // supdup output
-	opt_SNDLOC                // send location
-	opt_TTYPE                 // terminal type
-	opt_EOR                   // end or record
-	opt_TUID                  // TACACS user identification
-	opt_OUTMRK                // output marking
-	opt_TTYLOC                // terminal location number
-	opt_3270REGIME            // 3270 regime
-	opt_X3PAD                 // X.3 PAD
-	opt_NAWS                  // window size
-	opt_TSPEED                // terminal speed
-	opt_LFLOW                 // remote flow control
-	opt_LINEMODE              // Linemode option
-	opt_XDISPLOC              // X Display Location
-	opt_OLD_ENVIRON           // Old - Environment variables
-	opt_AUTHENTICATION        // Authenticate
-	opt_ENCRYPT               // Encryption option
-	opt_NEW_ENVIRON           // New - Environment variables
-	opt_EXOPL          = 255  // extended-options-list
+	opt_BINARY         telnetOPT = iota // 8-bit data path
+	opt_ECHO                            // echo
+	opt_RCP                             // prepare to reconnect
+	opt_SGA                             // suppress go ahead
+	opt_NAMS                            // approximate message size
+	opt_STATUS                          // give status
+	opt_TM                              // timing mark
+	opt_RCTE                            // remote controlled transmission and echo
+	opt_NAOL                            // negotiate about output line width
+	opt_NAOP                            // negotiate about output page size
+	opt_NAOCRD                          // negotiate about CR disposition
+	opt_NAOHTS                          // negotiate about horizontal tabstops
+	opt_NAOHTD                          // negotiate about horizontal tab disposition
+	opt_NAOFFD                          // negotiate about formfeed disposition
+	opt_NAOVTS                          // negotiate about vertical tab stops
+	opt_NAOVTD                          // negotiate about vertical tab disposition
+	opt_NAOLFD                          // negotiate about output LF disposition
+	opt_XASCII                          // extended ascic character set
+	opt_LOGOUT                          // force logout
+	opt_BM                              // byte macro
+	opt_DET                             // data entry terminal
+	opt_SUPDUP                          // supdup protocol
+	opt_SUPDUPOUTPUT                    // supdup output
+	opt_SNDLOC                          // send location
+	opt_TTYPE                           // terminal type
+	opt_EOR                             // end or record
+	opt_TUID                            // TACACS user identification
+	opt_OUTMRK                          // output marking
+	opt_TTYLOC                          // terminal location number
+	opt_3270REGIME                      // 3270 regime
+	opt_X3PAD                           // X.3 PAD
+	opt_NAWS                            // window size
+	opt_TSPEED                          // terminal speed
+	opt_LFLOW                           // remote flow control
+	opt_LINEMODE                        // Linemode option
+	opt_XDISPLOC                        // X Display Location
+	opt_OLD_ENVIRON                     // Old - Environment variables
+	opt_AUTHENTICATION                  // Authenticate
+	opt_ENCRYPT                         // Encryption option
+	opt_NEW_ENVIRON                     // New - Environment variables
+	opt_EXOPL          = 255            // extended-options-list
 )
 
 var optStrings = []string{
@@ -163,7 +169,7 @@ var optStrings = []string{
 //   ##    ##  ##  ##   ##  ##  ##
 //   ##    ##  ##  ##  ##   ##  ##
 //   ##      ##    #####      ##
-//  Some sub options have sub-options,
+//  Some options have sub-options,
 //     opt_AUTHENTICATION, opt_ENCRYPT,
 //  And will be implemented in course of time.
 //
@@ -208,22 +214,30 @@ func (t *TelnetServer) ListenTimeout(proto, addr string, dur time.Duration) (e e
 
 	select {
 	case <-time.After(dur):
-
 	case e = <-con_ch:
 	}
+
 	if e != nil {
 		fmt.Printf("%v", e)
 	}
-	if t.conn != nil {
-		fmt.Printf("Connected: listn: %v, conn:%v\n", t.listn, t.conn)
+
+	if t.debug {
+		if t.conn != nil {
+			fmt.Printf("Connected:")
+		}
+		fmt.Printf("listn: %v, conn:%v\n", t.listn, t.conn)
 	}
 	return
 }
 
+// This is similar to ListenTimeout, except, it prints number of seconds waited,
+// And exits if Errors are supposed to be treated seriously
 func (t *TelnetServer) ListenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
 	timeout := int(dur)
 	for ; timeout > 0; timeout-- {
-		fmt.Printf("Waiting %d seconds for connection \n", timeout)
+		if t.debug {
+			fmt.Printf("Waiting %d seconds for connection \n", timeout)
+		}
 		if e = t.ListenTimeout(proto, addr, 1); e != nil {
 			return
 		}
@@ -268,18 +282,43 @@ func (t *Telnet) Read(buf []byte) (int, error) {
 	return n, nil
 }
 
-func (t *Telnet) __execCMD(c byte, again bool, err error) {
+func (t *Telnet) __execCMD(c telnetCMD) (err error) {
+	//if t.debug {
+	fmt.Printf("Command recieved %s\n", optStrings[c])
+	//}
+	switch c {
+	case cmd_ABORT:
+	case cmd_SUSP:
+	case cmd_EOR:
+	case cmd_NOP:
+	case cmd_DM:
+	case cmd_BREAK:
+	case cmd_IP:
+	case cmd_AO:
+	case cmd_AYT:
+	case cmd_EC:
+	case cmd_EL:
+	case cmd_GA:
+	case cmd_SE:
+	case cmd_SB:
+	case cmd_WILL:
+	case cmd_WONT:
+	case cmd_DO:
+	case cmd_DONT:
+	}
 	return
 }
 
-func (t *Telnet) __readByte() (c byte, again bool, err error) {
+func (t *Telnet) __readByte() (c byte, err error) {
 	if c, err = t.bufrd.ReadByte(); err != nil {
-		return 0, false, err
+		return 0, err
 	}
 
-	if c == cmd_IAC {
-
+	cmd := telnetCMD(c)
+	if cmd == cmd_IAC {
+		err = t.__execCMD(cmd)
 	}
+
 	return
 }
 
@@ -287,9 +326,8 @@ func (t *Telnet) __readByte() (c byte, again bool, err error) {
 func (t *Telnet) ReadByte() (c byte, err error) {
 	// TODO: We have to interpret the 'telnet' commands and options
 	// Send the left overs to whoever asking
-	var again bool
 	for {
-		if c, again, err = t.__readByte(); again == false || err != nil {
+		if c, err = t.__readByte(); err != nil {
 			c = 0
 			break
 		}
@@ -303,7 +341,15 @@ func (t *Telnet) ReadBytes(delim byte) (line []byte, err error) {
 	if delim == 0 {
 		delim = LF
 	}
-	return t.bufrd.ReadBytes(delim)
+
+	for {
+		c, err := t.ReadByte()
+		if err != nil {
+			break
+		}
+		line = append(line, c)
+	}
+	return
 }
 
 func (t *Telnet) ReadLine() (line []byte, isPrefix bool, err error) {
@@ -315,12 +361,16 @@ func (t *Telnet) ReadLine() (line []byte, isPrefix bool, err error) {
 // func (t *Telnet) ReadString(delim byte) (line string, err error)    {}
 
 func (t *Telnet) Close() {
-	fmt.Printf("Closing conn:%v\n", t.conn)
+	if t.debug {
+		fmt.Printf("Closing conn:%v\n", t.conn)
+	}
 	t.conn.Close()
 }
 
 func (ts *TelnetServer) Close() {
-	fmt.Printf("Closing listn:%v conn:%v\n", ts.listn, ts.conn)
+	//if ts.debug {
+	//	fmt.Printf("Closing listn:%v conn:%v\n", ts.listn, ts.conn)
+	//}
 	ts.Telnet.Close()
 	ts.listn.Close()
 }
