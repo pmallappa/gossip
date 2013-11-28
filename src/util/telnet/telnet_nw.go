@@ -478,9 +478,9 @@ func (t *Telnet) Close() {
 }
 
 func (ts *TelnetServer) Close() {
-	//if ts.debug {
-	//	fmt.Printf("Closing listn:%v conn:%v\n", ts.listn, ts.conn)
-	//}
+	if ts.debug {
+		fmt.Printf("Closing: %v\n", ts.listn.Addr)
+	}
 	ts.Telnet.Close()
 	ts.listn.Close()
 }
