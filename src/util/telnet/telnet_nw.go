@@ -52,6 +52,8 @@ type Telnet struct {
 	unixCRLF bool
 
 	debug bool
+	cmd   byte // Previous CMD
+	opt   byte // Option for previous CMD
 }
 
 func (t *Telnet) EnableDebug() {
@@ -72,35 +74,54 @@ const (
 type telnetCMD byte
 
 const (
-	cmd_EOF        = 236 + iota // End of file
-	cmd_SUSP                    // 237: Suspend process
-	cmd_ABORT                   // Abort process
-	cmd_EOR                     // end of record
-	cmd_SE                      // 240: end of sub negotiation
-	cmd_NOP                     // 241: nop
-	cmd_DM                      // data mark
-	cmd_BREAK                   // break
-	cmd_IP                      // interrupt process
-	cmd_AO                      // abort output
-	cmd_AYT                     // 246: Are You There
-	cmd_EC                      // delete current character
-	cmd_EL                      // delete current line
-	cmd_GA                      // Line reverse
-	cmd_SB                      // 250: Subnegotiation
-	cmd_WILL                    // Indicating Option *WILL* be used
-	cmd_WONT                    // Indicating option *WONT* be used
-	cmd_DO                      // Commanding, to use Option
-	cmd_DONT                    // Response, Option not supported
-	cmd_IAC                     // 255: Interpret As Command
-	cmd_FIRSTENTRY = cmd_EOF
+	cmd_EOF   = 236 + iota // End of file
+	cmd_SUSP               // 237: Suspend process
+	cmd_ABORT              // Abort process
+	cmd_EOR                // end of record
+	cmd_SE                 // 240: end of sub negotiation
+	cmd_NOP                // 241: nop
+	cmd_DM                 // data mark
+	cmd_BREAK              // break
+	cmd_IP                 // interrupt process
+	cmd_AO                 // abort output
+	cmd_AYT                // 246: Are You There
+	cmd_EC                 // delete current character
+	cmd_EL                 // delete current line
+	cmd_GA                 // Line reverse
+	cmd_SB                 // 250: Subnegotiation
+	cmd_WILL               // Indicating Option *WILL* be used
+	cmd_WONT               // Indicating option *WONT* be used
+	cmd_DO                 // Commanding, to use Option
+	cmd_DONT               // Response, Option not supported
+	cmd_IAC                // 255: Interpret As Command
 )
 
-var cmdStrings = []string{
-	"EOF", "SUSP", "ABORT", "EOR",
-	"SE", "NOP", "DM", "BREAK", "IP",
-	"AO", "AYT", "EC", "EL", "GA",
-	"SB", "WILL", "WONT", "DO",
-	"DONT", "IAC",
+var cmdStrings = [256]string{
+	// 0 - 236 are not used
+	cmd_EOF:   "EOF",
+	cmd_SUSP:  "SUSP",
+	cmd_ABORT: "ABORT",
+	cmd_EOR:   "EOR",
+	cmd_SE:    "SE",
+	cmd_NOP:   "NOP",
+	cmd_DM:    "DM",
+	cmd_BREAK: "BREAK",
+	cmd_IP:    "IP",
+	cmd_AO:    "AO",
+	cmd_AYT:   "AYT",
+	cmd_EC:    "EC",
+	cmd_EL:    "EL",
+	cmd_GA:    "GA",
+	cmd_SB:    "SB",
+	cmd_WILL:  "WILL",
+	cmd_WONT:  "WONT",
+	cmd_DO:    "DO",
+	cmd_DONT:  "DONT",
+	cmd_IAC:   "IAC",
+}
+
+func (c telnetCMD) String() string {
+	return cmdStrings[c]
 }
 
 type telnetOPT byte
@@ -149,17 +170,53 @@ const (
 	opt_EXOPL          = 255  // extended-options-list
 )
 
-var optStrings = [255]string{
-	"BINARY", "ECHO", "RCP", "SGA", "NAMS",
-	"STATUS", "TM", "RCTE", "NAOL", "NAOP",
-	"NAOCRD", "NAOHTS", "NAOHTD", "NAOFFD",
-	"NAOVTS", "NAOVTD", "NAOLFD", "XASCII",
-	"LOGOUT", "BM", "DET", "SUPDUP", "SUPDUPOUTPUT",
-	"SNDLOC", "TTYPE", "EOR", "TUID", "OUTMRK",
-	"TTYLOC", "3270REGIME", "X3PAD", "NAWS",
-	"TSPEED", "LFLOW", "LINEMODE", "XDISPLOC",
-	"OLD_ENVIRON", "AUTHENTICATION", "ENCRYPT",
-	"NEW_ENVIRON",
+var optStrings = [256]string{
+	opt_BINARY:         "BINARY",
+	opt_ECHO:           "ECHO",
+	opt_RCP:            "RCP",
+	opt_SGA:            "SGA",
+	opt_NAMS:           "NAMS",
+	opt_STATUS:         "STATUS",
+	opt_TM:             "TM",
+	opt_RCTE:           "RCTE",
+	opt_NAOL:           "NAOL",
+	opt_NAOP:           "NAOP",
+	opt_NAOCRD:         "NAOCRD",
+	opt_NAOHTS:         "NAOHTS",
+	opt_NAOHTD:         "NAOHTD",
+	opt_NAOFFD:         "NAOFFD",
+	opt_NAOVTS:         "NAOVTS",
+	opt_NAOVTD:         "NAOVTD",
+	opt_NAOLFD:         "NAOLFD",
+	opt_XASCII:         "XASCII",
+	opt_LOGOUT:         "LOGOUT",
+	opt_BM:             "BM",
+	opt_DET:            "DET",
+	opt_SUPDUP:         "SUPDUP",
+	opt_SUPDUPOUTPUT:   "SUPDUPOUTPUT",
+	opt_SNDLOC:         "SNDLOC",
+	opt_TTYPE:          "TTYPE",
+	opt_EOR:            "EOR",
+	opt_TUID:           "TUID",
+	opt_OUTMRK:         "OUTMRK",
+	opt_TTYLOC:         "TTYLOC",
+	opt_3270REGIME:     "REGIME",
+	opt_X3PAD:          "X3PAD",
+	opt_NAWS:           "NAWS",
+	opt_TSPEED:         "TSPEED",
+	opt_LFLOW:          "LFLOW",
+	opt_LINEMODE:       "LINEMODE",
+	opt_XDISPLOC:       "XDISPLOC",
+	opt_OLD_ENVIRON:    "OLD_VER",
+	opt_AUTHENTICATION: "AUTHENTICATION",
+	opt_ENCRYPT:        "ENCRYPT",
+	opt_NEW_ENVIRON:    "NEW_ENVIRON",
+	// 255
+	opt_EXOPL: "EXOPL",
+}
+
+func (c telnetOPT) String() string {
+	return optStrings[c]
 }
 
 //
@@ -223,13 +280,14 @@ func (t *TelnetServer) ListenTimeout(proto, addr string, dur time.Duration) (e e
 
 	if t.debug {
 		if t.conn != nil {
-			fmt.Printf("Connected:")
+			fmt.Printf("Connected: ")
 		}
-		fmt.Printf("listn: %v, conn:%v\n", t.listn, t.conn)
+		fmt.Printf("%v\n", t.conn.LocalAddr())
 	}
 	return
 }
 
+// TODO: FIX THIS, STILL HAS PROBLEMS
 // This is similar to ListenTimeout, except, it prints number of seconds waited,
 // And exits if Errors are supposed to be treated seriously
 func (t *TelnetServer) ListenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
@@ -251,42 +309,35 @@ func (t *TelnetServer) ListenTimeoutProgress(proto, addr string, dur time.Durati
 }
 
 // io.Writer interface
-func (t *Telnet) Write(buf []byte) (int, error) {
-	var (
-		n   int
-		err error
-	)
-
+func (t *Telnet) Write(buf []byte) (n int, err error) {
 	for len(buf) > 0 {
 		if n, err = t.conn.Write(buf); err != nil {
-			return n, err
+			return
 		}
 		buf = buf[n:]
 	}
-	return n, err
+	return
 }
 
 // io.Reader interface
-func (t *Telnet) Read(buf []byte) (int, error) {
-	var n int
-
+func (t *Telnet) Read(buf []byte) (n int, err error) {
 	buflen := len(buf)
 	for n < buflen {
-		b, err := t.conn.Read(buf)
-		if err != nil {
+		if b, err := t.conn.Read(buf); err != nil {
 			return b, err
+		} else {
+			n += b
+			buf = buf[b:]
 		}
-		n += b
-		buf = buf[b:]
 	}
 	return n, nil
 }
 
-func printcmd(c byte) {
-	fmt.Printf("Command recieved %s\n", cmdStrings[c-cmd_FIRSTENTRY])
+func printcmd(a byte) {
+	fmt.Printf("Command received %v\n", telnetCMD(a))
 }
-func printopt(c byte) {
-	fmt.Printf("Option recieved %s\n", optStrings[c-opt_BINARY])
+func printopt(o byte) {
+	fmt.Println("Option received %v\n", telnetOPT(o))
 }
 
 func (t *Telnet) __execCMD(c byte) (err error) {
@@ -298,7 +349,12 @@ func (t *Telnet) __execCMD(c byte) (err error) {
 	case cmd_NOP:
 	case cmd_DM:
 	case cmd_BREAK:
+		fmt.Println("Sending Backspace")
+		t.conn.Write([]byte{cmd_IAC, cmd_EC, cmd_DO})
+
 	case cmd_IP:
+		fmt.Println("Sending Backspace")
+		t.conn.Write([]byte{cmd_IAC, cmd_EC, cmd_DO})
 	case cmd_AO:
 	case cmd_AYT:
 	case cmd_EC:
@@ -309,6 +365,36 @@ func (t *Telnet) __execCMD(c byte) (err error) {
 	}
 
 	return
+}
+
+func (t *Telnet) _do() {
+	if t.debug {
+		fmt.Printf("Sending DO %v\n", telnetCMD(t.cmd))
+	}
+	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_DO})
+}
+
+func (t *Telnet) _dont() {
+	if t.debug {
+		fmt.Printf("Sending DONT %v\n", telnetCMD(t.cmd))
+	}
+	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_DONT})
+
+}
+
+func (t *Telnet) _will() {
+	if t.debug {
+		fmt.Printf("Sending WILL %v\n", telnetCMD(t.cmd))
+	}
+	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_WILL})
+
+}
+
+func (t *Telnet) _wont() {
+	if t.debug {
+		fmt.Printf("Sending WONT %v\n", telnetCMD(t.cmd))
+	}
+	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_WONT})
 }
 
 func (t *Telnet) __readByte() (c byte, again bool, err error) {
@@ -327,14 +413,19 @@ func (t *Telnet) __readByte() (c byte, again bool, err error) {
 		printcmd(c)
 		switch c {
 		case cmd_WILL:
-			//t.Do()
+			t._do()
 		case cmd_WONT:
+			t._dont()
 		case cmd_DO:
+			t._will()
 		case cmd_DONT:
+			t._wont()
 		default:
 			again = true
+			t.cmd = c
 			err = t.__execCMD(c)
 		}
+		c = 0
 	}
 
 	return
@@ -343,7 +434,7 @@ func (t *Telnet) __readByte() (c byte, again bool, err error) {
 // bufio.Reader
 func (t *Telnet) ReadByte() (c byte, err error) {
 	again := true
-	for again {
+	for again == true {
 		if c, again, err = t.__readByte(); err != nil {
 			c = 0
 		}
