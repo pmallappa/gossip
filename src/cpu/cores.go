@@ -6,6 +6,7 @@ import (
 )
 
 import (
+	"dev/mem"
 	"util/logng"
 )
 
@@ -17,13 +18,13 @@ type Exception struct {
 	instr string
 }
 
-type InfoT struct {
+type infoT struct {
 	freq   uint32 // Hz
 	vendor string // Eg, TI, Qualcomm, NetLogic
 	model  string // Eg, OMAP3, SnapDragon, XLP
 }
 
-type CoreT struct {
+type coreT struct {
 	logng.LogNG
 	id    uint32 // SMP ID
 	cycle uint64 // Processor cycle, modified after every instruction
@@ -31,13 +32,14 @@ type CoreT struct {
 }
 
 type Core struct {
-	InfoT
-	CoreT
+	infoT
+	coreT
+	mem.Mem
 }
 
-func (c *InfoT) Freq() uint64        { return uint64(c.freq) }
-func (c *InfoT) SetFreq(freq uint64) { c.freq = uint32(freq) }
-func (c *InfoT) Info() map[string]string {
+func (c *infoT) Freq() uint64        { return uint64(c.freq) }
+func (c *infoT) SetFreq(freq uint64) { c.freq = uint32(freq) }
+func (c *infoT) Info() map[string]string {
 	return map[string]string{
 		"model":  c.model,
 		"vendor": c.vendor,
@@ -45,15 +47,15 @@ func (c *InfoT) Info() map[string]string {
 	}
 }
 
-func (c *InfoT) SetInfo(vendor string, model string) {
+func (c *infoT) SetInfo(vendor string, model string) {
 	c.vendor = vendor
 	c.model = model
 
 }
 
-func (c *CoreT) ID() uint32    { return c.id } // Return CPU ID
-func (c *CoreT) Cycle() uint64 { return c.cycle }
-func (c *CoreT) Setup() error  { return nil }
+func (c *coreT) ID() uint32    { return c.id } // Return CPU ID
+func (c *coreT) Cycle() uint64 { return c.cycle }
+func (c *coreT) Setup() error  { return nil }
 
 type CpuController interface {
 	Init() error
@@ -91,4 +93,11 @@ type InstrType uint32
 type CpuError struct {
 	Op  string
 	Err error
+}
+
+func (c *Core) Start() error {
+	return nil
+}
+func (c *Core) Init() error {
+	return nil
 }

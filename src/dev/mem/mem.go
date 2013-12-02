@@ -15,9 +15,15 @@ import (
 //"util"
 )
 
+// Each CPU/Core gets its own read/write channel
+// Address are communicated through 'addr' channel.
+// Response are sent via the read/write channel.
 type Mem struct {
 	buf    []byte
 	endian binary.ByteOrder
+	rd     []chan uint64
+	wr     []chan uint64
+	addr   []chan uint64
 }
 
 func (m *Mem) SetEndian(o binary.ByteOrder) {
@@ -82,4 +88,8 @@ func Newmem(size uint64) *Mem {
 	m := new(Mem)
 	m.buf = make([]byte, size)
 	return m
+}
+
+func Init() {
+
 }

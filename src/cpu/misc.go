@@ -11,7 +11,7 @@ import (
 )
 
 // Static Declaration to pass values to new CPU's
-var cpu InfoT
+var cpu infoT
 
 func ParseFlags() (map[string]string, error) {
 	var e error

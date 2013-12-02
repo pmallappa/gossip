@@ -20,7 +20,7 @@ func main() {
 	defer ts.Close()
 	ts.EnableDebug()
 
-	if err := ts.ListenTimeout(proto, server, 200); err != nil {
+	if err := ts.ListenTimeoutProgress(proto, server, 20); err != nil {
 		fmt.Println(err)
 		panic("Holla")
 	}

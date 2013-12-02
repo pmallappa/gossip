@@ -38,7 +38,7 @@ import (
 	//"log"
 	"net"
 	//"strings"
-	"time"
+	//	"time"
 )
 
 // Each sequence of read is one or two bytes, depending on if the byte read
@@ -58,11 +58,6 @@ type Telnet struct {
 
 func (t *Telnet) EnableDebug() {
 	t.debug = true
-}
-
-type TelnetServer struct {
-	Telnet
-	listn net.Listener
 }
 
 const (
@@ -96,7 +91,7 @@ const (
 	cmd_IAC                // 255: Interpret As Command
 )
 
-var cmdStrings = [256]string{
+var cmdStrings = []string{
 	// 0 - 236 are not used
 	cmd_EOF:   "EOF",
 	cmd_SUSP:  "SUSP",
@@ -170,7 +165,7 @@ const (
 	opt_EXOPL          = 255  // extended-options-list
 )
 
-var optStrings = [256]string{
+var optStrings = []string{
 	opt_BINARY:         "BINARY",
 	opt_ECHO:           "ECHO",
 	opt_RCP:            "RCP",
@@ -235,77 +230,6 @@ func NewTelnet() *Telnet {
 	return &Telnet{
 		unixCRLF: true,
 	}
-}
-
-func NewTelnetServer() *TelnetServer {
-	return &TelnetServer{}
-}
-
-func connect(c chan error, t *TelnetServer) {
-	var e error
-	if t.conn, e = t.listn.Accept(); e != nil {
-		c <- e
-		return
-	}
-
-	t.bufwr = bufio.NewWriterSize(t.conn, 512)
-	t.bufrd = bufio.NewReaderSize(t.conn, 512)
-
-	c <- nil
-}
-
-// Options are passed like telnet=tcp!localhost:2030
-// Change is to accept everything that golang/pkg/net can do with
-// 'proto' and 'addr'
-// eg:
-//        Dial("tcp", "12.34.56.78:80")      OR  Dial("tcp", "google.com:http")
-//        Dial("tcp", "[2001:db8::1]:http")  OR  Dial("tcp", "[fe80::1%lo0]:80")
-//        Dial("ip4:1", "127.0.0.1")         OR  Dial("ip6:ospf", "::1")
-func (t *TelnetServer) ListenTimeout(proto, addr string, dur time.Duration) (e error) {
-	if t.listn, e = net.Listen(proto, addr); e != nil {
-		return
-	}
-
-	con_ch := make(chan error)
-	go connect(con_ch, t)
-
-	select {
-	case <-time.After(dur * time.Second):
-	case e = <-con_ch:
-	}
-
-	if e != nil {
-		fmt.Printf("%v", e)
-	}
-
-	if t.debug {
-		if t.conn != nil {
-			fmt.Printf("Connected: ")
-		}
-		fmt.Printf("%v\n", t.conn.LocalAddr())
-	}
-	return
-}
-
-// TODO: FIX THIS, STILL HAS PROBLEMS
-// This is similar to ListenTimeout, except, it prints number of seconds waited,
-// And exits if Errors are supposed to be treated seriously
-func (t *TelnetServer) ListenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
-	timeout := int(dur)
-	for ; timeout > 0; timeout-- {
-		if t.debug {
-			fmt.Printf("Waiting %d seconds for connection \n", timeout)
-		}
-		if e = t.ListenTimeout(proto, addr, 1); e != nil {
-			return
-		}
-		// In case we are connected we are out
-		if t.conn != nil {
-			return
-		}
-	}
-
-	return
 }
 
 // io.Writer interface
@@ -475,12 +399,4 @@ func (t *Telnet) Close() {
 		fmt.Printf("Closing conn:%v\n", t.conn)
 	}
 	t.conn.Close()
-}
-
-func (ts *TelnetServer) Close() {
-	if ts.debug {
-		fmt.Printf("Closing: %v\n", ts.listn.Addr)
-	}
-	ts.Telnet.Close()
-	ts.listn.Close()
 }

@@ -59,6 +59,14 @@ type SpclReg struct { // Special Register
 	valid     bool
 }
 
+func (r *SpclReg) SetReserved(mask uint64, ones bool) {
+	if ones {
+		r.rsrvdOne = mask
+	} else {
+		r.rsrvdZero = mask
+	}
+}
+
 func (r *SpclReg) Valid() bool { return r.valid }
 func (r *SpclReg) Set(v uint64) (e error) {
 	if r.rsrvdZero&v != 0 {
@@ -77,6 +85,14 @@ func (r *SpclReg) Set(v uint64) (e error) {
 	r.val = v
 
 	return
+}
+
+func NewSpclReg(resetval uint64, valid bool, name string) *SpclReg {
+	return &SpclReg{
+		Gpr:      Gpr{name: name},
+		resetVal: resetval,
+		valid:    true,
+	}
 }
 
 type CopReg struct {
