@@ -35,11 +35,12 @@ type Gpr struct {
 	access RegAccess // RDRW,RDONLY,RDRW
 }
 
-func (r *Gpr) Val() uint64           { return r.val }
-func (r *Gpr) Name() string          { return r.name }
-func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
-func (r *Gpr) Set(v uint64) error    { r.val = v; return nil }
-func (r *Gpr) SetName(s string)      { r.name = s }
+func (r *Gpr) Val() uint64                                 { return r.val }
+func (r *Gpr) Name() string                                { return r.name }
+func (r *Gpr) SetAccess(t RegAccess)                       { r.access = t }
+func (r *Gpr) Set(v uint64) error                          { r.val = v; return nil }
+func (r *Gpr) SetName(s string)                            { r.name = s }
+func (r *Gpr) SetAll(name string, val uint64, a RegAccess) { r.name = name; r.val = val; r.access = a }
 
 // UpdateFields is to generate individual fields from Reg.Val
 // This is only called when theres no fields,
