@@ -13,9 +13,10 @@ import (
 type ExcptType uint32
 
 // Types of Cpu Exceptions
-type Exception struct {
-	Type  ExcptType
-	instr string
+type Exception interface {
+	Error() string
+	String() string
+	Type() ExcptType
 }
 
 type infoT struct {
