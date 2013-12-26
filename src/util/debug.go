@@ -2,19 +2,8 @@ package util
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"runtime"
 )
-
-var dbg int
-
-type debug struct {
-	subsys string
-	uid    uint16
-	log    *log.Logger
-	level  int
-}
 
 func PrintMe() {
 	pc, file, line, _ := runtime.Caller(1)
@@ -36,16 +25,4 @@ func Exiting() {
 	if dbg > 0 {
 		printMyFunc("Exiting", 2)
 	}
-}
-
-func DebugInit(subsys string, uid int, w io.Writer) {
-
-}
-
-func SetDebugLevel(n int) {
-	dbg = n
-}
-
-func GetDebugLeve() int {
-	return dbg
 }

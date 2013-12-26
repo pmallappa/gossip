@@ -24,7 +24,7 @@ func dialAfter(c chan error, server string, proto string, t time.Duration) {
 }
 
 func Test_TelentConnection(t *testing.T) {
-	telserve := NewTelnetServer()
+	telserve := NewServer()
 	defer telserve.Close()
 	server := ":2000"
 	go dialAfter(ch, proto, server, 1)

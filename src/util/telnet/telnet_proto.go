@@ -45,7 +45,7 @@ import (
 // has value {0-254} or 255, if later(255) case, then its a control command,
 // and next byte indicates the actual command
 
-type Telnet struct {
+type telnetT struct {
 	conn     net.Conn
 	bufrd    *bufio.Reader
 	bufwr    *bufio.Writer // Dont know if buffered writer required
@@ -56,7 +56,7 @@ type Telnet struct {
 	opt   byte // Option for previous CMD
 }
 
-func (t *Telnet) EnableDebug() {
+func (t *telnetT) EnableDebug() {
 	t.debug = true
 }
 
@@ -226,14 +226,14 @@ func (c telnetOPT) String() string {
 //  And will be implemented in course of time.
 //
 
-func NewTelnet() *Telnet {
-	return &Telnet{
+func NewTelnet() *telnetT {
+	return &telnetT{
 		unixCRLF: true,
 	}
 }
 
 // io.Writer interface
-func (t *Telnet) Write(buf []byte) (n int, err error) {
+func (t *telnetT) Write(buf []byte) (n int, err error) {
 	for len(buf) > 0 {
 		if n, err = t.conn.Write(buf); err != nil {
 			return
@@ -244,7 +244,7 @@ func (t *Telnet) Write(buf []byte) (n int, err error) {
 }
 
 // io.Reader interface
-func (t *Telnet) Read(buf []byte) (n int, err error) {
+func (t *telnetT) Read(buf []byte) (n int, err error) {
 	buflen := len(buf)
 	for n < buflen {
 		if b, err := t.conn.Read(buf); err != nil {
@@ -264,7 +264,7 @@ func printopt(o byte) {
 	fmt.Println("Option received %v\n", telnetOPT(o))
 }
 
-func (t *Telnet) __execCMD(c byte) (err error) {
+func (t *telnetT) __execCMD(c byte) (err error) {
 
 	switch c {
 	case cmd_ABORT:
@@ -291,14 +291,14 @@ func (t *Telnet) __execCMD(c byte) (err error) {
 	return
 }
 
-func (t *Telnet) _do() {
+func (t *telnetT) _do() {
 	if t.debug {
 		fmt.Printf("Sending DO %v\n", telnetCMD(t.cmd))
 	}
 	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_DO})
 }
 
-func (t *Telnet) _dont() {
+func (t *telnetT) _dont() {
 	if t.debug {
 		fmt.Printf("Sending DONT %v\n", telnetCMD(t.cmd))
 	}
@@ -306,7 +306,7 @@ func (t *Telnet) _dont() {
 
 }
 
-func (t *Telnet) _will() {
+func (t *telnetT) _will() {
 	if t.debug {
 		fmt.Printf("Sending WILL %v\n", telnetCMD(t.cmd))
 	}
@@ -314,15 +314,15 @@ func (t *Telnet) _will() {
 
 }
 
-func (t *Telnet) _wont() {
+func (t *telnetT) _wont() {
 	if t.debug {
 		fmt.Printf("Sending WONT %v\n", telnetCMD(t.cmd))
 	}
 	t.conn.Write([]byte{cmd_IAC, t.cmd, cmd_IAC, cmd_WONT})
 }
 
-func (t *Telnet) __readByte() (c byte, again bool, err error) {
-	// We have to interpret the 'telnet' commands and options
+func (t *telnetT) __readByte() (c byte, again bool, err error) {
+	// We have to interpret the 'telnetT' commands and options
 	// Send the left overs to whoever asking
 
 	if c, err = t.bufrd.ReadByte(); err != nil {
@@ -356,7 +356,7 @@ func (t *Telnet) __readByte() (c byte, again bool, err error) {
 }
 
 // bufio.Reader
-func (t *Telnet) ReadByte() (c byte, err error) {
+func (t *telnetT) ReadByte() (c byte, err error) {
 	again := true
 	for again == true {
 		if c, again, err = t.__readByte(); err != nil {
@@ -366,7 +366,7 @@ func (t *Telnet) ReadByte() (c byte, err error) {
 	return
 }
 
-func (t *Telnet) ReadBytes(delim byte) (line []byte, err error) {
+func (t *telnetT) ReadBytes(delim byte) (line []byte, err error) {
 	// TODO: need to take care of interpreting the commands
 	if delim == 0 {
 		delim = LF
@@ -386,15 +386,15 @@ func (t *Telnet) ReadBytes(delim byte) (line []byte, err error) {
 	return
 }
 
-func (t *Telnet) ReadLine() (line []byte, isPrefix bool, err error) {
+func (t *telnetT) ReadLine() (line []byte, isPrefix bool, err error) {
 	return t.bufrd.ReadLine()
 }
 
-// func (t *Telnet) ReadRune() (r rune, size int, err error)           {}
-// func (t *Telnet) ReadSlice(delim byte) (line []byte, err error)     {}
-// func (t *Telnet) ReadString(delim byte) (line string, err error)    {}
+// func (t *telnetT) ReadRune() (r rune, size int, err error)           {}
+// func (t *telnetT) ReadSlice(delim byte) (line []byte, err error)     {}
+// func (t *telnetT) ReadString(delim byte) (line string, err error)    {}
 
-func (t *Telnet) Close() {
+func (t *telnetT) Close() {
 	if t.debug {
 		fmt.Printf("Closing conn:%v\n", t.conn)
 	}
