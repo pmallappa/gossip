@@ -81,3 +81,21 @@ func Test_Read(t *testing.T) {
 	}
 
 }
+
+// func Test_Telnet2(t *testing.T) {
+// 	server = ":3000"
+// 	go dialAfter(ch, proto, server, 1)
+// 	_ = <-ch
+// }
+
+// Blocks till some data is read
+func Test_Read(t *testing.T) {
+
+}
+
+func Test_Write(t *testing.T) {
+}
+
+func Test_Send(t *testing.T) {
+
+}

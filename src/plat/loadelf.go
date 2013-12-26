@@ -3,7 +3,7 @@ package plat
 import (
 	//	"bytes"
 	"debug/elf"
-	"errors"
+	//"errors"
 	"fmt"
 )
 
@@ -12,13 +12,13 @@ import (
 )
 
 type PlatELFLoader interface {
-	GetELFMachine() []elf.Machine
+	ELFMachine() []elf.Machine
 	//GetABI() elf.OSABI
-	GetELFClass() []elf.Class
+	ELFClass() []elf.Class
 }
 
 func isClassSupported(c elf.Class) bool {
-	for _, class := range curPlatform.GetELFClass() {
+	for _, class := range curPlatform.ELFClass() {
 		if c == class {
 			return true
 		}
@@ -27,7 +27,7 @@ func isClassSupported(c elf.Class) bool {
 }
 
 func isMachineSupported(m elf.Machine) bool {
-	for _, machine := range curPlatform.GetELFMachine() {
+	for _, machine := range curPlatform.ELFMachine() {
 		if m == machine {
 			return true
 		}
@@ -64,7 +64,7 @@ func loadELF(files []string) error {
 				}
 			}
 		} else {
-			return errors.New("Elf File problem")
+			return fmt.Errorf("Could not open ELF file %s", filename)
 		}
 		defer file.Close() // Close after loaded
 	}
