@@ -24,7 +24,7 @@ func dialAfter(c chan error, server string, proto string, t time.Duration) {
 }
 
 func Test_TelentConnection(t *testing.T) {
-	telserve := NewTelnetServer()
+	telserve := NewServer()
 	defer telserve.Close()
 	server := ":2000"
 	go dialAfter(ch, proto, server, 1)
@@ -79,5 +79,23 @@ func Test_Read(t *testing.T) {
 	if err != nil {
 		t.Errorf("Client returned: %v", err)
 	}
+
+}
+
+// func Test_Telnet2(t *testing.T) {
+// 	server = ":3000"
+// 	go dialAfter(ch, proto, server, 1)
+// 	_ = <-ch
+// }
+
+// Blocks till some data is read
+func Test_Read(t *testing.T) {
+
+}
+
+func Test_Write(t *testing.T) {
+}
+
+func Test_Send(t *testing.T) {
 
 }

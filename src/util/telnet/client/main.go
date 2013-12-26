@@ -1,3 +1,8 @@
+// Telnet Client program. Sample implementation
+// Connects to telnet server,
+// Reads user input and sends across network
+// Writes network reads to STDOUT or io.Writer
+
 package main
 
 import (
@@ -16,17 +21,19 @@ var (
 
 func main() {
 
-	ts := telnet.NewTelnetServer()
-	defer ts.Close()
-	ts.EnableDebug()
+	tc := telnet.NewClient(proto, server)
+	defer tc.Close()
+	tc.EnableDebug()
 
-	if err := ts.ListenTimeout(proto, server, 200); err != nil {
+	if err := tc.ConnectTimeout(proto, server, 200); err != nil {
 		fmt.Println(err)
 		panic("Holla")
 	}
 
-	for {
-		line, err := ts.ReadBytes(0)
+	// for {
+	{ // We run only once
+		tc.Write([]byte("ls /"))
+		line, err := tc.ReadBytes(0)
 		if err != nil {
 			break
 		}

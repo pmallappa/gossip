@@ -12,11 +12,11 @@ type RegAccess uint8
 
 // By Default All Registers are Read/Write
 const (
-	RDWR RegAccess = iota
-	RDONLY
-	WRONLY
-	RESERVED
-	INVALID
+	R_RDWR RegAccess = iota
+	R_RDONLY
+	R_WRONLY
+	R_RESERVED
+	R_INVALID
 )
 
 type Register interface {
@@ -35,20 +35,24 @@ type Gpr struct {
 	access RegAccess // RDRW,RDONLY,RDRW
 }
 
-func (r *Gpr) Val() uint64                                 { return r.val }
-func (r *Gpr) Name() string                                { return r.name }
-func (r *Gpr) SetAccess(t RegAccess)                       { r.access = t }
-func (r *Gpr) Set(v uint64) error                          { r.val = v; return nil }
-func (r *Gpr) SetName(s string)                            { r.name = s }
-func (r *Gpr) SetAll(name string, val uint64, a RegAccess) { r.name = name; r.val = val; r.access = a }
+func (r *Gpr) Val() uint64           { return r.val }
+func (r *Gpr) Name() string          { return r.name }
+func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
+func (r *Gpr) Set(v uint64) error    { r.val = v; return nil }
+func (r *Gpr) SetName(s string)      { r.name = s }
+func (r *Gpr) SetAll(name string, val uint64, a RegAccess) {
+	r.name = name
+	r.val = val
+	r.access = a
+}
 
 // UpdateFields is to generate individual fields from Reg.Val
 // This is only called when theres no fields,
 // Specific register need not implement this
 func (r *Gpr) UpdateFields(v uint64) error { r.Set(v); return nil }
 
-// UpdateReg updates Reg.Val from specific fields. This function does
-// the opposite of UpdateFields
+// UpdateReg updates Reg.Val from specific fields. This function
+//  does the opposite of UpdateFields
 func (r *Gpr) UpdateReg() (e error) { return }
 
 type SpclReg struct { // Special Register
@@ -59,6 +63,9 @@ type SpclReg struct { // Special Register
 	valid     bool
 }
 
+// Set Reserved fields in a register, if 'ones' is true,
+// it will set 'READ AS ONE' fields
+// otherwise the 'READ AS ZERO' fields are set.
 func (r *SpclReg) SetReserved(mask uint64, ones bool) {
 	if ones {
 		r.rsrvdOne = mask
@@ -67,7 +74,10 @@ func (r *SpclReg) SetReserved(mask uint64, ones bool) {
 	}
 }
 
-func (r *SpclReg) Valid() bool { return r.valid }
+func (r *SpclReg) Valid() bool { return r.access != R_INVALID }
+func (r *SpclReg) SetValid(v bool) {
+	r.valid = v
+}
 func (r *SpclReg) Set(v uint64) (e error) {
 	if r.rsrvdZero&v != 0 {
 		e = fmt.Errorf("writing to reserved fields of %s field(s): %x",
@@ -87,12 +97,13 @@ func (r *SpclReg) Set(v uint64) (e error) {
 	return
 }
 
-func NewSpclReg(resetval uint64, valid bool, name string) *SpclReg {
-	return &SpclReg{
+func NewSpclReg(name string, rstval uint64, valid bool) *SpclReg {
+	s := &SpclReg{
 		Gpr:      Gpr{name: name},
-		resetVal: resetval,
-		valid:    true,
+		resetVal: rstval,
+		valid:    valid,
 	}
+	return s
 }
 
 type CopReg struct {

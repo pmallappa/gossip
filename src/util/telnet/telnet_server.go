@@ -3,23 +3,44 @@ package telnet
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"time"
 )
 
-type Server struct {
-	Telnet
-	Addr  string
-	listn net.Listener
+type serverT struct {
+	telnetT
+	proto, laddr string
+	exec         string // Program to be invoked, after successful connection
+	listn        net.Listener
 }
 
-var defaultServer = &Server{}
+type Server interface {
+	Listen(proto, addr string) // A one time listener
+	ListenAndServe(proto, addr string)
 
-func NewServer() *Server {
-	return &Server{Addr: ":telnet"}
+	// Wait for connection till timeout
+	ListenTimeout(proto, addr string, dur time.Duration)
 }
 
-func connect(c chan error, t *Server) {
+var defaultServer = serverT{
+	proto: "tcp",
+	laddr: ":telnet",
+	exec:  "/bin/sh",
+}
+
+func NewServerDefault() *serverT {
+	return &defaultServer
+}
+
+func NewServer(proto, laddr string) *serverT {
+	return &serverT{
+		proto: proto,
+		laddr: laddr,
+	}
+}
+
+func connect(c chan error, t *serverT) {
 	var e error
 	if t.conn, e = t.listn.Accept(); e != nil {
 		c <- e
@@ -32,17 +53,47 @@ func connect(c chan error, t *Server) {
 	c <- nil
 }
 
-func ListenAndServe() {
+func handleConnection(exec string, conn net.Conn) {
+	// TODO:
+	// Start a program denoted by 'exec',
+	// untill the program exits or connection closes
+	//    -> read connection, write to program input
+	//    -> read program output, write to connection
+	for {
+		io.Copy(conn, conn)
+	}
+}
+
+// This is a continous listener
+func (t *serverT) ListenAndServe(proto, addr string) {
+
+	if proto == "" {
+		proto = t.proto
+	}
+	if addr == "" {
+		addr = t.laddr
+	}
+
+	ln, err := net.Listen(proto, addr)
+	if err != nil {
+		// handle error
+	}
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			// handle error
+			continue
+		}
+		go handleConnection(t.exec, conn)
+	}
 }
 
 // Options are passed like telnet=tcp!localhost:2030
 // Change is to accept everything that golang/pkg/net can do with
 // 'proto' and 'addr'
-// eg:
-//        Dial("tcp", "12.34.56.78:80")      OR  Dial("tcp", "google.com:http")
-//        Dial("tcp", "[2001:db8::1]:http")  OR  Dial("tcp", "[fe80::1%lo0]:80")
-//        Dial("ip4:1", "127.0.0.1")         OR  Dial("ip6:ospf", "::1")
-func (t *Server) ListenTimeout(proto, addr string, dur time.Duration) (e error) {
+// net.Listen("tcp", ":8080")
+
+func (t *serverT) ListenTimeout(proto, addr string, dur time.Duration) (e error) {
 	if t.listn, e = net.Listen(proto, addr); e != nil {
 		return
 	}
@@ -70,7 +121,7 @@ func (t *Server) ListenTimeout(proto, addr string, dur time.Duration) (e error) 
 
 // This is similar to ListenTimeout, but it prints number of seconds waited,
 // And exits if Errors are supposed to be treated seriously
-func (ts *Server) ListenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
+func (ts *serverT) _listenTimeoutProgress(proto, addr string, dur time.Duration) (e error) {
 	timeout := int(dur)
 	//c := make(chan bool)
 	//go ts._counter(c, timeout)
@@ -91,10 +142,10 @@ func (ts *Server) ListenTimeoutProgress(proto, addr string, dur time.Duration) (
 	return
 }
 
-func (ts *Server) Close() {
+func (ts *serverT) Close() {
 	if ts.debug {
 		fmt.Printf("Closing: %v\n", ts.listn.Addr)
 	}
-	ts.Telnet.Close()
+	ts.telnetT.Close()
 	ts.listn.Close()
 }
