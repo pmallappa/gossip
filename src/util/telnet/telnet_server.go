@@ -3,6 +3,7 @@ package telnet
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"time"
 )
@@ -17,10 +18,12 @@ type serverT struct {
 type Server interface {
 	Listen(proto, addr string) // A one time listener
 	ListenAndServe(proto, addr string)
-	ListenAndTimeout(proto, addr string, dur time.Duration) // Wait for connection till timeout
+
+	// Wait for connection till timeout
+	ListenTimeout(proto, addr string, dur time.Duration)
 }
 
-var defaultServer = &serverT{
+var defaultServer = serverT{
 	proto: "tcp",
 	laddr: ":telnet",
 	exec:  "/bin/sh",
@@ -50,14 +53,14 @@ func connect(c chan error, t *serverT) {
 	c <- nil
 }
 
-func handleConnection(exec string, conn *net.Conn) {
+func handleConnection(exec string, conn net.Conn) {
 	// TODO:
 	// Start a program denoted by 'exec',
 	// untill the program exits or connection closes
 	//    -> read connection, write to program input
 	//    -> read program output, write to connection
 	for {
-		io.Copy(c, c)
+		io.Copy(conn, conn)
 	}
 }
 
@@ -68,7 +71,7 @@ func (t *serverT) ListenAndServe(proto, addr string) {
 		proto = t.proto
 	}
 	if addr == "" {
-		addr = t.addr
+		addr = t.laddr
 	}
 
 	ln, err := net.Listen(proto, addr)
@@ -90,7 +93,7 @@ func (t *serverT) ListenAndServe(proto, addr string) {
 // 'proto' and 'addr'
 // net.Listen("tcp", ":8080")
 
-func (t *serverT) _listenTimeout(proto, addr string, dur time.Duration) (e error) {
+func (t *serverT) ListenTimeout(proto, addr string, dur time.Duration) (e error) {
 	if t.listn, e = net.Listen(proto, addr); e != nil {
 		return
 	}

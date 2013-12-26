@@ -16,16 +16,19 @@ type clientT struct {
 	proto, addr string
 }
 
-var defaultClient = &clientT{"tcp", ":telnet"}
+var defaultClient = clientT{
+	proto: "tcp",
+	addr:  ":telnet",
+}
 
 func NewClientDefault() *clientT {
-	return &clientT{Addr: ":telnet"}
+	return &defaultClient
 }
 
 func NewClient(proto, laddr string) *clientT {
 	return &clientT{
 		proto: proto,
-		laddr: laddr,
+		addr:  laddr,
 	}
 }
 

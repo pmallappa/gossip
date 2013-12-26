@@ -16,13 +16,9 @@ func printMyFunc(s string, n int) {
 }
 
 func Entered() {
-	if dbg > 0 {
-		printMyFunc("Entering", 2)
-	}
+	printMyFunc("Entering", 2)
 }
 
 func Exiting() {
-	if dbg > 0 {
-		printMyFunc("Exiting", 2)
-	}
+	printMyFunc("Exiting", 2)
 }

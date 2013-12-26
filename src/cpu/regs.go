@@ -103,6 +103,7 @@ func NewSpclReg(name string, rstval uint64, valid bool) *SpclReg {
 		resetVal: rstval,
 		valid:    valid,
 	}
+	return s
 }
 
 type CopReg struct {
