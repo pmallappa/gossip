@@ -38,7 +38,7 @@ import (
 	//"log"
 	"net"
 	//"strings"
-	//	"time"
+	//"time"
 )
 
 // Each sequence of read is one or two bytes, depending on if the byte read

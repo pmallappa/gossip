@@ -7,7 +7,8 @@ package main
 
 import (
 	"fmt"
-	//"io"
+	"io"
+	"os"
 	"time"
 )
 import (
@@ -26,22 +27,27 @@ func main() {
 	defer tc.Close()
 	tc.EnableDebug()
 
-	if err := tc.ConnectTimeout(proto, server, 200); err != nil {
+	err := tc.ConnectTimeout(proto, server, 200)
+	if err != nil {
 		fmt.Println(err)
 		panic("Holla")
 	}
+
 	buf := make([]byte, 100)
+
+	go io.Copy(os.Stdout, tc)
+
 	for {
-		println("clent: Before write")
-		tc.Write([]byte("/usr/bin/fdisk -l"))
-		for {
-			println("client: Before read")
-			n, err := tc.ReadLine(buf)
-			if err != nil || n == 0 {
-				break
-			}
-			fmt.Printf("%s\n", buf[:n])
+		n, err := os.Stdout.Read(buf)
+		if err != nil {
+			fmt.Printf("%s %s\n", buf[:n], err)
 		}
-		time.After(2*time.Second)
+
+		n, err := tc.Write(buf)
+		if err != nil {
+			fmt.Printf("Write Error: %s", err)
+		}
+
+		time.After(2 * time.Second)
 	}
 }

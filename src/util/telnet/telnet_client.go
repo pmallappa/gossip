@@ -2,15 +2,17 @@ package telnet
 
 import (
 	"bufio"
+	"io"
 	"net"
+	"os"
 	"time"
 )
 
 // proto and addr are as follows
 // eg:
-//        Dial("tcp", "12.34.56.78:80")      OR  Dial("tcp", "google.com:http")
-//        Dial("tcp", "[2001:db8::1]:http")  OR  Dial("tcp", "[fe80::1%lo0]:80")
-//        Dial("ip4:1", "127.0.0.1")         OR  Dial("ip6:ospf", "::1")
+// Dial("tcp", "12.34.56.78:80")      OR  Dial("tcp", "google.com:http")
+// Dial("tcp", "[2001:db8::1]:http")  OR  Dial("tcp", "[fe80::1%lo0]:80")
+// Dial("ip4:1", "127.0.0.1")         OR  Dial("ip6:ospf", "::1")
 
 type clientT struct {
 	telnetT
@@ -56,5 +58,9 @@ func (tc *clientT) ConnectTimeout(proto, addr string, t time.Duration) (e error)
 	tc.bufwr = bufio.NewWriterSize(tc.conn, 512)
 	tc.bufrd = bufio.NewReaderSize(tc.conn, 512)
 
+	return
+}
+
+func (tc *clientT) Read(buf []byte) (n int, e error) {
 	return
 }

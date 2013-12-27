@@ -13,7 +13,7 @@ import (
 type serverT struct {
 	//telnetT
 	proto, laddr string
-	exec         string // Program to be invoked, after successful connection
+	exec         string // after successful connection
 	debug        bool
 	listn        net.Listener
 }
@@ -48,41 +48,32 @@ func NewServer(proto, laddr string) *serverT {
 	}
 }
 
-// func connect(c chan error, t *serverT) {
-// 	var e error
-// 	if t.conn, e = t.listn.Accept(); e != nil {
-// 		c <- e
-// 		return
-// 	}
-
-// 	t.bufwr = bufio.NewWriterSize(t.conn, 512)
-// 	t.bufrd = bufio.NewReaderSize(t.conn, 512)
-
-// 	c <- nil
-// }
-
+// Start a program denoted by 'exec',
+// untill the program exits or connection closes
+//    -> read connection, write to program input
+//    -> read program output, write to connection
 func handleConnection(t *telnetT, command string) {
-	// Setup Telnet
-	// Start a program denoted by 'exec',
-	// untill the program exits or connection closes
-	//    -> read connection, write to program input
-	//    -> read program output, write to connection
+
 	var err error
-	var stdin io.WriteCloser
-	var stdout io.ReadCloser
+
+	defer t.Close()
 
 	t.bufwr = bufio.NewWriterSize(t.conn, 512)
 	t.bufrd = bufio.NewReaderSize(t.conn, 512)
 
 	split := strings.Split(command, " ")
 	cmd := exec.Command(split[0])
-	cmd.Args = split[1:]
-
-	if stdin, err = cmd.StdinPipe(); err != nil {
-		goto out
+	if len(split) > 1 {
+		cmd.Args = split[1:]
 	}
-	if stdout, err = cmd.StdoutPipe(); err != nil {
-		goto out
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return
+	}
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return
 	}
 
 	if t.debug {
@@ -90,31 +81,18 @@ func handleConnection(t *telnetT, command string) {
 	}
 
 	if err = cmd.Start(); err != nil {
-		goto out
+		return
 	}
 
 	go io.Copy(stdin, t.bufrd)
 	go io.Copy(t.bufwr, stdout)
-	// for t.conn != nil {
-	// 	if _, e := conn.ReadFrom(t.bufrd); e != nil {
-	// 		break
-	// 	}
-
-	// 	if _, e := io.Copy(t.bufwr, stdout); e != nil {
-	// 		break
-	// 	}
-
-	// }
 
 	err = cmd.Wait()
 	if t.debug {
 		fmt.Printf("server: %s exited with %v", command, err)
 	}
-	return
 
-out:
 	fmt.Printf("%s\n", err)
-	t.Close()
 }
 
 // This is a continous listener
@@ -133,7 +111,7 @@ func (st *serverT) ListenAndServe(proto, addr string) (err error) {
 	}
 	for {
 		t := NewTelnet()
-		if st.debug{
+		if st.debug {
 			t.EnableDebug()
 		}
 		t.conn, err = ln.Accept()
