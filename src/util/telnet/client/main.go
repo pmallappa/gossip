@@ -7,7 +7,8 @@ package main
 
 import (
 	"fmt"
-	//"time"
+	//"io"
+	"time"
 )
 import (
 	"util/telnet"
@@ -29,14 +30,18 @@ func main() {
 		fmt.Println(err)
 		panic("Holla")
 	}
-
-	// for {
-	{ // We run only once
-		tc.Write([]byte("ls /"))
-		line, err := tc.ReadBytes(0)
-		if err != nil {
-			break
+	buf := make([]byte, 100)
+	for {
+		println("clent: Before write")
+		tc.Write([]byte("/usr/bin/fdisk -l"))
+		for {
+			println("client: Before read")
+			n, err := tc.ReadLine(buf)
+			if err != nil || n == 0 {
+				break
+			}
+			fmt.Printf("%s\n", buf[:n])
 		}
-		fmt.Print(string(line))
+		time.After(2*time.Second)
 	}
 }

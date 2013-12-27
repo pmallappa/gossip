@@ -26,20 +26,12 @@ var (
 
 func main() {
 
-	ts := telnet.NewServer()
+	ts := telnet.NewServer(proto, server)
 	defer ts.Close()
 	ts.EnableDebug()
 
-	if err := ts.ListenTimeoutProgress(proto, server, 20); err != nil {
+	if err := ts.ListenAndServe(proto, server); err != nil {
 		fmt.Println(err)
 		panic("Holla")
-	}
-
-	for {
-		line, err := ts.ReadBytes(0)
-		if err != nil {
-			break
-		}
-		fmt.Print(string(line))
 	}
 }

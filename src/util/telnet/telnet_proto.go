@@ -245,16 +245,16 @@ func (t *telnetT) Write(buf []byte) (n int, err error) {
 
 // io.Reader interface
 func (t *telnetT) Read(buf []byte) (n int, err error) {
-	buflen := len(buf)
-	for n < buflen {
-		if b, err := t.conn.Read(buf); err != nil {
-			return b, err
-		} else {
-			n += b
-			buf = buf[b:]
+	for n < len(buf) {
+		c, err := t.ReadByte()
+		if err != nil {
+			break
 		}
+		buf[n] = c
+		n++
 	}
-	return n, nil
+	//fmt.Printf("ReadBytes: %s", line)
+	return
 }
 
 func printcmd(a byte) {
@@ -366,28 +366,29 @@ func (t *telnetT) ReadByte() (c byte, err error) {
 	return
 }
 
-func (t *telnetT) ReadBytes(delim byte) (line []byte, err error) {
+func (t *telnetT) ReadBytes(delim byte, line []byte) (n int, err error) {
 	// TODO: need to take care of interpreting the commands
 	if delim == 0 {
 		delim = LF
 	}
 
-	for {
+	for n < len(line) {
 		c, err := t.ReadByte()
 		if err != nil {
 			break
 		}
-		line = append(line, c)
-
 		if c == delim {
 			break
 		}
+		line[n] = c
+		n++
 	}
+	//fmt.Printf("ReadBytes: %s", line)
 	return
 }
 
-func (t *telnetT) ReadLine() (line []byte, isPrefix bool, err error) {
-	return t.bufrd.ReadLine()
+func (t *telnetT) ReadLine(line []byte) (n int, err error) {
+	return t.ReadBytes(0, line)
 }
 
 // func (t *telnetT) ReadRune() (r rune, size int, err error)           {}

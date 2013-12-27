@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os/exec"
+	"strings"
 	"time"
 )
 
 type serverT struct {
-	telnetT
+	//telnetT
 	proto, laddr string
 	exec         string // Program to be invoked, after successful connection
+	debug        bool
 	listn        net.Listener
+}
+
+func (ts *serverT) EnableDebug() {
+	ts.debug = true
 }
 
 type Server interface {
@@ -26,7 +33,7 @@ type Server interface {
 var defaultServer = serverT{
 	proto: "tcp",
 	laddr: ":telnet",
-	exec:  "/bin/sh",
+	exec:  "/usr/bin/sh",
 }
 
 func NewServerDefault() *serverT {
@@ -37,55 +44,107 @@ func NewServer(proto, laddr string) *serverT {
 	return &serverT{
 		proto: proto,
 		laddr: laddr,
+		exec:  "/usr/bin/sh",
 	}
 }
 
-func connect(c chan error, t *serverT) {
-	var e error
-	if t.conn, e = t.listn.Accept(); e != nil {
-		c <- e
-		return
-	}
+// func connect(c chan error, t *serverT) {
+// 	var e error
+// 	if t.conn, e = t.listn.Accept(); e != nil {
+// 		c <- e
+// 		return
+// 	}
 
-	t.bufwr = bufio.NewWriterSize(t.conn, 512)
-	t.bufrd = bufio.NewReaderSize(t.conn, 512)
+// 	t.bufwr = bufio.NewWriterSize(t.conn, 512)
+// 	t.bufrd = bufio.NewReaderSize(t.conn, 512)
 
-	c <- nil
-}
+// 	c <- nil
+// }
 
-func handleConnection(exec string, conn net.Conn) {
-	// TODO:
+func handleConnection(t *telnetT, command string) {
+	// Setup Telnet
 	// Start a program denoted by 'exec',
 	// untill the program exits or connection closes
 	//    -> read connection, write to program input
 	//    -> read program output, write to connection
-	for {
-		io.Copy(conn, conn)
+	var err error
+	var stdin io.WriteCloser
+	var stdout io.ReadCloser
+
+	t.bufwr = bufio.NewWriterSize(t.conn, 512)
+	t.bufrd = bufio.NewReaderSize(t.conn, 512)
+
+	split := strings.Split(command, " ")
+	cmd := exec.Command(split[0])
+	cmd.Args = split[1:]
+
+	if stdin, err = cmd.StdinPipe(); err != nil {
+		goto out
 	}
+	if stdout, err = cmd.StdoutPipe(); err != nil {
+		goto out
+	}
+
+	if t.debug {
+		fmt.Printf("Starting command :%s", command)
+	}
+
+	if err = cmd.Start(); err != nil {
+		goto out
+	}
+
+	go io.Copy(stdin, t.bufrd)
+	go io.Copy(t.bufwr, stdout)
+	// for t.conn != nil {
+	// 	if _, e := conn.ReadFrom(t.bufrd); e != nil {
+	// 		break
+	// 	}
+
+	// 	if _, e := io.Copy(t.bufwr, stdout); e != nil {
+	// 		break
+	// 	}
+
+	// }
+
+	err = cmd.Wait()
+	if t.debug {
+		fmt.Printf("server: %s exited with %v", command, err)
+	}
+	return
+
+out:
+	fmt.Printf("%s\n", err)
+	t.Close()
 }
 
 // This is a continous listener
-func (t *serverT) ListenAndServe(proto, addr string) {
+func (st *serverT) ListenAndServe(proto, addr string) (err error) {
 
 	if proto == "" {
-		proto = t.proto
+		proto = st.proto
 	}
 	if addr == "" {
-		addr = t.laddr
+		addr = st.laddr
 	}
 
 	ln, err := net.Listen(proto, addr)
 	if err != nil {
-		// handle error
+		return err
 	}
 	for {
-		conn, err := ln.Accept()
+		t := NewTelnet()
+		if st.debug{
+			t.EnableDebug()
+		}
+		t.conn, err = ln.Accept()
 		if err != nil {
 			// handle error
 			continue
 		}
-		go handleConnection(t.exec, conn)
+
+		go handleConnection(t, st.exec)
 	}
+	return nil
 }
 
 // Options are passed like telnet=tcp!localhost:2030
@@ -99,7 +158,7 @@ func (t *serverT) ListenTimeout(proto, addr string, dur time.Duration) (e error)
 	}
 
 	con_ch := make(chan error)
-	go connect(con_ch, t)
+	//go connect(con_ch, t)
 
 	select {
 	case <-time.After(dur * time.Second):
@@ -112,9 +171,9 @@ func (t *serverT) ListenTimeout(proto, addr string, dur time.Duration) (e error)
 
 	if t.debug {
 		fmt.Printf("\n%v", addr)
-		if t.conn != nil {
-			fmt.Println("[Connected]")
-		}
+		// 	if t.conn != nil {
+		// 		fmt.Println("[Connected]")
+		// 	}
 	}
 	return
 }
@@ -131,9 +190,9 @@ func (ts *serverT) _listenTimeoutProgress(proto, addr string, dur time.Duration)
 	for ; timeout > 0; timeout-- {
 		fmt.Printf("Waiting %d seconds for connection \r", timeout)
 		<-time.After(1 * time.Second)
-		if ts.conn != nil { // We got a connection
-			return nil
-		}
+		//if ts.conn != nil { // We got a connection
+		//	return nil
+		//}
 	}
 
 	if timeout == 0 {
@@ -146,6 +205,5 @@ func (ts *serverT) Close() {
 	if ts.debug {
 		fmt.Printf("Closing: %v\n", ts.listn.Addr)
 	}
-	ts.telnetT.Close()
 	ts.listn.Close()
 }
