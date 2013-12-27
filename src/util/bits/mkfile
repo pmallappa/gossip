@@ -1,0 +1,16 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	bits \
+
+bits_FILES=\
+	bits.go \
+#	cpu_mips.go \
+
+bits.$O: $bits_FILES
+
+<$VPROC/mk/mklib
+
+DIRS=\
+	#bits \
+	#arm  \

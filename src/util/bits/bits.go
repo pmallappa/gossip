@@ -31,13 +31,14 @@ func (b8 B8) Bit(b int) (int, error) {
 	if b > 7 {
 		return 0, E_InvalidPosition
 	}
-	return b8 & 1 << b
+	return int(b8 & 1 << uint(b)), nil
 }
+
 func (b8 B8) Set(b int) error {
 	if b > 7 {
 		return E_InvalidPosition
 	}
-	b8 |= 1 << b
+	b8 |= 1 << uint(b)
 	return nil
 }
 
@@ -45,7 +46,7 @@ func (b8 B8) Clear(b int) error {
 	if b > 7 {
 		return E_InvalidPosition
 	}
-	b8 &= ^(1 << b)
+	b8 &= ^(1 << uint(b))
 	return nil
 }
 
@@ -53,23 +54,47 @@ func (b8 B8) IsSet(b int) (bool, error) {
 	if b > 7 {
 		return false, E_InvalidPosition
 	}
-	return b8&1<<b == 1, nil
+	return b8&1<<uint(b) == 1, nil
 }
 
 func (b8 B8) IsClear(b int) bool {
 	if b > 7 {
-		return false, E_InvalidPosition
+		return false
 	}
-	return b8&1<<b == 0
+	return b8&1<<uint(b) == 0
 }
 
 // Count Leading zeros, from MSB
 func (b8 B8) Clz() int {
+	var c int // c will be the number of zero bits on the right
+
+	// Taken from bit twidling hacks stanford article
+	b8 &= -signed(b8)
+	if b8 {
+		c--
+	}
+	if b8 & 0x0000FFFF {
+		c -= 16
+	}
+	if b8 & 0x00FF00FF {
+		c -= 8
+	}
+	if b8 & 0x0F0F0F0F {
+		c -= 4
+	}
+	if b8 & 0x33333333 {
+		c -= 2
+	}
+	if b8 & 0x55555555 {
+		c -= 1
+	}
+
+	return 0
 }
 
 // Count Trailing zeros, from LSB
 func (b8 B8) Ctz() int {
-
+	return 0
 }
 
 /*
@@ -80,105 +105,91 @@ func (b8 B8) Ctz() int {
  * #####    ##  ######
  */
 
-func (b16 B16) Set(b int) error {
+func (b16 B16) Set(b int) {
 	if b > 16 {
-		return E_InvalidPosition
+		return
 	}
-	b16 |= 1 << b
+	b16 |= 1 << uint(b)
 }
 
-func (b16 B16) Clear(b int) error {
+func (b16 B16) Clear(b int) {
 	if b > 16 {
-		return E_InvalidPosition
+		return
 	}
-	b16 &= ^(1 << b)
+	b16 &= ^(1 << uint(b))
 
 }
 
 func (b16 B16) IsSet(b int) bool {
 	if b > 16 {
-		return E_InvalidPosition
+		return false
 	}
-	return b16&1<<b == 1
+	return b16&1<<uint(b) == 1
 }
 
 func (b16 B16) IsClear(b int) bool {
 	if b > 16 {
-		return E_InvalidPosition
+		return false
 	}
-	return b16&1<<b == 0
+	return b16&1<<uint(b) == 0
 }
 
 /*
- * #####   ######    ###
+ * #####    #####    ###
  * ##  ##      ##  ##  ##
- * #####    ###',     ##
- * ##  ##      ##   ##
- * #####   ###### #######
+ * #####   ###',     ##
+ * ##  ##     ##   ##
+ * #####  #####  ######
  */
-func (b32 Bit32) Bit(p int) int {
+func (b32 B32) Bit(p int) int {
 	if p > 31 {
-		panic()
+		panic("Invalid bit position")
 	}
-	return (b32 >> p) & 1
+	return int((b32 >> uint(p)) & 1)
 }
 
-func (b32 Bit32) IsSet(p int) bool {
+func (b32 B32) IsSet(p int) bool {
 	if p > 31 {
-		panic()
+		panic("")
 	}
-	return (b32>>p)&1 == 1
+	return (b32>>uint(p))&1 == 1
 }
 
-func (b32 Bit32) IsClear(p int) bool {
+func (b32 B32) IsClear(p int) bool {
 	if p > 31 {
-		panic()
+		panic("")
 	}
 
-	return (b32>>p)&1 == 0
+	return (b32>>uint(p))&1 == 0
 }
 
-func (b32 Bit32) Bits(high, low uint8) uint32 {
-	if p > 31 {
-		panic
-	}
-
-	return (b32 >> low) & (^(1 << (high - low + 1)) - 1)
+func (b32 B32) Bits(high, low uint8) uint32 {
+	return uint32((b32 >> low) & (^(1 << (high - low + 1)) - 1))
 }
 
 /*
- * #####      ####  ##
- * ##  ##    ##     ##  ##
- * #####    ####',  ##  ##
- * ##  ##  ##  ##   ######
- * #####   ######       ##
+ *     #####  ####   ##
+ *    ##  ## ##     ##   ##
+ *   #####  ####', ##   ##
+ *  ##  ## ##  ## #########
+ * #####  ######      ##
  */
 
-func (b64 Bit64) Bit(p int) int {
+func (b64 B64) Bit(p int) int {
 	if p > 63 {
 		return -1
 	}
-	return (b >> p) & 1
+	return int((b64 >> uint(p)) & 1)
 }
 
-func (b64 Bit64) Bits(high, low int) (uint64, error) {
-	if high < low || high > 64 {
-		return 0, E_InvalidPosition
-	}
-	return (b >> low) & (^(1 << (high - low + 1)) - 1), nil
+func (b64 B64) Bits(high, low int) uint64 {
+	return uint64((b64 >> uint(low)) & (^(1 << uint(high-low+1)) - 1))
 }
 
-func (b64 Bit64) IsSetBit(p int) bool {
-	if p > 64 {
-		return 0, E_InvalidPosition
-	}
-	return (b64>>p)&1 == 1
+func (b64 B64) IsSetBit(p int) bool {
+	return (b64>>uint(p))&1 == 1
 }
 
-func (b64 Bit64) IsClearBit(p int) bool {
-	if p > 64 {
-		return 0, E_InvalidPosition
-	}
-
-	return (b64>>p)&1 == 0
+func (b64 B64) IsClearBit(p int) bool {
+	return (b64>>uint(p))&1 == 0
 }
