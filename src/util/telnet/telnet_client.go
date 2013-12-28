@@ -2,9 +2,7 @@ package telnet
 
 import (
 	"bufio"
-	"io"
 	"net"
-	"os"
 	"time"
 )
 
@@ -36,8 +34,8 @@ func NewClient(proto, laddr string) *clientT {
 }
 
 type Client interface {
-	Connect(proto, addr string) *net.Conn
-	ConnectTimeout(proto, addr string, dur time.Duration) *net.Conn
+	Connect(proto, addr string) error
+	ConnectTimeout(proto, addr string, dur time.Duration) error
 }
 
 func (tc *clientT) Connect(proto, addr string) (e error) {
@@ -51,16 +49,10 @@ func (tc *clientT) Connect(proto, addr string) (e error) {
 }
 
 func (tc *clientT) ConnectTimeout(proto, addr string, t time.Duration) (e error) {
-	if tc.conn, e = net.Dial(proto, addr); e != nil {
-		return
-	}
-
-	tc.bufwr = bufio.NewWriterSize(tc.conn, 512)
-	tc.bufrd = bufio.NewReaderSize(tc.conn, 512)
-
-	return
+	return tc.Connect(proto, addr)
 }
 
+// TODO, this has to go through telnetT.Read()
 func (tc *clientT) Read(buf []byte) (n int, e error) {
-	return
+	return tc.conn.Read(buf)
 }

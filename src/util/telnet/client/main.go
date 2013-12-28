@@ -38,16 +38,18 @@ func main() {
 	go io.Copy(os.Stdout, tc)
 
 	for {
-		n, err := os.Stdout.Read(buf)
+		n, err := os.Stdin.Read(buf)
 		if err != nil {
 			fmt.Printf("%s %s\n", buf[:n], err)
+			break
 		}
 
-		n, err := tc.Write(buf)
+		n, err = tc.Write(buf[:n])
 		if err != nil {
 			fmt.Printf("Write Error: %s", err)
+			break
 		}
 
-		time.After(2 * time.Second)
+		time.After(2500 * time.Second)
 	}
 }

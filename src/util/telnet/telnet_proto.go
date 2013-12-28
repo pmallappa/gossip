@@ -41,6 +41,10 @@ import (
 	//"time"
 )
 
+import (
+	"util"
+)
+
 // Each sequence of read is one or two bytes, depending on if the byte read
 // has value {0-254} or 255, if later(255) case, then its a control command,
 // and next byte indicates the actual command
@@ -234,6 +238,7 @@ func NewTelnet() *telnetT {
 
 // io.Writer interface
 func (t *telnetT) Write(buf []byte) (n int, err error) {
+	util.PrintMe()
 	for len(buf) > 0 {
 		if n, err = t.conn.Write(buf); err != nil {
 			return
@@ -245,27 +250,18 @@ func (t *telnetT) Write(buf []byte) (n int, err error) {
 
 // io.Reader interface
 func (t *telnetT) Read(buf []byte) (n int, err error) {
-	for n < len(buf) {
-		c, err := t.ReadByte()
-		if err != nil {
-			break
-		}
-		buf[n] = c
-		n++
-	}
-	//fmt.Printf("ReadBytes: %s", line)
+	n, err = t.ReadLine(buf)
 	return
 }
 
 func printcmd(a byte) {
-	fmt.Printf("Command received %v\n", telnetCMD(a))
+	fmt.Printf("Command received %s\n", telnetCMD(a))
 }
 func printopt(o byte) {
-	fmt.Println("Option received %v\n", telnetOPT(o))
+	fmt.Println("Option received %s\n", telnetOPT(o))
 }
 
 func (t *telnetT) __execCMD(c byte) (err error) {
-
 	switch c {
 	case cmd_ABORT:
 	case cmd_SUSP:
@@ -352,7 +348,7 @@ func (t *telnetT) __readByte() (c byte, again bool, err error) {
 		c = 0
 	}
 
-	return
+	return c, false, nil
 }
 
 // bufio.Reader
@@ -360,7 +356,7 @@ func (t *telnetT) ReadByte() (c byte, err error) {
 	again := true
 	for again == true {
 		if c, again, err = t.__readByte(); err != nil {
-			c = 0
+			break
 		}
 	}
 	return
@@ -368,22 +364,35 @@ func (t *telnetT) ReadByte() (c byte, err error) {
 
 func (t *telnetT) ReadBytes(delim byte, line []byte) (n int, err error) {
 	// TODO: need to take care of interpreting the commands
+	var c byte
+	util.PrintStack(4)
 	if delim == 0 {
 		delim = LF
 	}
 
 	for n < len(line) {
-		c, err := t.ReadByte()
-		if err != nil {
+		if c, err = t.ReadByte(); err != nil {
 			break
 		}
+
+		if c == LF {
+			if line[n-1] == CR {
+				n--
+			}
+		}
+
+		line[n] = c
+		n++
+
 		if c == delim {
 			break
 		}
-		line[n] = c
-		n++
+
 	}
-	//fmt.Printf("ReadBytes: %s", line)
+
+	line = line[:n]
+
+	fmt.Printf("%d ReadBytes: %s\n", n, line)
 	return
 }
 

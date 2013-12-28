@@ -10,6 +10,14 @@ func PrintMe() {
 	fmt.Printf("%s=>%20s:%d\n", runtime.FuncForPC(pc).Name(), file, line)
 }
 
+func PrintStack(n int) {
+	for n != 1 {
+		pc, file, line, _ := runtime.Caller(n)
+		fmt.Printf("%s=>%s:%d\n", file, runtime.FuncForPC(pc).Name(), line)
+		n--
+	}
+}
+
 func printMyFunc(s string, n int) {
 	pc, _, line, _ := runtime.Caller(n)
 	fmt.Printf("%s=>%s:%d\n", s, runtime.FuncForPC(pc).Name(), line)

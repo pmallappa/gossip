@@ -11,7 +11,6 @@ import (
 )
 
 type serverT struct {
-	//telnetT
 	proto, laddr string
 	exec         string // after successful connection
 	debug        bool
@@ -58,7 +57,8 @@ func handleConnection(t *telnetT, command string) {
 
 	defer t.Close()
 
-	t.bufwr = bufio.NewWriterSize(t.conn, 512)
+	command = "/usr/local/plan9/bin/rc"
+	//t.bufwr = bufio.NewWriterSize(t.conn, 512)
 	t.bufrd = bufio.NewReaderSize(t.conn, 512)
 
 	split := strings.Split(command, " ")
@@ -77,17 +77,33 @@ func handleConnection(t *telnetT, command string) {
 	}
 
 	if t.debug {
-		fmt.Printf("Starting command :%s", command)
+		fmt.Printf("Starting command :%s\n", split[0])
 	}
 
 	if err = cmd.Start(); err != nil {
 		return
 	}
 
-	go io.Copy(stdin, t.bufrd)
-	go io.Copy(t.bufwr, stdout)
+	go io.Copy(t, stdout)
+
+	buf := make([]byte, 100)
+
+	for {
+		n, err := t.Read(buf)
+		if err != nil {
+			fmt.Printf("%s %s\n", buf[:n], err)
+			break
+		}
+
+		n, err = stdin.Write(buf[:n])
+		if err != nil {
+			fmt.Printf("Write Error: %s", err)
+			break
+		}
+	}
 
 	err = cmd.Wait()
+
 	if t.debug {
 		fmt.Printf("server: %s exited with %v", command, err)
 	}
