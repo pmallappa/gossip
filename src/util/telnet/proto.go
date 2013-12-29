@@ -51,13 +51,11 @@ import (
 
 type telnetT struct {
 	conn     net.Conn
-	bufrd    *bufio.Reader
-	bufwr    *bufio.Writer // Dont know if buffered writer required
 	unixCRLF bool
-
-	debug bool
-	cmd   byte // Previous CMD
-	opt   byte // Option for previous CMD
+	debug    bool
+	cmd      byte // Previous CMD
+	opt      byte // Option for previous CMD
+	bufrd    *bufio.Reader
 }
 
 func (t *telnetT) EnableDebug() {

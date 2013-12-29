@@ -10,23 +10,36 @@ import (
 	"time"
 )
 
+// Server
+//  laddr - see next (proto)
+//  proto - address strings required to connect
+//	exec  - Program to start after successful connection
+//  debug - As the name says when enabled throws various messages
+//  raw   - In raw mode, telnet commands are not interpreted,
+//          instead re-encoded as needed.
 type serverT struct {
-	proto, laddr string
-	exec         string // after successful connection
-	debug        bool
-	listn        net.Listener
+	listn net.Listener
+	proto,
+	laddr string
+	exec  string // Program to start after successful connection
+	debug bool
+	raw   bool
+}
+
+func NewServer(proto, laddr string) *serverT {
+	return &serverT{
+		proto: proto,
+		laddr: laddr,
+		exec:  "/usr/bin/sh",
+	}
 }
 
 func (ts *serverT) EnableDebug() {
 	ts.debug = true
 }
 
-type Server interface {
-	Listen(proto, addr string) // A one time listener
-	ListenAndServe(proto, addr string)
-
-	// Wait for connection till timeout
-	ListenTimeout(proto, addr string, dur time.Duration)
+func (ts *serverT) EnableRaw() {
+	ts.raw = true
 }
 
 var defaultServer = serverT{
@@ -39,12 +52,12 @@ func NewServerDefault() *serverT {
 	return &defaultServer
 }
 
-func NewServer(proto, laddr string) *serverT {
-	return &serverT{
-		proto: proto,
-		laddr: laddr,
-		exec:  "/usr/bin/sh",
-	}
+type Server interface {
+	Listen(proto, addr string) // A one time listener
+	ListenAndServe(proto, addr string)
+
+	// Wait for connection till timeout
+	ListenTimeout(proto, addr string, dur time.Duration)
 }
 
 // Start a program denoted by 'exec',
@@ -84,31 +97,24 @@ func handleConnection(t *telnetT, command string) {
 		return
 	}
 
-	go io.Copy(t, stdout)
+	// io.Copy works only till EOF is recieved or
+	// The connection is Closed....
+	// TODO: Check for EOF, see we may have to restart
+	// Command
+	go func() {
+		io.Copy(t, stdout)
+	}()
 
-	buf := make([]byte, 100)
+	io.Copy(stdin, t)
 
-	for {
-		n, err := t.Read(buf)
-		if err != nil {
-			fmt.Printf("%s %s\n", buf[:n], err)
-			break
-		}
-
-		n, err = stdin.Write(buf[:n])
-		if err != nil {
-			fmt.Printf("Write Error: %s", err)
-			break
-		}
-	}
+	// We have no use with this, so kill it
+	cmd.Process.Kill()
 
 	err = cmd.Wait()
 
 	if t.debug {
 		fmt.Printf("server: %s exited with %v", command, err)
 	}
-
-	fmt.Printf("%s\n", err)
 }
 
 // This is a continous listener
