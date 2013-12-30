@@ -14,14 +14,14 @@ import (
 //  laddr - see next (proto)
 //  proto - address strings required to connect
 //	exec  - Program to start after successful connection
-//  debug - As the name says when enabled throws various messages
+//  debug - As the name says
 //  raw   - In raw mode, telnet commands are not interpreted,
 //          instead re-encoded as needed.
 type serverT struct {
 	listn net.Listener
 	proto,
 	laddr string
-	exec  string // Program to start after successful connection
+	exec  string // Program to start after connection
 	debug bool
 	raw   bool
 }
@@ -113,7 +113,7 @@ func handleConnection(t *telnetT, command string) {
 	err = cmd.Wait()
 
 	if t.debug {
-		fmt.Printf("server: %s exited with %v", command, err)
+		fmt.Printf("server: %s exited with %v\n", command, err)
 	}
 }
 
@@ -203,7 +203,7 @@ func (ts *serverT) _listenTimeoutProgress(proto, addr string, dur time.Duration)
 
 func (ts *serverT) Close() {
 	if ts.debug {
-		fmt.Printf("Closing: %v\n", ts.listn.Addr)
+		fmt.Printf("Closing: %s\n", ts.listn.Addr)
 	}
 	ts.listn.Close()
 }

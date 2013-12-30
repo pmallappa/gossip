@@ -55,5 +55,6 @@ func (tc *clientT) ConnectTimeout(proto, addr string, t time.Duration) (e error)
 
 // TODO, this has to go through telnetT.Read()
 func (tc *clientT) Read(buf []byte) (n int, e error) {
-	return tc.bufrd.Read(buf)
+	n, e = tc.bufrd.Read(buf)
+	return
 }
