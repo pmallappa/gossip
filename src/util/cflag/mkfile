@@ -1,0 +1,16 @@
+<$VPROC/mk/mkhdr
+
+LIB=\
+	cflag \
+
+cflag_FILES=\
+	cflag.go \
+#	cpu_mips.go \
+
+cflag.$O: $loggng_FILES
+
+<$VPROC/mk/mklib
+
+DIRS=\
+	#cflag \
+	#arm  \
