@@ -5,27 +5,28 @@ import (
 	"fmt"
 )
 
-import(
+import (
 	"util"
+	"util/cflag"
 )
 
 type devOptstr []string
 
 var (
-	devOpts, chardevOpts, netdevOpts, pcidevOpts, usbdevOpts devOptstr
-	devOpts_help string = "-dev ?"
+	devOpts, chardevOpts,
+	netdevOpts, pcidevOpts, usbdevOpts devOptstr
+	devOpts_help     string = "-dev ?"
 	chardevOpts_help string = "-chardev ?"
-	netdevOpts_help string = "-netdev ?"
-	pcidevOpts_help string = "-pcidev ?"
-	usbdevOpts_help string = "-usbdev ?"
+	netdevOpts_help  string = "-netdev ?"
+	pcidevOpts_help  string = "-pcidev ?"
+	usbdevOpts_help  string = "-usbdev ?"
 )
 
-
-func ParseFlags() (map[string]string, error) {
+func Parse(str string) (map[string]string, error) {
 	var e error
 	var m map[string]string
 
-	for _,str := range(devOpts) {
+	for _, str := range devOpts {
 		if m, e := util.ParseFlags(str); e != nil {
 			return m, e
 		}

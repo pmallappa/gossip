@@ -1,12 +1,14 @@
 *.pyc
 *.6
 6.*
+*~
 pkg
 bin
 build
 *.diff
 *.sublime*
 .goenv
+Makefile
 
 .idea
 .sconsign.dblite

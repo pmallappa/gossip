@@ -19,10 +19,10 @@ func init() {
 		"CPU's, type ? to list, but -plat should be provided")
 }
 
-func InitGeneric() {
+func Init() error {
 	util.PrintMe()
 }
 
-func RegisterCpu(cpu *Core) {
+func RegisterCpu(cpu *Core) error {
 	//availableCpu = append(availableCpu, cpu)
 }

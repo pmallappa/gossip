@@ -11,6 +11,7 @@ import (
 // local imports
 import (
 	"bus"
+	"util/cflag"
 )
 
 // Each device has a host part and device part
@@ -38,8 +39,8 @@ type EdgeInterrupt interface {
 }
 
 type LevelInterrupt interface {
-	DeassertLevel(int) error
 	AssertLevel(int) error
+	DeassertLevel(int) error
 }
 
 type Info struct {
@@ -59,7 +60,7 @@ type Dev struct {
 	rw        bus.ReadWriterAll
 	// The options that we couldn't parse
 	// may be of some use to the actual device.
-	Opts map[string]string
+	opts cflag.Cflag
 }
 
 type Device struct {
@@ -68,9 +69,13 @@ type Device struct {
 }
 
 // All devices must implement bus.ReadWriterAll
-type Devicer interface {
-	Initialize() error
-	ParseFlags(map[string]string) (map[string]string, error)
+type Initizlize interface {
+	Init() error
+	Configure() error
+}
+
+type Parser interface {
+	Parse(string) error
 }
 
 func NewDevice(size uint64) *Device {
@@ -78,6 +83,8 @@ func NewDevice(size uint64) *Device {
 	//m.regs = make([]byte, size)
 	return m
 }
+
+func Register()
 
 func init() {
 	initDevFlags()

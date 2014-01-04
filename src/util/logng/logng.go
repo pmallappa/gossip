@@ -53,6 +53,10 @@ import (
 
 type LogLevel uint8
 
+// Levels, At each level any logging information whos
+// level is equal to or less the current level is logged
+// for eg: if current level is set to ERROR, only ERROR
+// and FATAL kinds are logged others are ignored
 const (
 	INFO LogLevel = iota
 	DEBUG
@@ -89,8 +93,12 @@ func (l *LogNG) SetLevel(lvl LogLevel) {
 	l.level = lvl
 }
 
+// -- BEGIN: Value/Getter interface from 'flag'
 func (l *LogNG) Set(str string) error {
-	for _, val := range strings.Split(str, ",") {
+	if l.sep == "" {
+		l.sep = ","
+	}
+	for _, val := range strings.Split(str, l.sep) {
 		args := strings.Split(val, "=")
 		switch args[0] {
 		case "level":
@@ -114,7 +122,7 @@ func (l *LogNG) Set(str string) error {
 				if l.args == "" {
 					l.args += val
 				} else {
-					l.args += "," + val
+					l.args += l.sep + val
 				}
 			}
 
@@ -126,6 +134,16 @@ func (l *LogNG) Set(str string) error {
 
 	return nil
 }
+
+func (l *LogNG) String() string {
+	return ""
+}
+
+func (l *LogNG) Get() interface{} {
+	return nil
+}
+
+// -- END: Value/Getter interface from 'flag'
 
 func init() {
 	flag.StringVar(&stderrargs, "log", "", "Set the log output and level"+
@@ -150,12 +168,17 @@ type LogNG struct {
 
 	// Extra args, that we were unable to Parse()
 	args string
+
+	// Option separator, since we allow the log to be parsed
+	// for other options which are part of other subsystem
+	sep string
 }
 
 // Create new logger with given string, which is parsed using Set
 func New(str string) *LogNG {
 	l := &LogNG{
 		level: WARNING,
+		sep:   ",",
 	}
 	l.Set(str)
 
@@ -167,61 +190,61 @@ func (l *LogNG) Args() string { return l.args }
 func (l *LogNG) EnableDate() { l.log.SetFlags(log.Ldate) }
 
 func (l *LogNG) Info(args ...interface{}) {
-	if l.level > INFO {
+	if l.level >= INFO {
 		l.log.Print(args...)
 	}
 }
 
 func (l *LogNG) Infoln(args ...interface{}) {
-	if l.level <= INFO {
+	if l.level >= INFO {
 		l.log.Println(args...)
 	}
 }
 
 func (l *LogNG) Infof(fmt string, args ...interface{}) {
-	if l.level <= INFO {
+	if l.level >= INFO {
 		l.log.Printf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Warning(args ...interface{}) {
-	if l.level <= WARNING {
+	if l.level >= WARNING {
 		l.log.Print(args...)
 	}
 }
 
 func (l *LogNG) Warningln(args ...interface{}) {
-	if l.level <= WARNING {
+	if l.level >= WARNING {
 		l.log.Println(args...)
 	}
 }
 
 func (l *LogNG) Warningf(fmt string, args ...interface{}) {
-	if l.level <= WARNING {
+	if l.level >= WARNING {
 		l.log.Printf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Error(args ...interface{}) {
-	if l.level <= ERROR {
+	if l.level >= ERROR {
 		l.log.Fatal(args...)
 	}
 }
 
 func (l *LogNG) Errorln(args ...interface{}) {
-	if l.level <= ERROR {
+	if l.level >= ERROR {
 		l.log.Fatalln(args...)
 	}
 }
 
 func (l *LogNG) Errorf(fmt string, args ...interface{}) {
-	if l.level <= ERROR {
+	if l.level >= ERROR {
 		l.log.Fatalf(fmt, args...)
 	}
 }
 
 func (l *LogNG) Fatal(args ...interface{}) {
-	if l.level <= FATAL {
+	if l.level >= FATAL {
 		f := l.log.Flags()
 		l.log.SetFlags(log.Llongfile)
 		l.log.Panic(args...)
@@ -230,7 +253,7 @@ func (l *LogNG) Fatal(args ...interface{}) {
 }
 
 func (l *LogNG) Fatalln(args ...interface{}) {
-	if l.level <= FATAL {
+	if l.level >= FATAL {
 		// We want to report where the Fatal error happened
 		f := l.log.Flags()
 		l.log.SetFlags(log.Llongfile)
@@ -240,7 +263,7 @@ func (l *LogNG) Fatalln(args ...interface{}) {
 }
 
 func (l *LogNG) Fatalf(fmt string, args ...interface{}) {
-	if l.level <= FATAL {
+	if l.level >= FATAL {
 		f := l.log.Flags()
 		l.log.SetFlags(log.Llongfile)
 		l.log.Panicf(fmt, args...)
