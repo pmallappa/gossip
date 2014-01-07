@@ -112,7 +112,9 @@ func (l *LogNG) Set(str string) error {
 			if strings.HasPrefix(args[1], "file:") {
 				args[1] = args[1][5:]
 				// Else its a file, open the file
-				if writer, e := os.OpenFile(args[1], os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640); e != nil {
+				if writer,
+					e := os.OpenFile(args[1],
+					os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640); e != nil {
 					return e
 				} else {
 					l.log = log.New(writer, "", 0)

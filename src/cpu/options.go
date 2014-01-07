@@ -2,18 +2,18 @@ package cpu
 
 import (
 	"flag"
-	"strings"
+	//"strings"
 )
 
 import (
-	"util"
+	//"util"
 	"util/cflag"
 	"util/logng"
 )
 
-var cpuOpts = cflag.NewFlagSet("cpu")
+var cpuOpts = cflag.NewCFlagSet("cpu")
 
-var logger = logng.LogNG
+var logger logng.LogNG
 
 // For logger we support option like
 // -cpu freq=100MHz,log='level=WARNING,out=tcp:localhost:2000'
@@ -27,7 +27,9 @@ func initOpts() error {
 		cpuOpts.Add(v)
 	}
 
-	flag.Var(&cpuOpts, "cpu", "Various options for CPU")
+	flag.Var(cpuOpts, "cpu", "Various options for CPU")
+
+	return nil
 }
 
 func GetOpt(s string) interface{} {

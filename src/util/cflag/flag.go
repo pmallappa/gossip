@@ -23,7 +23,7 @@ type CFlagHelper interface {
 type cflagsetT struct {
 	str   string
 	cflag map[string]*CFlag
-	sep   byte // Separator used to delimit flags
+	sep   string // Separator used to delimit flags
 
 	debug bool // For testing only
 }
@@ -43,12 +43,12 @@ func (cfs *cflagsetT) PrintDefaults() {
 }
 
 // -- BEGIN Value interface
-func (cfs *cflagsetT) Set(str string) error {
+func (cfs *cflagsetT) Set(str string) (e error) {
 	cfs.str = str
-	if e = cfs.parse(); e != nil {
-		cfs.PrintDefaults()
+	if cf, e := cfs.parse(); e != nil {
+		cf.PrintDefaults()
 	}
-
+	return
 }
 
 func (cfs *cflagsetT) String() string {
@@ -58,7 +58,7 @@ func (cfs *cflagsetT) String() string {
 // -- END Value interface End
 
 // -- BEGIN Getter interface
-func (cfs *cflagSetT) Get() interface{} {
+func (cfs *cflagsetT) Get() interface{} {
 	return cfs
 }
 
@@ -90,6 +90,14 @@ func NewCFlag(name, desc string, def interface{}) *CFlag {
 func (cf *CFlag) String() string {
 	return fmt.Sprintf("Name %s, Default: %v, Description:%s, Value:%v",
 		cf.name, cf.defval, cf.desc, cf.value)
+}
+
+func (cf *CFlag) PrintDefaults() {
+	fmt.Printf("Default:%q\n", cf.defval)
+}
+
+func (cf *CFlag) Help() string {
+	return fmt.Sprintf("\t%s\t %s (Default: %q)\n", cf.name, cf.desc, cf.defval)
 }
 
 func (cfs *cflagsetT) parseOne(s string) (err error) {
@@ -127,7 +135,7 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 		case "no", "false", "off", "0", "f":
 			k.value = false
 		default:
-			err = fmt.Errorf("Unfavourable value %s\n", split[1])
+			err = fmt.Errorf("Un- value %s\n", split[1])
 		}
 
 	case string:
@@ -135,18 +143,19 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 
 	case UnitsBin:
 		b := k.value.(UnitsBin)
-		if err = b.Parse(split[1]); err != nil {
+		if err = b.Set(split[1]); err != nil {
 			k.value = b
 		}
 
 	case UnitsDec:
 		d := k.value.(UnitsDec)
-		if err = d.Parse(split[1]); err != nil {
+		if err = d.Set(split[1]); err != nil {
 			k.value = d
 		}
 
 	default:
-		err = k.value.Set(split[1])
+		//var v flag.Value = k.value
+		//err = v.Set(split[1])
 	}
 
 	if k.debug && err == nil {
@@ -186,7 +195,7 @@ type (
 
 // -- BEGIN Value interface
 // MemSize will support MiB
-func (b *UnitsBin) Set(str string) error {
+func (b *UnitsBin) Set(str string) (e error) {
 	var mult, mem uint64
 
 	strlen := len(str)
@@ -226,7 +235,7 @@ func (b *UnitsBin) String() string {
 // Frequency will honour K/M/G or k/m/g
 // to specify Kilo/Mega/Giga Hz.
 // Eg: -cpu freq=800Mhz or freq=1000 or freq=200MHZ
-func (d *UnitsDec) Set() error {
+func (d *UnitsDec) Set(s string) (e error) {
 	var mult, dec uint64
 
 	slen := len(s)

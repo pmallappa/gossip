@@ -21,8 +21,10 @@ func init() {
 
 func Init() error {
 	util.PrintMe()
+	return nil
 }
 
 func RegisterCpu(cpu *Core) error {
 	//availableCpu = append(availableCpu, cpu)
+	return nil
 }
