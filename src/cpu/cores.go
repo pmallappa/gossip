@@ -10,7 +10,10 @@ import (
 	"util/logng"
 )
 
-type ExcptType uint32
+type (
+	Mode      uint32
+	ExcptType uint32
+)
 
 // Types of Cpu Exceptions
 type Exception interface {

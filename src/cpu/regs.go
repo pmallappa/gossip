@@ -21,7 +21,7 @@ const (
 
 type Register interface {
 	Set(uint64) error
-	Val() uint64
+	Get() uint64
 	Name() string
 	SetName(string)
 	UpdateFields(uint64) error
@@ -35,7 +35,7 @@ type Gpr struct {
 	access RegAccess // RDRW,RDONLY,RDRW
 }
 
-func (r *Gpr) Val() uint64           { return r.val }
+func (r *Gpr) Get() uint64           { return r.val }
 func (r *Gpr) Name() string          { return r.name }
 func (r *Gpr) SetAccess(t RegAccess) { r.access = t }
 func (r *Gpr) Set(v uint64) error    { r.val = v; return nil }

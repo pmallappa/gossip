@@ -1,3 +1,6 @@
+// Various Bit operations.
+// static declarations are used to speed up the process,
+
 package bits
 
 type (
@@ -29,40 +32,32 @@ func (b biterror) Error() string {
  * #####    ####
  */
 
-func (b8 B8) Bit(b int) (int, error) {
-	if b > 7 {
-		return 0, E_InvalidPosition
+func (b8 B8) Bits(high, low int) uint8 {
+	h := uint(high)
+	l := uint(low)
+	if h < l {
+		h, l = l, h
 	}
-	return int(b8 & 1 << uint(b)), nil
+	return uint8((b8 >> l) & (^(1 << (h - l + 1)) - 1))
 }
 
-func (b8 B8) Set(b int) error {
-	if b > 7 {
-		return E_InvalidPosition
-	}
+func (b8 B8) Bit(b int) int {
+	return int(b8 & 1 << uint(b))
+}
+
+func (b8 B8) Set(b int) {
 	b8 |= 1 << uint(b)
-	return nil
 }
 
-func (b8 B8) Clear(b int) error {
-	if b > 7 {
-		return E_InvalidPosition
-	}
+func (b8 B8) Clear(b int) {
 	b8 &= ^(1 << uint(b))
-	return nil
 }
 
-func (b8 B8) IsSet(b int) (bool, error) {
-	if b > 7 {
-		return false, E_InvalidPosition
-	}
-	return b8&1<<uint(b) == 1, nil
+func (b8 B8) IsSet(b int) bool {
+	return b8&1<<uint(b) == 1
 }
 
 func (b8 B8) IsClear(b int) bool {
-	if b > 7 {
-		return false
-	}
 	return b8&1<<uint(b) == 0
 }
 
@@ -89,46 +84,81 @@ func (b8 B8) Clz() int {
 	return 0
 }
 
-// Count Trailing zeros, from LSB
-func (b8 B8) Ctz() int {
-	return 0
+func Bit8(v uint8, p int) int {
+	return B8(v).Bit(p)
+}
+
+func Bits8(v uint8, high, low int) uint8 {
+	return B8(v).Bits(high, low)
+}
+
+func IsSet8(v uint8, p int) bool {
+	return B8(v).IsSet(p)
+}
+
+func IsClear8(v uint8, p int) bool {
+	return B8(v).IsSet(p)
+}
+
+func Clz8(v uint8) int {
+	return B8(v).Clz()
 }
 
 /*
- * #####    ##   ####
- * ##  ##   ##  ##
- * #####    ##  ####',
+ *    #####    ##   ####
+ *   ##  ##   ##  ##
+ *  #####    ##  ####',
  * ##  ##   ##  ##  ##
- * #####    ##  ######
+ *#####    ##  ######
  */
+func (b16 B16) Bits(high, low int) uint16 {
+	h := uint(high)
+	l := uint(low)
+	if h < l {
+		h, l = l, h
+	}
+
+	return uint16((b16 >> l) & (^(1 << (h - l + 1)) - 1))
+}
+
+func (b16 B16) Bit(p int) int {
+	return int(b16 & 1 << uint(p))
+}
 
 func (b16 B16) Set(b int) {
-	if b > 16 {
-		return
-	}
 	b16 |= 1 << uint(b)
 }
 
 func (b16 B16) Clear(b int) {
-	if b > 16 {
-		return
-	}
 	b16 &= ^(1 << uint(b))
-
 }
 
 func (b16 B16) IsSet(b int) bool {
-	if b > 16 {
-		return false
-	}
 	return b16&1<<uint(b) == 1
 }
 
 func (b16 B16) IsClear(b int) bool {
-	if b > 16 {
-		return false
-	}
 	return b16&1<<uint(b) == 0
+}
+
+func Bit16(v uint16, p int) int {
+	return B16(v).Bit(p)
+}
+
+func Bits16(v uint16, high, low int) uint16 {
+	return B16(v).Bits(high, low)
+}
+
+func IsSet16(v uint16, p int) bool {
+	return B16(v).IsSet(p)
+}
+
+func IsClear16(v uint16, p int) bool {
+	return B16(v).IsSet(p)
+}
+
+func Clz16(v uint16) int {
+	return B16(v).Clz()
 }
 
 // Count Leading zeros, from MSB
@@ -157,35 +187,31 @@ func (b B16) Clz() int {
 }
 
 /*
- * #####    #####    ###
- * ##  ##      ##  ##  ##
- * #####   ###',     ##
- * ##  ##     ##   ##
- * #####  #####  ######
+ *    #####  #####   ###
+ *   ##  ##     ## ##  ##
+ *   #####   ###',    ##
+ *  ##  ##   ##     ##
+ * #####  #####   ######
  */
 func (b32 B32) Bit(p int) int {
-	if p > 31 {
-		panic("Invalid bit position")
-	}
 	return int((b32 >> uint(p)) & 1)
 }
 
 func (b32 B32) IsSet(p int) bool {
-	if p > 31 {
-		panic("")
-	}
 	return (b32>>uint(p))&1 == 1
 }
 
 func (b32 B32) IsClear(p int) bool {
-	if p > 31 {
-		panic("")
-	}
 	return (b32>>uint(p))&1 == 0
 }
 
-func (b32 B32) Bits(high, low uint8) uint32 {
-	return uint32((b32 >> low) & (^(1 << (high - low + 1)) - 1))
+func (b32 B32) Bits(high, low int) uint32 {
+	h := uint(high)
+	l := uint(low)
+	if h < l {
+		h, l = l, h
+	}
+	return uint32((b32 >> l) & (^(1 << (h - l + 1)) - 1))
 }
 
 // Count Leading zeros, from MSB
@@ -216,6 +242,26 @@ func (b B32) Clz() int {
 	return 0
 }
 
+func Bit32(v uint32, p int) int {
+	return B32(v).Bit(p)
+}
+
+func Bits32(v uint32, high, low int) uint32 {
+	return B32(v).Bits(high, low)
+}
+
+func IsSet32(v uint32, p int) bool {
+	return B32(v).IsSet(p)
+}
+
+func IsClear32(v uint32, p int) bool {
+	return B32(v).IsSet(p)
+}
+
+func Clz32(v uint32) int {
+	return B32(v).Clz()
+}
+
 /*
  *     #####  ####   ##
  *    ##  ## ##     ##   ##
@@ -232,7 +278,12 @@ func (b64 B64) Bit(p int) int {
 }
 
 func (b64 B64) Bits(high, low int) uint64 {
-	return uint64((b64 >> uint(low)) & (^(1 << uint(high-low+1)) - 1))
+	h := uint(high)
+	l := uint(low)
+	if h < l {
+		h, l = l, h
+	}
+	return uint64((b64 >> l) & (^(1 << (h - l + 1)) - 1))
 }
 
 func (b64 B64) IsSet(p int) bool {
@@ -245,7 +296,7 @@ func (b64 B64) IsClear(p int) bool {
 
 // Count Leading zeros, from MSB
 func (b B64) Clz() int {
-	var c int = 16 // c will be the number of zero bits on the right
+	var c int = 64 // c will be the number of zero bits on the right
 
 	// Taken from bit twidling hacks stanford article
 	b &= B64(-b)
@@ -272,4 +323,24 @@ func (b B64) Clz() int {
 	}
 
 	return 0
+}
+
+func Bit64(v uint64, p int) int {
+	return B64(v).Bit(p)
+}
+
+func Bits64(v uint64, high, low int) uint64 {
+	return B64(v).Bits(high, low)
+}
+
+func IsSet64(v uint64, p int) bool {
+	return B64(v).IsSet(p)
+}
+
+func IsClear64(v uint64, p int) bool {
+	return B64(v).IsSet(p)
+}
+
+func Clz64(v uint64) int {
+	return B64(v).Clz()
 }
