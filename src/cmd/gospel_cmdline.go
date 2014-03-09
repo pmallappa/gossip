@@ -8,10 +8,6 @@ import (
 	//"strings"
 )
 
-import (
-	"plat"
-)
-
 var (
 	perf, debug   bool
 	pstart, pstop int
@@ -80,10 +76,6 @@ func parseFlags() {
 		os.Exit(1)
 	}
 
-	if _, err = plat.ParseFlags(); err != nil {
-		//fmt.Printf("%v\n", err)
-		os.Exit(1)
-	}
 	if err = parseLocal(); err != nil {
 		os.Exit(1)
 	}

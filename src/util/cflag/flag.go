@@ -3,7 +3,7 @@
 package cflag
 
 import (
-	//"flag"
+	"flag"
 	"fmt"
 	"strconv"
 	"strings"
@@ -19,6 +19,70 @@ type CFlagHelper interface {
 	Help() string
 }
 
+type optType uint32
+
+const (
+	INT optType = iota
+	UINT
+	FLOAT
+	STRING
+	BOOL
+	COMPLEX
+	RUNE
+	OTHER
+)
+
+type CFlag struct {
+	name      string
+	t         optType
+	val       flag.Value
+	dval      string // Default value
+	shortname string // short form of operation, not needed
+	desc      string // Description
+
+	//TODO: Obsolete things, should be removed for good
+	defval interface{}
+	value  interface{}
+
+	debug bool // For Testing only
+}
+
+func NewCFlag1(v flag.Value, name, desc, defval string, ot optType) *CFlag {
+	c := &CFlag{
+		val:  v,
+		name: name,
+		desc: desc,
+		dval: defval,
+		t:    ot,
+	}
+	c.val.Set(defval)
+	return c
+}
+
+func NewCFlag(name, desc string, def interface{}) *CFlag {
+	return &CFlag{
+		name:   name,
+		desc:   desc,
+		defval: def,
+		value:  def,
+	}
+}
+
+func (cf *CFlag) String() string {
+	return fmt.Sprintf("Name %s, Default: %s, Description:%s, Value:%v",
+		cf.name, cf.dval, cf.desc, cf.val)
+}
+
+func (cf *CFlag) PrintDefaults() {
+	if cf != nil && cf.defval != nil {
+		fmt.Printf("Default:%q\n", cf.defval)
+	}
+}
+
+func (cf *CFlag) Help() string {
+	return fmt.Sprintf("\t%s\t %s (Default: %s)\n", cf.name, cf.desc, cf.val)
+}
+
 // cflag is comma separated key=value pairs
 type cflagsetT struct {
 	str   string
@@ -26,6 +90,10 @@ type cflagsetT struct {
 	sep   string // Separator used to delimit flags
 
 	debug bool // For testing only
+}
+
+func New() *cflagsetT {
+	return NewCFlagSet("")
 }
 
 func NewCFlagSet(s string) *cflagsetT {
@@ -52,7 +120,11 @@ func (cfs *cflagsetT) Set(str string) (e error) {
 }
 
 func (cfs *cflagsetT) String() string {
-	return cfs.str
+	str := fmt.Sprintf("%s\n", cfs.str)
+	for _, cf := range cfs.cflag {
+		str += fmt.Sprintf("%q\n", cf)
+	}
+	return str
 }
 
 // -- END Value interface End
@@ -66,38 +138,6 @@ func (cfs *cflagsetT) Get() interface{} {
 
 func (cfs *cflagsetT) GetOpt(str string) interface{} {
 	return cfs.cflag[str].value
-}
-
-type CFlag struct {
-	name      string
-	defval    interface{}
-	shortname string // short form of operation, not needed
-	desc      string // Description
-	value     interface{}
-
-	debug bool // For Testing only
-}
-
-func NewCFlag(name, desc string, def interface{}) *CFlag {
-	return &CFlag{
-		name:   name,
-		desc:   desc,
-		defval: def,
-		value:  def,
-	}
-}
-
-func (cf *CFlag) String() string {
-	return fmt.Sprintf("Name %s, Default: %v, Description:%s, Value:%v",
-		cf.name, cf.defval, cf.desc, cf.value)
-}
-
-func (cf *CFlag) PrintDefaults() {
-	fmt.Printf("Default:%q\n", cf.defval)
-}
-
-func (cf *CFlag) Help() string {
-	return fmt.Sprintf("\t%s\t %s (Default: %q)\n", cf.name, cf.desc, cf.defval)
 }
 
 func (cfs *cflagsetT) parseOne(s string) (err error) {
@@ -114,48 +154,35 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 	}
 
 	// Confirmation
-	if k.name != split[0] {
+	if k.name != "" && k.name != split[0] {
 		return fmt.Errorf("Unbelievable")
 	}
 
-	switch k.defval.(type) {
-	case int8, int16, int32, int64, int:
+	switch k.t {
+	case INT:
 		k.value, err = strconv.ParseInt(split[1], 0, 64)
 
-	case uint8, uint16, uint32, uint64, uint:
+	case UINT:
 		k.value, err = strconv.ParseUint(split[1], 0, 64)
 
-	case float32, float64:
+	case FLOAT:
 		k.value, err = strconv.ParseFloat(split[1], 64)
 
-	case bool:
+	case BOOL:
 		switch val := strings.ToLower(split[1]); val {
 		case "yes", "true", "on", "1", "t":
 			k.value = true
 		case "no", "false", "off", "0", "f":
 			k.value = false
 		default:
-			err = fmt.Errorf("Un- value %s\n", split[1])
+			err = fmt.Errorf("Un-known value %s\n", val)
 		}
 
-	case string:
+	case STRING:
 		k.value = split[1]
 
-	case UnitsBin:
-		b := k.value.(UnitsBin)
-		if err = b.Set(split[1]); err != nil {
-			k.value = b
-		}
-
-	case UnitsDec:
-		d := k.value.(UnitsDec)
-		if err = d.Set(split[1]); err != nil {
-			k.value = d
-		}
-
 	default:
-		//var v flag.Value = k.value
-		//err = v.Set(split[1])
+		err = k.val.Set(split[1])
 	}
 
 	if k.debug && err == nil {
@@ -171,6 +198,9 @@ func (cfs *cflagsetT) parse() (c *CFlag, e error) {
 	split := strings.Split(str, cfs.sep)
 
 	for i, cf := range split {
+		if cfs.debug {
+			fmt.Printf("Parsing...%q\n", split[i])
+		}
 		if e = cfs.parseOne(split[i]); e != nil {
 			return cfs.cflag[cf], e
 		}
@@ -178,92 +208,13 @@ func (cfs *cflagsetT) parse() (c *CFlag, e error) {
 	return
 }
 
+/*
+* Add() function allows platform/devices to install default
+* values, just in-case
+ */
 func (cfs *cflagsetT) Add(cf *CFlag) {
 	cfs.cflag[cf.name] = cf
 	if cfs.debug {
 		fmt.Printf("Added %q\n", cf)
 	}
-}
-
-///
-/// Special types to be parsed, eg memory size and freq
-///
-type (
-	UnitsBin uint64
-	UnitsDec uint64
-)
-
-// -- BEGIN Value interface
-// MemSize will support MiB
-func (b *UnitsBin) Set(str string) (e error) {
-	var mult, mem uint64
-
-	strlen := len(str)
-
-	switch str[strlen-1] {
-	case 'k', 'K':
-		mult = 1 << 10 // 2^10
-	case 'm', 'M':
-		mult = 1 << 20 // 2^20
-	case 'g', 'G':
-		mult = 1 << 30 // 2^30
-	default:
-		mult = 1
-	}
-
-	if mult != 1 {
-		str = str[:strlen-1]
-	}
-
-	// This cannot be a 'int' rather be a 'uint'
-	if mem, e = strconv.ParseUint(str, 0, 64); e != nil {
-		println(e)
-		return e
-	}
-
-	*b = UnitsBin(mem * mult)
-
-	return
-}
-
-func (b *UnitsBin) String() string {
-	return fmt.Sprintf("%d", uint64(*b))
-}
-
-// -- End Value interface
-
-// Frequency will honour K/M/G or k/m/g
-// to specify Kilo/Mega/Giga Hz.
-// Eg: -cpu freq=800Mhz or freq=1000 or freq=200MHZ
-func (d *UnitsDec) Set(s string) (e error) {
-	var mult, dec uint64
-
-	slen := len(s)
-
-	switch s[slen-1] {
-	case 'k', 'K':
-		mult = 1e3 // 10^3
-	case 'm', 'M':
-		mult = 1e6 // 10^6
-	case 'g', 'G':
-		mult = 1e9 // 10^9
-	default:
-		mult = 1
-	}
-
-	// Adjust the string to loose last 'K/k/M/m/G/g'
-	if mult != 1 {
-		s = s[:slen-1]
-	}
-	// Though Uint32 is sufficient as processor freq are not more than 4GHz
-	if dec, e = strconv.ParseUint(s, 0, 64); e != nil {
-		return
-	}
-
-	*d = UnitsDec(dec * mult)
-	return
-}
-
-func (d *UnitsDec) String() string {
-	return fmt.Sprintf("%d", uint64(*d))
 }

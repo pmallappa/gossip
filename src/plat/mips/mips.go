@@ -3,7 +3,7 @@ package mips
 import (
 	"debug/elf"
 
-//"fmt"
+	//"fmt"
 )
 
 // import cpu/mips as mipscpu
@@ -27,10 +27,10 @@ func (p *PlatMips) Start() {
 
 func ParseFlags() error {
 	var opts map[string]string
-	var e error
-	if opts, e = plat.ParseFlags(); e != nil {
-		return e
-	}
+	//	var e error
+	//	if opts, e = plat.ParseFlags(); e != nil {
+	//		return e
+	//	}
 	for k, v := range opts {
 		println(k, v)
 	}

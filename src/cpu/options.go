@@ -6,12 +6,12 @@ import (
 )
 
 import (
-	//"util"
 	"util/cflag"
 	"util/logng"
+	"util/unit"
 )
 
-var cpuOpts = cflag.NewCFlagSet("cpu")
+var cpuOpts = cflag.New()
 
 var logger logng.LogNG
 
@@ -20,9 +20,11 @@ var logger logng.LogNG
 
 func initOpts() error {
 	for _, v := range []*cflag.CFlag{
-		cflag.NewCFlag("log", "Specify logging use <logdesc>", &logger),
-		cflag.NewCFlag("freq", "CPU Freqency, accepts {K,M,G,k,m,g}Hz",
-			cflag.UnitsDec(100*1024*1024)),
+		cflag.NewCFlag1(&logger, "log", "Specify logging use <logdesc>",
+			"", cflag.OTHER),
+		cflag.NewCFlag1(&unit.Freq{}, "freq",
+			"CPU Freqency, accepts {K,M,G,k,m,g}Hz", "100MHz",
+			cflag.OTHER),
 	} {
 		cpuOpts.Add(v)
 	}

@@ -3,69 +3,52 @@ package dev
 import (
 	"flag"
 	"fmt"
+	"strings"
 )
 
 import (
-	"util"
+	//	"util"
 	"util/cflag"
 )
 
-type devOptstr []string
+type devopt string
 
 var (
-	devOpts, chardevOpts,
-	netdevOpts, pcidevOpts, usbdevOpts devOptstr
-	devOpts_help     string = "-dev ?"
-	chardevOpts_help string = "-chardev ?"
-	netdevOpts_help  string = "-netdev ?"
-	pcidevOpts_help  string = "-pcidev ?"
-	usbdevOpts_help  string = "-usbdev ?"
+	devOpts     devopt
+	charDevOpts = cflag.New()
+	netDevOpts  = cflag.New()
+	usbDevOpts  = cflag.New()
 )
 
 func Parse(str string) (map[string]string, error) {
 	var e error
 	var m map[string]string
 
-	for _, str := range devOpts {
-		if m, e := util.ParseFlags(str); e != nil {
-			return m, e
-		}
-
-		for k, v := range m {
-			switch k {
-			case "char":
-				chardevOpts.Set(str)
-			case "net":
-				netdevOpts.Set(str)
-			case "usb":
-				usbdevOpts.Set(str)
-			default:
-				v = v
-			}
-		}
-	}
 	return m, e
 }
 
 func initDevFlags() {
-	devOpts = make([]string, 0, 128)
-	chardevOpts = make([]string, 0, 128)
-	netdevOpts = make([]string, 0, 128)
-	pcidevOpts = make([]string, 0, 128)
-	usbdevOpts = make([]string, 0, 128)
-
-	flag.Var(&devOpts, "dev", devOpts_help)
-	flag.Var(&chardevOpts, "chardev", chardevOpts_help)
-	flag.Var(&netdevOpts, "netdev", netdevOpts_help)
-	flag.Var(&pcidevOpts, "pcidev", pcidevOpts_help)
-	flag.Var(&usbdevOpts, "usbdev", usbdevOpts_help)
+	flag.Var(&devOpts, "dev", "Generic device help")
+	flag.Var(charDevOpts, "chardev", "Charcter devices, use ? for more")
+	flag.Var(netDevOpts, "netdev", "Network Devices, use ? for more")
+	flag.Var(usbDevOpts, "usbdev", "USB Devices, use ? for more")
 }
 
-func (f *devOptstr) String() string {
-	return fmt.Sprint([]string(*f))
+func (f *devopt) String() string {
+	return fmt.Sprint(string(*f))
 }
 
-func (f *devOptstr) Set(value string) error {
-	*f = append(*f, value)
+func (f *devopt) Set(str string) error {
+	// skip the prefix and set appropriate device
+	switch {
+	case strings.HasPrefix(str, "char,") == true:
+		charDevOpts.Set(str[4:])
+	case strings.HasPrefix(str, "net,") == true:
+		netDevOpts.Set(str[3:])
+	case strings.HasPrefix(str, "usb,") == true:
+		usbDevOpts.Set(str[3:])
+	default:
+		fmt.Printf("Every device has to be prefix with char/net/usb")
+	}
 	return nil
 }

@@ -10,8 +10,8 @@ import (
 	"plat"
 	"util"
 
-//	_ "plat/arm"
-//	_ "plat/arm/other"
+	//	_ "plat/arm"
+	//	_ "plat/arm/other"
 )
 
 type PlatArm struct {
@@ -33,14 +33,6 @@ func (p *PlatArm) Start() {
 
 func (p *PlatArm) Init() error {
 	util.PrintMe()
-	var opts map[string]string
-	var e error
-	if opts, e = plat.ParseFlags(); e != nil {
-		return e
-	}
-	for k, v := range opts {
-		println(k, v)
-	}
 	arm.Init()
 	return nil
 }

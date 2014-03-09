@@ -6,6 +6,7 @@ LIB=\
 
 DIRS=\
 	telnet \
+	cflag \
 	bits \
 	#arm  \
 

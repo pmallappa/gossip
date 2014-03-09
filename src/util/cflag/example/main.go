@@ -4,18 +4,22 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+)
+import (
+	"util"
 	"util/cflag"
 )
 
 type Freq struct {
-	c cflag.UnitsDec
+	c util.UnitsDec
 }
 
 func (f *Freq) Parse(s string) error {
 	return nil
 }
+
 func (f *Freq) String() string {
-	return fmt.Sprintf("%d\n", uint64(f.c))
+	return fmt.Sprintf("%s", f.c.String())
 }
 
 func (f *Freq) Set(s string) error {
@@ -24,8 +28,9 @@ func (f *Freq) Set(s string) error {
 	if strings.HasSuffix(strings.ToLower(s), "hz") {
 		s = s[:slen-2]
 	}
-	fmt.Printf("=====================================\n")
-	return f.c.Parse(s)
+	f.c.Set(s)
+	fmt.Printf("============== Setting to :%d\n", f.c)
+	return nil //f.c.Parse(s)
 }
 
 // For logger we support option like
@@ -35,14 +40,16 @@ func (f *Freq) Set(s string) error {
 
 func main() {
 
-	var f Freq
-	var c cflag.CFlagSet
+	//var c cflag.CFlagSet
+	c := cflag.New()
+	//flag.Var(c, "cpu", "CPU Freqency, accepts {K,M,G,k,m,g}Hz")
 
-	flag.Var(&f, "freq", "CPU Freqency, accepts {K,M,G,k,m,g}Hz")
-	flag.Var(&c, "cpu", "CPU Args")
+	c.Add(cflag.NewCFlag(&Freq{}, "freq",
+		"CPU Freqency, accepts {K,M,G,k,m,g}Hz)",
+		"100MHZ", cflag.OTHER))
 
-	c.Add
+	flag.Var(c, "cpu", "accepts things")
 
 	flag.Parse()
-	fmt.Printf("%q\n", f)
+	fmt.Printf("%s\n", c)
 }

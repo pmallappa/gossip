@@ -1,15 +1,15 @@
 package arm
 
 import (
-	//"fmt"
+//"fmt"
 )
 
 import (
 //	"cpu"
-	"cpu/arm"
+//"cpu/arm"
 )
 
-var supported_cpus = []string {
+var supported_cpus = []string{
 	"926EJS",
 	"1176JZFS",
 	"11MPCore",
@@ -21,7 +21,7 @@ var supported_cpus = []string {
 
 func pbInit() {
 	println("Init plat/arm/realviewPB")
-	for c := range supported_cpus {
-		arm.RegisterCpu(supported_cpus[c])
+	for _ = range supported_cpus {
+		//cpu.RegisterCpu(supported_cpus[c])
 	}
 }

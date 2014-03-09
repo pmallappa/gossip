@@ -1,14 +1,15 @@
 package plat
 
 import (
-	"errors"
 	"flag"
-	"fmt"
-	"strconv"
+	//	"fmt"
+	//"strconv"
 )
 
 import (
 	"util"
+	"util/cflag"
+	"util/unit"
 )
 
 var (
@@ -16,78 +17,9 @@ var (
 	smpflag   string
 )
 
-/* Try to process as much as possible, rest send to specific platform
-for interpretation */
-func parsePlatFlags() (map[string]string, error) {
-	m, e := util.ParseFlagsSubst(platflags, "plat")
-	if e != nil {
-		goto out
-	}
-	for k, v := range m {
-		switch k {
-		case "mem":
-			//p.SetMem(memParse(v))
-			memSize, _ = util.ParseMem(v)
-		case "?":
-			var s string
-			s = "Available Platforms: \n"
-			for i := range availplats {
-				s += availplats[i].GetInfo()["model"] + "\n"
-			}
-			fmt.Print(s)
-			e = errors.New(s)
-		case "vendor":
-			vendor = v
-		case "model":
-			model = v
-		case "plat":
-			platname = v
-		default:
-			continue
-		}
-		// if any cases returns non-nil
-		if e != nil {
-			goto out
-		}
-		// Delete the consumed options
-		delete(m, k)
-	}
-
-	// Even at the end of this, we dont have a platform
-out:
-	return m, e
-}
-
 func parseSMPFlags() (int, error) {
+	var e error
 	var smp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
-
-	m, e := util.ParseFlagsSubst(smpflag, "smp")
-	if e != nil {
-		return 0, e
-	}
-
-	for k, v := range m {
-		switch k {
-		case "maxcpus":
-			maxcpus, e = strconv.ParseUint(v, 0, 0)
-		case "cores":
-			cores, e = strconv.ParseUint(v, 0, 0)
-		case "threads":
-			threads, e = strconv.ParseUint(v, 0, 0)
-		case "sockets":
-			sockets, e = strconv.ParseUint(v, 0, 0)
-		case "smp":
-			smp, e = strconv.ParseUint(v, 0, 0)
-		default:
-		}
-
-		delete(m, k)
-
-		if e != nil {
-			goto out
-		}
-
-	}
 
 	// Suppress error untill we figure out the meaning of 'maxcpus'
 	_ = maxcpus
@@ -112,32 +44,44 @@ func parseSMPFlags() (int, error) {
 		}
 	}
 
-out:
 	return int(smp), e
 }
 
-func ParseFlags() (map[string]string, error) {
-	var m map[string]string
-	var err error
-	if m, err = parsePlatFlags(); err != nil {
-		return nil, err
-	}
-	if nSMP, err = parseSMPFlags(); err != nil {
-		return nil, err
+var (
+	platFlags = cflag.New()
+	smpFlags  = cflag.New()
+)
+
+func initPlatOpts() {
+	for _, v := range []*cflag.CFlag{
+		cflag.NewCFlag1(&unit.Size{}, "mem", "Platform Memory",
+			"128MiB", cflag.OTHER),
+		cflag.NewCFlag("model", "Platform Model", ""),
+		cflag.NewCFlag("vendor", "Platform Vendor", ""),
+	} {
+		platFlags.Add(v)
 	}
 
-	return m, nil
+	flag.Var(platFlags, "plat", "Platforms, type ? to list")
 }
 
-var defaultPlat string = "malta"
+func initSMPOpts() {
+	for _, v := range []*cflag.CFlag{
+		cflag.NewCFlag("maxcpus", "Platform Memory", 1),
+		cflag.NewCFlag("cores", "Platform Memory", 1),
+		cflag.NewCFlag("threads", "Platform Memory", 1),
+		cflag.NewCFlag("sockets", "Platform Memory", 1),
+	} {
+		smpFlags.Add(v)
+	}
+	flag.Var(smpFlags, "smp", "SMP")
+}
 
 func init() {
 	util.PrintMe()
 	availplats = make([]Platform, 0, 128)
 
-	flag.StringVar(&platflags, "plat", defaultPlat,
-		"Platforms, type ? to list")
-	flag.StringVar(&smpflag, "smp", "",
-		"-smp n[,maxcpus=cpus][,cores=cores]"+
-			"[,threads=threads][,sockets=sockets]")
+	initPlatOpts()
+	initSMPOpts()
+	initLdOpts()
 }

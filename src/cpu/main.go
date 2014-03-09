@@ -1,30 +1,27 @@
 package cpu
 
 import (
-	"flag"
-)
-
-import (
 	"util"
+	"util/cflag"
 )
 
-var cpu_opts string
+var cpu_opts = cflag.NewCFlagSet("cpu")
 
-var availableCpu []*Core
+var availableCpu []*Cpu
 
 func init() {
-	availableCpu = make([]*Core, 0, 64)
+	availableCpu = make([]*Cpu, 0, 64)
 	util.PrintMe()
-	flag.StringVar(&cpu_opts, "cpu", "",
-		"CPU's, type ? to list, but -plat should be provided")
+	//flag.StringVar(&cpu_opts, "cpu", "",
+	//	"CPU's, type ? to list, but -plat should be provided")
 }
 
 func Init() error {
-	util.PrintMe()
+
 	return nil
 }
 
-func RegisterCpu(cpu *Core) error {
+func RegisterCpu(cpu *Cpu) error {
 	//availableCpu = append(availableCpu, cpu)
 	return nil
 }

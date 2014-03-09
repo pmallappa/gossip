@@ -9,7 +9,7 @@ import (
 )
 
 import (
-	"util"
+//	"util"
 )
 
 type loadReqs struct {
@@ -35,6 +35,7 @@ func (f *loadOptstr) Set(value string) error {
 //
 
 var (
+	ldOpts    loadOptstr
 	load_opts loadOptstr
 
 	ld_help_str string = "type=file,file=<file>,addr=    - Loads raw contents of file to addr\n" +
@@ -63,10 +64,10 @@ func parseLoadFlags() error {
 
 	for _, entry := range load_opts {
 		var m map[string]string
-		var e error
-		if m, e = util.ParseFlagsSubst(entry, "type"); e != nil {
-			return errors.New("Unable to Parse")
-		}
+		//var e error
+		//if m, e = util.ParseFlagsSubst(entry, "type"); e != nil {
+		//	return errors.New("Unable to Parse")
+		//}
 		switch m["type"] {
 		case "file":
 			if _, present := m["name"]; !present {
@@ -78,11 +79,11 @@ func parseLoadFlags() error {
 				return errors.New("Should provide name=<name> for file")
 			}
 
-			if addr, err := util.ParseMem(m["addr"]); err == nil {
-				fileloads[addr] = m["name"]
-			} else {
-				return err
-			}
+			//if addr, err := util.ParseMem(m["addr"]); err == nil {
+			//	fileloads[addr] = m["name"]
+			//} else {
+			//	return err
+			//}
 		case "elf":
 			elfloads = append(elfloads, entry)
 		case "zero":
@@ -96,19 +97,23 @@ func parseLoadFlags() error {
 				return errors.New("Should provide addr=<addr> K, M, G suffix supported")
 			}
 
-			if length, err := util.ParseMem(m["len"]); err == nil {
-				if addr, err := util.ParseMem(m["addr"]); err == nil {
-					zeroloads[addr] = length
-				} else {
-					return err
-				}
-			} else {
-				return errors.New("Should provide addr=<address> for file")
-			}
+			//if length, err := util.ParseMem(m["len"]); err == nil {
+			//	if addr, err := util.ParseMem(m["addr"]); err == nil {
+			//		zeroloads[addr] = length
+			//	} else {
+			//		return err
+			//	}
+			//} else {
+			//	return errors.New("Should provide addr=<address> for file")
+			//}
 
 		default:
 			return fmt.Errorf("Dont understand -ld option %s", m["type"])
 		}
 	}
 	return nil
+}
+
+func initLdOpts() {
+	flag.Var(&ldOpts, "Load options", "")
 }
