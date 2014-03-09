@@ -3,7 +3,8 @@ package plat
 import (
 	"flag"
 	//	"fmt"
-	//"strconv"
+	"strconv"
+	"strings"
 )
 
 import (
@@ -12,14 +13,40 @@ import (
 	"util/unit"
 )
 
-var (
-	platflags string
-	smpflag   string
-)
+type smpFlags string
 
-func parseSMPFlags() (int, error) {
+var smp int
+
+func (s *smpFlags) String() string {
+	return ""
+}
+func (s *smpFlags) Set(str string) error {
 	var e error
-	var smp, maxcpus, cores, threads, sockets uint64 = 1, 1, 1, 1, 1
+	var tmp int64
+
+	i := strings.Index(str, ",")
+
+	if i == -1 {
+		tmp, e = strconv.ParseInt(str, 0, 64)
+	} else {
+		tmp, e = strconv.ParseInt(str[:i-1], 0, 64)
+	}
+	if e != nil {
+		return e
+	}
+	smp = int(tmp)
+	smpdetails.Set(str[i+1:]) // remove the instance and proceed
+
+	return nil
+}
+
+func parseSMP() (int, error) {
+	var e error
+
+	maxcpus := smpdetails.GetOpt("maxcpus").(int)
+	cores := smpdetails.GetOpt("cores").(int)
+	threads := smpdetails.GetOpt("threads").(int)
+	sockets := smpdetails.GetOpt("sockets").(int)
 
 	// Suppress error untill we figure out the meaning of 'maxcpus'
 	_ = maxcpus
@@ -48,8 +75,9 @@ func parseSMPFlags() (int, error) {
 }
 
 var (
-	platFlags = cflag.New()
-	smpFlags  = cflag.New()
+	smpflags   smpFlags
+	platflag   = cflag.New()
+	smpdetails = cflag.New()
 )
 
 func initPlatOpts() {
@@ -59,10 +87,10 @@ func initPlatOpts() {
 		cflag.NewCFlag("model", "Platform Model", ""),
 		cflag.NewCFlag("vendor", "Platform Vendor", ""),
 	} {
-		platFlags.Add(v)
+		platflag.Add(v)
 	}
 
-	flag.Var(platFlags, "plat", "Platforms, type ? to list")
+	flag.Var(platflag, "plat", "Platforms, type ? to list")
 }
 
 func initSMPOpts() {
@@ -72,9 +100,10 @@ func initSMPOpts() {
 		cflag.NewCFlag("threads", "Platform Memory", 1),
 		cflag.NewCFlag("sockets", "Platform Memory", 1),
 	} {
-		smpFlags.Add(v)
+		smpdetails.Add(v)
 	}
-	flag.Var(smpFlags, "smp", "SMP")
+
+	flag.Var(&smpflags, "smp", "n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]")
 }
 
 func init() {

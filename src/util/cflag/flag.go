@@ -29,6 +29,7 @@ const (
 	BOOL
 	COMPLEX
 	RUNE
+	TYPE_BUILTIN
 	OTHER
 )
 
@@ -65,6 +66,7 @@ func NewCFlag(name, desc string, def interface{}) *CFlag {
 		desc:   desc,
 		defval: def,
 		value:  def,
+		t:      TYPE_BUILTIN,
 	}
 }
 
@@ -158,30 +160,31 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 		return fmt.Errorf("Unbelievable")
 	}
 
-	switch k.t {
-	case INT:
-		k.value, err = strconv.ParseInt(split[1], 0, 64)
+	if k.t == TYPE_BUILTIN {
+		switch k.value.(type) {
+		case int, int8, int16, int32, int64:
+			k.value, err = strconv.ParseInt(split[1], 0, 64)
 
-	case UINT:
-		k.value, err = strconv.ParseUint(split[1], 0, 64)
+		case uint, uint8, uint16, uint32, uint64:
+			k.value, err = strconv.ParseUint(split[1], 0, 64)
 
-	case FLOAT:
-		k.value, err = strconv.ParseFloat(split[1], 64)
+		case float32, float64:
+			k.value, err = strconv.ParseFloat(split[1], 64)
 
-	case BOOL:
-		switch val := strings.ToLower(split[1]); val {
-		case "yes", "true", "on", "1", "t":
-			k.value = true
-		case "no", "false", "off", "0", "f":
-			k.value = false
-		default:
-			err = fmt.Errorf("Un-known value %s\n", val)
+		case bool:
+			switch val := strings.ToLower(split[1]); val {
+			case "yes", "true", "on", "1", "t":
+				k.value = true
+			case "no", "false", "off", "0", "f":
+				k.value = false
+			default:
+				err = fmt.Errorf("Un-known value %s\n", val)
+			}
+
+		case string:
+			k.value = split[1]
 		}
-
-	case STRING:
-		k.value = split[1]
-
-	default:
+	} else {
 		err = k.val.Set(split[1])
 	}
 
