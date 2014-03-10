@@ -12,6 +12,7 @@ import (
 	//"dev/mem"
 	//"dev/serial"
 	//"dev/net"
+	"util"
 	"util/logng"
 )
 
@@ -131,6 +132,7 @@ func NewPlat() *Plat {
 }
 
 func (p *Plat) Setup() error {
+	util.PrintMe()
 	if model == "" {
 		return fmt.Errorf("Vendor not found, select a platform")
 	}

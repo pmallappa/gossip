@@ -29,91 +29,87 @@ const (
 	BOOL
 	COMPLEX
 	RUNE
-	TYPE_BUILTIN
+	BUILTIN
 	OTHER
 )
 
-type CFlag struct {
+type SubOption struct {
 	name      string
 	t         optType
 	val       flag.Value
-	dval      string // Default value
+	defval    string // Default value
 	shortname string // short form of operation, not needed
 	desc      string // Description
 
-	//TODO: Obsolete things, should be removed for good
-	defval interface{}
-	value  interface{}
+	value interface{}
 
 	debug bool // For Testing only
 }
 
-func NewCFlag1(v flag.Value, name, desc, defval string, ot optType) *CFlag {
-	c := &CFlag{
-		val:  v,
-		name: name,
-		desc: desc,
-		dval: defval,
-		t:    ot,
+func NewSubOptionOther(v flag.Value, name, desc, defval string) *SubOption {
+	c := &SubOption{
+		val:    v,
+		name:   name,
+		desc:   desc,
+		defval: defval,
+		t:      OTHER,
 	}
 	c.val.Set(defval)
 	return c
 }
 
-func NewCFlag(name, desc string, def interface{}) *CFlag {
-	return &CFlag{
-		name:   name,
-		desc:   desc,
-		defval: def,
-		value:  def,
-		t:      TYPE_BUILTIN,
+func NewSubOption(name, desc string, def interface{}) *SubOption {
+	return &SubOption{
+		name: name,
+		desc: desc,
+		//defval: def,
+		value: def,
+		t:     BUILTIN,
 	}
 }
 
-func (cf *CFlag) String() string {
+func (cf *SubOption) String() string {
 	return fmt.Sprintf("Name %s, Default: %s, Description:%s, Value:%v",
-		cf.name, cf.dval, cf.desc, cf.val)
+		cf.name, cf.defval, cf.desc, cf.val)
 }
 
-func (cf *CFlag) PrintDefaults() {
-	if cf != nil && cf.defval != nil {
-		fmt.Printf("Default:%q\n", cf.defval)
-	}
+func (cf *SubOption) PrintDefaults() {
+	fmt.Printf("Default:%q\n", cf.defval)
 }
 
-func (cf *CFlag) Help() string {
+func (cf *SubOption) Help() string {
 	return fmt.Sprintf("\t%s\t %s (Default: %s)\n", cf.name, cf.desc, cf.val)
 }
 
 // cflag is comma separated key=value pairs
-type cflagsetT struct {
-	str   string
-	cflag map[string]*CFlag
-	sep   string // Separator used to delimit flags
+type optionT struct {
+	str     string
+	subopts map[string]*SubOption
+	sep     string // Separator used to delimit flags
 
 	debug bool // For testing only
 }
 
-func New() *cflagsetT {
-	return NewCFlagSet("")
+func New() *optionT {
+	return NewOption("")
 }
 
-func NewCFlagSet(s string) *cflagsetT {
-	return &cflagsetT{
-		str:   s,
-		sep:   ",",
-		cflag: make(map[string]*CFlag),
+func NewOption(s string) *optionT {
+	return &optionT{
+		str:     s,
+		sep:     ",",
+		subopts: make(map[string]*SubOption),
 	}
 }
 
-func (cfs *cflagsetT) PrintDefaults() {
-	for _, v := range cfs.cflag {
+func (cfs *optionT) PrintDefaults() {
+	for _, v := range cfs.subopts {
 		v.PrintDefaults()
 	}
 }
 
 // -- BEGIN Value interface
-func (cfs *cflagsetT) Set(str string) (e error) {
+func (cfs *optionT) Set(str string) (e error) {
 	cfs.str = str
 	if cf, e := cfs.parse(); e != nil {
 		cf.PrintDefaults()
@@ -121,9 +117,9 @@ func (cfs *cflagsetT) Set(str string) (e error) {
 	return
 }
 
-func (cfs *cflagsetT) String() string {
+func (cfs *optionT) String() string {
 	str := fmt.Sprintf("%s\n", cfs.str)
-	for _, cf := range cfs.cflag {
+	for _, cf := range cfs.subopts {
 		str += fmt.Sprintf("%q\n", cf)
 	}
 	return str
@@ -132,24 +128,24 @@ func (cfs *cflagsetT) String() string {
 // -- END Value interface End
 
 // -- BEGIN Getter interface
-func (cfs *cflagsetT) Get() interface{} {
+func (cfs *optionT) Get() interface{} {
 	return cfs
 }
 
 // -- END Getter
 
-func (cfs *cflagsetT) GetOpt(str string) interface{} {
-	return cfs.cflag[str].value
+func (cfs *optionT) GetSubOpt(str string) interface{} {
+	return cfs.subopts[str].value
 }
 
-func (cfs *cflagsetT) parseOne(s string) (err error) {
+func (cfs *optionT) parseOne(s string) (err error) {
 
 	split := strings.SplitN(s, "=", 2)
 
 	if len(split) != 2 {
 		return
 	}
-	k := cfs.cflag[split[0]]
+	k := cfs.subopts[split[0]]
 
 	if k == nil {
 		return fmt.Errorf("Not Found")
@@ -160,7 +156,7 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 		return fmt.Errorf("Unbelievable")
 	}
 
-	if k.t == TYPE_BUILTIN {
+	if k.t == BUILTIN {
 		switch k.value.(type) {
 		case int, int8, int16, int32, int64:
 			k.value, err = strconv.ParseInt(split[1], 0, 64)
@@ -196,7 +192,7 @@ func (cfs *cflagsetT) parseOne(s string) (err error) {
 }
 
 // Real parse function, for each of key=value pairs,
-func (cfs *cflagsetT) parse() (c *CFlag, e error) {
+func (cfs *optionT) parse() (c *SubOption, e error) {
 	str := cfs.str
 	split := strings.Split(str, cfs.sep)
 
@@ -205,7 +201,7 @@ func (cfs *cflagsetT) parse() (c *CFlag, e error) {
 			fmt.Printf("Parsing...%q\n", split[i])
 		}
 		if e = cfs.parseOne(split[i]); e != nil {
-			return cfs.cflag[cf], e
+			return cfs.subopts[cf], e
 		}
 	}
 	return
@@ -215,8 +211,8 @@ func (cfs *cflagsetT) parse() (c *CFlag, e error) {
 * Add() function allows platform/devices to install default
 * values, just in-case
  */
-func (cfs *cflagsetT) Add(cf *CFlag) {
-	cfs.cflag[cf.name] = cf
+func (cfs *optionT) Add(cf *SubOption) {
+	cfs.subopts[cf.name] = cf
 	if cfs.debug {
 		fmt.Printf("Added %q\n", cf)
 	}

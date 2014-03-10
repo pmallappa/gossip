@@ -8,10 +8,11 @@ import (
 import (
 	"util"
 	"util/cflag"
+	"util/unit"
 )
 
 type Freq struct {
-	c util.UnitsDec
+	c unit.Decimal
 }
 
 func (f *Freq) Parse(s string) error {
@@ -44,9 +45,9 @@ func main() {
 	c := cflag.New()
 	//flag.Var(c, "cpu", "CPU Freqency, accepts {K,M,G,k,m,g}Hz")
 
-	c.Add(cflag.NewCFlag(&Freq{}, "freq",
+	c.Add(cflag.NewSubOptionOther(&Freq{}, "freq",
 		"CPU Freqency, accepts {K,M,G,k,m,g}Hz)",
-		"100MHZ", cflag.OTHER))
+		"100MHZ"))
 
 	flag.Var(c, "cpu", "accepts things")
 

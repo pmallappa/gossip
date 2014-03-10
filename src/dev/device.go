@@ -60,7 +60,7 @@ type Dev struct {
 	rw        bus.ReadWriterAll
 	// The options that we couldn't parse
 	// may be of some use to the actual device.
-	opts cflag.CFlag
+	opts cflag.SubOption
 }
 
 type Device struct {

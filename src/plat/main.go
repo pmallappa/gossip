@@ -2,7 +2,7 @@ package plat
 
 import (
 	"flag"
-	//	"fmt"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -43,10 +43,10 @@ func (s *smpFlags) Set(str string) error {
 func parseSMP() (int, error) {
 	var e error
 
-	maxcpus := smpdetails.GetOpt("maxcpus").(int)
-	cores := smpdetails.GetOpt("cores").(int)
-	threads := smpdetails.GetOpt("threads").(int)
-	sockets := smpdetails.GetOpt("sockets").(int)
+	maxcpus := smpdetails.GetSubOpt("maxcpus").(int)
+	cores := smpdetails.GetSubOpt("cores").(int)
+	threads := smpdetails.GetSubOpt("threads").(int)
+	sockets := smpdetails.GetSubOpt("sockets").(int)
 
 	// Suppress error untill we figure out the meaning of 'maxcpus'
 	_ = maxcpus
@@ -70,7 +70,7 @@ func parseSMP() (int, error) {
 			threads = smp / (sockets * cores)
 		}
 	}
-
+	fmt.Printf("Cores:%d, Threads:%d sockets:%d\n", cores, threads, sockets)
 	return int(smp), e
 }
 
@@ -81,11 +81,11 @@ var (
 )
 
 func initPlatOpts() {
-	for _, v := range []*cflag.CFlag{
-		cflag.NewCFlag1(&unit.Size{}, "mem", "Platform Memory",
-			"128MiB", cflag.OTHER),
-		cflag.NewCFlag("model", "Platform Model", ""),
-		cflag.NewCFlag("vendor", "Platform Vendor", ""),
+	for _, v := range []*cflag.SubOption{
+		cflag.NewSubOptionOther(&unit.Size{}, "mem", "Platform Memory",
+			"128MiB"),
+		cflag.NewSubOption("model", "Platform Model", ""),
+		cflag.NewSubOption("vendor", "Platform Vendor", ""),
 	} {
 		platflag.Add(v)
 	}
@@ -94,11 +94,11 @@ func initPlatOpts() {
 }
 
 func initSMPOpts() {
-	for _, v := range []*cflag.CFlag{
-		cflag.NewCFlag("maxcpus", "Platform Memory", 1),
-		cflag.NewCFlag("cores", "Platform Memory", 1),
-		cflag.NewCFlag("threads", "Platform Memory", 1),
-		cflag.NewCFlag("sockets", "Platform Memory", 1),
+	for _, v := range []*cflag.SubOption{
+		cflag.NewSubOption("maxcpus", "Platform Memory", 1),
+		cflag.NewSubOption("cores", "Platform Memory", 1),
+		cflag.NewSubOption("threads", "Platform Memory", 1),
+		cflag.NewSubOption("sockets", "Platform Memory", 1),
 	} {
 		smpdetails.Add(v)
 	}

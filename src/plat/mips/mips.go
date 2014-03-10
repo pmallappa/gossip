@@ -11,7 +11,6 @@ import (
 
 import (
 	//"cpu"
-	//"cpu/mips"
 	"plat"
 )
 
@@ -25,20 +24,7 @@ func (p *PlatMips) Start() {
 	}
 }
 
-func ParseFlags() error {
-	var opts map[string]string
-	//	var e error
-	//	if opts, e = plat.ParseFlags(); e != nil {
-	//		return e
-	//	}
-	for k, v := range opts {
-		println(k, v)
-	}
-	return nil
-}
-
 func (p *PlatMips) Init() error {
-	ParseFlags()
 	for i := 0; i < p.NumCores; i++ {
 		p.Cores[i].Init()
 	}

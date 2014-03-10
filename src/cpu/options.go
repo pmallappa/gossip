@@ -18,13 +18,12 @@ var logger logng.LogNG
 // For logger we support option like
 // -cpu freq=100MHz,log='level=WARNING,out=tcp:localhost:2000'
 
-func initOpts() error {
-	for _, v := range []*cflag.CFlag{
-		cflag.NewCFlag1(&logger, "log", "Specify logging use <logdesc>",
-			"", cflag.OTHER),
-		cflag.NewCFlag1(&unit.Freq{}, "freq",
-			"CPU Freqency, accepts {K,M,G,k,m,g}Hz", "100MHz",
-			cflag.OTHER),
+func initCpuOpts() error {
+	for _, v := range []*cflag.SubOption{
+		cflag.NewSubOptionOther(&logger, "log", "Specify logging use <logdesc>",
+			""),
+		cflag.NewSubOptionOther(&unit.Freq{}, "freq",
+			"CPU Freqency, accepts {K,M,G,k,m,g}Hz", "100MHz"),
 	} {
 		cpuOpts.Add(v)
 	}
@@ -35,5 +34,5 @@ func initOpts() error {
 }
 
 func GetOpt(s string) interface{} {
-	return cpuOpts.GetOpt(s)
+	return cpuOpts.GetSubOpt(s)
 }
