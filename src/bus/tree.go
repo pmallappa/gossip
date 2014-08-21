@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func (b *Bus) getDevice(addr uint64) (ReadWriterAll, uint64, error) {
+func (b *bus) getDevice(addr uint64) (ReadWriterAll, uint64, error) {
 	devlist := b.devices
 	for len(devlist) > 0 {
 		mid := len(devlist) / 2
@@ -24,14 +24,14 @@ func (b *Bus) getDevice(addr uint64) (ReadWriterAll, uint64, error) {
 	return nil, 0, errors.New("Illegal Address Access")
 }
 
-func (b *Bus) balance() {
+func (b *bus) balance() {
 }
 
-func (b *Bus) sort() {
+func (b *bus) sort() {
 
 }
 
-func (b *Bus) add(addr, size uint64, rw ReadWriterAll) error {
+func (b *bus) add(addr, size uint64, rw ReadWriterAll) error {
 	for i, _ := range b.devices {
 		if b.devices[i].start == addr {
 			return errors.New("Device already exists")

@@ -25,8 +25,19 @@ const (
 	CHAR DEVtype = 1 << iota
 	NET
 	BLK
-	PCI
+	MISCDEV
+)
+
+type DEVBustype uint32
+
+const (
+	PCI DEVBustype = 1 << iota
+	I2C
+	SCSI
+	IDE
+	HDA
 	USB
+	MISCDEVBUS
 )
 
 // All devices recieve the offset to read the memory controller strips-off
@@ -43,7 +54,7 @@ type LevelInterrupt interface {
 	DeassertLevel(int) error
 }
 
-type Info struct {
+type _Info struct {
 	model  string
 	vendor string
 	id     string
@@ -53,19 +64,21 @@ func (i *Info) GetInfo() map[string]string {
 	return map[string]string{"model": i.model, "vendor": i.vendor, "id": i.id}
 }
 
-type Dev struct {
+type _Dev struct {
 	devtype   DEVtype
 	irq       uint
 	interrupt chan bool
-	rw        bus.ReadWriterAll
-	// The options that we couldn't parse
-	// may be of some use to the actual device.
-	opts cflag.SubOption
+	opts      cflag.OptionT // Options specific to this device
 }
 
-type Device struct {
+type Dev struct {
 	Info
 	Dev
+}
+
+// All Devices must support all Read/Write
+type Device interface {
+	bus.ReadWriterAll
 }
 
 // All devices must implement bus.ReadWriterAll
@@ -84,8 +97,22 @@ func NewDevice(size uint64) *Device {
 	return m
 }
 
-func Register() {}
+func RegisterDev() {}
 
 func init() {
 	initDevFlags()
+}
+
+const (
+	R_RD RegAccess = iota
+	R_WR
+	R_RDWR = R_RD | R_WR
+	R_RESERVED
+	R_INVALID
+)
+
+type DevReg struct {
+	name   string
+	val    uint32    // could be uint8/16/32
+	access RegAccess // RD,RDWR,WR
 }

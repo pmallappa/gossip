@@ -2,8 +2,8 @@ package dev
 
 import (
 	"flag"
-	"fmt"
-	"strings"
+	//"fmt"
+	//"strings"
 )
 
 import (
@@ -11,13 +11,32 @@ import (
 	"util/cflag"
 )
 
-type devopt string
+/*
+-drive if=none,id=DRIVE-ID,HOST-OPTS...
+-device DEVNAME,drive=DRIVE-ID,DEV-OPTS...
+*/
+
+type Devopt []*cflag.OptionT
+
+func (d *Devopt) Set(s string) error {
+	o := cflag.NewOption(s)
+	*d = append(*d, o)
+	return nil
+}
+
+func (d *Devopt) Get() string {
+	return ""
+}
+
+func (d *Devopt) String() string {
+	return ""
+}
 
 var (
-	devOpts     devopt
-	charDevOpts = cflag.New()
-	netDevOpts  = cflag.New()
-	usbDevOpts  = cflag.New()
+	deviceOpts,
+	driveOpts, // Used for block devices
+	chrdevOpts, // Any character device
+	netdevOpts Devopt // Netdevice
 )
 
 func Parse(str string) (map[string]string, error) {
@@ -27,28 +46,22 @@ func Parse(str string) (map[string]string, error) {
 	return m, e
 }
 
+func initDevFlagOptions() {
+	/*
+		for _, v := range []opt{
+			{"drive", "", "Uniquely identify a device node"},
+			{"chardev", "", "Identify a chardev"},
+			{"netdev", "", "Identify a netdev"},
+		} {
+			deviceOpts.c.Add(cflag.NewSubOption(v.name, v.desc, v.name))
+		}
+	*/
+}
+
 func initDevFlags() {
-	flag.Var(&devOpts, "dev", "Generic device help")
-	flag.Var(charDevOpts, "chardev", "Charcter devices, use ? for more")
-	flag.Var(netDevOpts, "netdev", "Network Devices, use ? for more")
-	flag.Var(usbDevOpts, "usbdev", "USB Devices, use ? for more")
-}
+	flag.Var(&deviceOpts, "device", "Device part, of a Block device")
 
-func (f *devopt) String() string {
-	return fmt.Sprint(string(*f))
-}
-
-func (f *devopt) Set(str string) error {
-	// skip the prefix and set appropriate device
-	switch {
-	case strings.HasPrefix(str, "char,") == true:
-		charDevOpts.Set(str[4:])
-	case strings.HasPrefix(str, "net,") == true:
-		netDevOpts.Set(str[3:])
-	case strings.HasPrefix(str, "usb,") == true:
-		usbDevOpts.Set(str[3:])
-	default:
-		fmt.Printf("Every device has to be prefix with char/net/usb")
-	}
-	return nil
+	flag.Var(&driveOpts, "drive", "Drive part, of a block device")
+	flag.Var(&chrdevOpts, "chardev", "Host part of options for a chardev")
+	flag.Var(&netdevOpts, "netdev", "Host part of netdev options")
 }

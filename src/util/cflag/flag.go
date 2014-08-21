@@ -82,7 +82,7 @@ func (cf *SubOption) Help() string {
 }
 
 // cflag is comma separated key=value pairs
-type optionT struct {
+type OptionT struct {
 	str     string
 	subopts map[string]*SubOption
 	sep     string // Separator used to delimit flags
@@ -90,26 +90,26 @@ type optionT struct {
 	debug bool // For testing only
 }
 
-func New() *optionT {
+func New() *OptionT {
 	return NewOption("")
 }
 
-func NewOption(s string) *optionT {
-	return &optionT{
+func NewOption(s string) *OptionT {
+	return &OptionT{
 		str:     s,
 		sep:     ",",
 		subopts: make(map[string]*SubOption),
 	}
 }
 
-func (cfs *optionT) PrintDefaults() {
+func (cfs *OptionT) PrintDefaults() {
 	for _, v := range cfs.subopts {
 		v.PrintDefaults()
 	}
 }
 
 // -- BEGIN Value interface
-func (cfs *optionT) Set(str string) (e error) {
+func (cfs *OptionT) Set(str string) (e error) {
 	cfs.str = str
 	if cf, e := cfs.parse(); e != nil {
 		cf.PrintDefaults()
@@ -117,7 +117,7 @@ func (cfs *optionT) Set(str string) (e error) {
 	return
 }
 
-func (cfs *optionT) String() string {
+func (cfs *OptionT) String() string {
 	str := fmt.Sprintf("%s\n", cfs.str)
 	for _, cf := range cfs.subopts {
 		str += fmt.Sprintf("%q\n", cf)
@@ -128,17 +128,17 @@ func (cfs *optionT) String() string {
 // -- END Value interface End
 
 // -- BEGIN Getter interface
-func (cfs *optionT) Get() interface{} {
+func (cfs *OptionT) Get() interface{} {
 	return cfs
 }
 
 // -- END Getter
 
-func (cfs *optionT) GetSubOpt(str string) interface{} {
+func (cfs *OptionT) GetSubOpt(str string) interface{} {
 	return cfs.subopts[str].value
 }
 
-func (cfs *optionT) parseOne(s string) (err error) {
+func (cfs *OptionT) parseOne(s string) (err error) {
 
 	split := strings.SplitN(s, "=", 2)
 
@@ -192,7 +192,7 @@ func (cfs *optionT) parseOne(s string) (err error) {
 }
 
 // Real parse function, for each of key=value pairs,
-func (cfs *optionT) parse() (c *SubOption, e error) {
+func (cfs *OptionT) parse() (c *SubOption, e error) {
 	str := cfs.str
 	split := strings.Split(str, cfs.sep)
 
@@ -211,7 +211,7 @@ func (cfs *optionT) parse() (c *SubOption, e error) {
 * Add() function allows platform/devices to install default
 * values, just in-case
  */
-func (cfs *optionT) Add(cf *SubOption) {
+func (cfs *OptionT) Add(cf *SubOption) {
 	cfs.subopts[cf.name] = cf
 	if cfs.debug {
 		fmt.Printf("Added %q\n", cf)

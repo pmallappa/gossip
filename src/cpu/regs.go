@@ -113,3 +113,12 @@ type CopReg struct {
 type FpReg struct {
 	SpclReg
 }
+
+type ZeroReg struct {
+	SpclReg
+}
+
+func (z *ZeroReg) SetVal(uint64) (e error) {
+	// We ignore all writes to this
+	return
+}
