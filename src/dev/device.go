@@ -19,19 +19,19 @@ import (
 // running on simulator, Host part tells how to transfer the
 // data in-and-out of the simulated machine
 
-type DEVtype uint32
+type Type uint32
 
 const (
-	CHAR DEVtype = 1 << iota
+	CHAR Type = 1 << iota
 	NET
 	BLK
 	MISCDEV
 )
 
-type DEVBustype uint32
+type Bustype uint32
 
 const (
-	PCI DEVBustype = 1 << iota
+	PCI Bustype = 1 << iota
 	I2C
 	SCSI
 	IDE
@@ -54,13 +54,17 @@ type LevelInterrupt interface {
 	DeassertLevel(int) error
 }
 
+type Interrupter interface {
+	SetInterrupt(chan bool)
+}
+
 type _Info struct {
 	model  string
 	vendor string
 	id     string
 }
 
-func (i *Info) GetInfo() map[string]string {
+func (i *_Info) GetInfo() map[string]string {
 	return map[string]string{"model": i.model, "vendor": i.vendor, "id": i.id}
 }
 
@@ -72,17 +76,19 @@ type _Dev struct {
 }
 
 type Dev struct {
-	Info
-	Dev
+	_Info
+	_Dev
 }
 
 // All Devices must support all Read/Write
 type Device interface {
 	bus.ReadWriterAll
+	Interrupter
+	Initializer
 }
 
 // All devices must implement bus.ReadWriterAll
-type Initizlize interface {
+type Initializer interface {
 	Init() error
 	Configure() error
 }
@@ -91,8 +97,8 @@ type Parser interface {
 	Parse(string) error
 }
 
-func NewDevice(size uint64) *Device {
-	m := new(Device)
+func NewDevice(size uint64) *Dev {
+	m := new(Dev)
 	//m.regs = make([]byte, size)
 	return m
 }
@@ -102,6 +108,8 @@ func RegisterDev() {}
 func init() {
 	initDevFlags()
 }
+
+type RegAccess uint8
 
 const (
 	R_RD RegAccess = iota

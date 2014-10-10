@@ -13,15 +13,15 @@ specifies what the guest OS should think of the device.
 
 Options:
 
--dev <type>[,option=value][,option=value]
+-device <type>[,option=value][,option=value]
 
 \'option' depends on \'type'
 \'type' can be \'char', \'disk', 'net'
 
 Character Device:
 ------------
-  -dev char,iobase=IOADDR,irq=IRQ,index=IDX,name='name'
-  -chardev 'name'[,idx=id][,option=val][,option=val]
+  -device char,iobase=IOADDR,irq=IRQ,id=IDX,name='name'
+  -chardev 'name'[,chardev=id][,option=val][,option=val]
       where  'name' is <null><socket><file><pipe><udp><parport><console>
                        <tty>
   eg:

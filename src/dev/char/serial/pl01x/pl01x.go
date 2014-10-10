@@ -29,12 +29,14 @@ const (
 
 )
 
-type pl011 struct {
-	regs [0x50]dev.Register
-	wr   io.ReadWrite
+type PL011 struct {
+	regs    [0x50]dev.Register
+	wr      io.ReadWrite
+	fifolen u8 // fifo len
+	ser     serial.Serial
 }
 
-func (p *pl011) Init() error {
+func (p *PL011) Init() error {
 	if p.wr == nil {
 		return errors.New("No Transmit method defined")
 	}
@@ -43,7 +45,12 @@ func (p *pl011) Init() error {
 		switch i {
 		case UARTDR:
 			p.regs[i] = &regDR
-			p.regs[i].wr = p.wr
+			flen := 16
+			if fifolen {
+				flen = fifolen
+			}
+			p.regs[i].fifo = make([]u8, flen, flen<<1)
+
 		case UARTRSR, UARTECR,
 			UARTFR, UARTILPR, UARTIBRD,
 			UARTFBRD, UARTLCR_H, UARTCR,
@@ -58,17 +65,16 @@ func (p *pl011) Init() error {
 
 }
 
+// This will be called from
+func (p *PL011) SetInterruptLine(c chan bool) {
+
+}
+
 type regDR struct {
-	fifolen u8
-	fifo    [16]u8
-	wr      io.ReadWriter
+	fifo []u8
 }
 
-func (pl *pl011) Xmit() {
-
-}
-
-func (pl *pl011) write32(off uint32, val uint32) error {
+func (pl *PL011) write32(off uint32, val uint32) error {
 	switch off {
 	case UARTDR:
 		p.regDR.write(val)
@@ -92,26 +98,26 @@ func (pl *pl011) write32(off uint32, val uint32) error {
 	}
 }
 
-func (pl *pl011) Write(off uint32, val uint32) error {
+func (pl *PL011) Write(off uint32, val uint32) error {
 	return write32(off, val)
 }
 
-func (pl *pl011) read32(off uint32) (uint32, error) {
+func (pl *PL011) read32(off uint32) (uint32, error) {
 
 }
 
-func (pl *pl011) read8(off uint32) (uint8, error) {
+func (pl *PL011) read8(off uint32) (uint8, error) {
 	val, err := read32(off)
 
 	return uint8(val), err
 }
 
-func (pl *pl011) read16(off uint32) (uint16, error) {
+func (pl *PL011) read16(off uint32) (uint16, error) {
 	val, err := read32(off)
 
 	return uint16(val), err
 }
 
-func (pl *pl011) Read(off uint32) (uint32 error) {
+func (pl *PL011) Read(off uint32) (uint32 error) {
 	return read32(off)
 }

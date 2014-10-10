@@ -6,39 +6,36 @@ package char
 
 import (
 	"io"
-	)
+)
 
 import (
 	"dev"
 )
 
-type CDevHostType uint32
+type Type uint32
 
 const (
-	CDevUDP CDevHostType = 1 << (8 + iota)
-	CDevPIPE
-	CDevFILE
-	CDevVC
-	CDevCONSOLE
-	CDevSOCK
-	CDevPARPORT
-	CDevTTY
+	CDevT_UDP Type = 1 << (8 + iota)
+	CDevT_PIPE
+	CDevT_FILE
+	CDevT_VC
+	CDevT_CONSOLE
+	CDevT_SOCK
+	CDevT_PARPORT
+	CDevT_TTY
 )
 
-type CharDev struct {
-	ctype		CDevHostType
-	id			uint16
-	mux			bool
-
+type CharDevice interface {
 	dev.Device
+}
 
-	path		string
+type CharDev struct {
+	ctyp Type
+	id   uint16
+	mux  bool
 
-	host		string
-	port		uint16
-	localaddr	uint64
-	localport	uint32
-
+	dev.Dev
+	w io.ReadWriter
 }
 
 // Parse all that we can, rest will be passed it down to the actual device module

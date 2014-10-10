@@ -16,10 +16,10 @@ import (
 -device DEVNAME,drive=DRIVE-ID,DEV-OPTS...
 */
 
-type Devopt []*cflag.OptionT
+type Devopt []*cflag.FlagSet
 
 func (d *Devopt) Set(s string) error {
-	o := cflag.NewOption(s)
+	o := cflag.NewFlagSet(s, flag.ExitOnError)
 	*d = append(*d, o)
 	return nil
 }

@@ -3,54 +3,55 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strings"
+	//"strings"
 )
 import (
-	"util"
-	"util/cflag"
-	"util/unit"
+	"../../cflag"
 )
-
-type Freq struct {
-	c unit.Decimal
-}
-
-func (f *Freq) Parse(s string) error {
-	return nil
-}
-
-func (f *Freq) String() string {
-	return fmt.Sprintf("%s", f.c.String())
-}
-
-func (f *Freq) Set(s string) error {
-	slen := len(s)
-	// Adjust to loose hz, if specified like 800Mhz
-	if strings.HasSuffix(strings.ToLower(s), "hz") {
-		s = s[:slen-2]
-	}
-	f.c.Set(s)
-	fmt.Printf("============== Setting to :%d\n", f.c)
-	return nil //f.c.Parse(s)
-}
 
 // For logger we support option like
 // If options supports multiple key=value, different separator can be used at each level
 // first level is ',', second is ';', third is '!'
 // -cpu freq=100MHz,log='level=WARNING;out=tcp:localhost:2000'
 
+var (
+	quiet, help bool
+)
+
 func main() {
+	perf := cflag.NewFlagSet("perf", flag.ExitOnError)
+	for _, v := range []*flag.Flag{
+		cflag.Int("start", -1, "[cycle] start performance measurement at cycle"),
+		cflag.Int("stop", -1, "[cycle] stop performance measurement at cycle"),
+	} {
+		perf.AddFlag(v)
+	}
+	flag.Var(perf, "perf", "Default perf")
 
-	//var c cflag.CFlagSet
-	c := cflag.New()
-	//flag.Var(c, "cpu", "CPU Freqency, accepts {K,M,G,k,m,g}Hz")
+	// Debug
+	debug := cflag.NewFlagSet("debug", flag.ExitOnError)
+	for _, v := range []*flag.Flag{
+		cflag.Int("start", -1, "[cycle] starts instruction tracing at [cycle]"),
+		cflag.Int("stop", -1, "[cycle] stops instruction tracing at [cycle]"),
+	} {
+		debug.AddFlag(v)
+	}
 
-	c.Add(cflag.NewSubOptionOther(&Freq{}, "freq",
-		"CPU Freqency, accepts {K,M,G,k,m,g}Hz)",
-		"100MHZ"))
+	flag.Var(debug, "debug", "Default debugs")
 
-	flag.Var(c, "cpu", "accepts things")
+	// Help
+	flag.BoolVar(&help, "help", false, "Display help")
+	flag.BoolVar(&help, "h", false, "Display help")
+
+	flag.BoolVar(&quiet, "quite", true, "As the Name says, be quite	")
 
 	flag.Parse()
-	fmt.Printf("%s\n", c)
+
+	var m = make(map[string]*flag.Flag)
+	m = debug.Get().(map[string]*flag.Flag)
+	for i, v := range m {
+		fmt.Printf("i:%s v.Name:%s v:%q\n", i, v.Name, v.Value.String())
+	}
+
+	fmt.Printf("")
 }

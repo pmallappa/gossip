@@ -8,63 +8,40 @@ import (
 	//"strings"
 )
 
+import (
+	"cflag"
+)
+
 var (
-	perf, debug   bool
-	pstart, pstop int
-	dstart, dstop int
-	quiet, help   bool
+	quiet, help bool
 )
 
 func init() {
-	flag.BoolVar(&quiet, "quiet", true, "As the name indicates, default true")
-
-	// Performance
-	flag.BoolVar(&perf, "perf", false, "enable perfomance measurement, summary printed at exit")
-	flag.IntVar(&pstart, "pstart", -1, "[cycle] start performance measurement at cycle, summary printed at exit")
-	flag.IntVar(&pstop, "pstop", -1, "[cycle] stop performance measurement at cycle, summary printed at exit")
+	perf := cflag.NewFlagSet("perf", flag.ExitOnError)
+	for _, v := range []*flag.Flag{
+		cflag.Int("start", -1, "[cycle] start performance measurement at cycle"),
+		cflag.Int("stop", -1, "[cycle] stop performance measurement at cycle"),
+	} {
+		perf.AddFlag(v)
+	}
+	flag.Var(perf, "perf", "Default perf")
 
 	// Debug
-	flag.BoolVar(&debug, "debug", false, "enables instruction tracing")
-	flag.IntVar(&dstart, "dstart", -1, "[cycle] starts instruction tracing at [cycle]")
-	flag.IntVar(&dstop, "dstop", -1, "[cycle] stops instruction tracing at [cycle]")
+	debug := cflag.NewFlagSet("debug", flag.ExitOnError)
+	for _, v := range []*flag.Flag{
+		cflag.Int("start", -1, "[cycle] starts instruction tracing at [cycle]"),
+		cflag.Int("stop", -1, "[cycle] stops instruction tracing at [cycle]"),
+	} {
+		debug.AddFlag(v)
+	}
+
+	flag.Var(debug, "debug", "Default debugs")
 
 	// Help
 	flag.BoolVar(&help, "help", false, "Display help")
 	flag.BoolVar(&help, "h", false, "Display help")
 
-}
-
-//
-// Perfomance start and stop
-//
-func parsePerf() error {
-	var start, stop int
-	if perf {
-		start = 0
-		stop = 0
-	}
-	if pstart != -1 {
-		start = pstart
-	}
-	if pstop != -1 {
-		stop = pstop
-	}
-	pstop = stop
-	pstart = start
-
-	return nil
-}
-
-func parseLocal() error {
-	var err error
-	if err = parsePerf(); err != nil {
-	}
-
-	if err != nil {
-
-	}
-
-	return err
+	flag.BoolVar(&quiet, "quite", true, "As the Name says, be quite	")
 }
 
 func parseFlags() {
@@ -73,10 +50,6 @@ func parseFlags() {
 
 	if help {
 		flag.Usage()
-		os.Exit(1)
-	}
-
-	if err = parseLocal(); err != nil {
 		os.Exit(1)
 	}
 }
